@@ -31,7 +31,7 @@ const DEMON_BODIES := 11
 const DEMON_FLOATS := DEMON_BODIES * 7 + 3
 ## What a client may ask the host to do with its body, and what the host may do to a client's.
 const COMMANDS: Array[StringName] = [&"interact", &"throw", &"shove", &"release", &"break_leash"]
-const OWNER_CALLS: Array[StringName] = [&"knock_down", &"hurt", &"tumble", &"shoved", &"revive", &"shake", &"drain_stamina", &"set_possessed"]
+const OWNER_CALLS: Array[StringName] = [&"knock_down", &"hurt", &"tumble", &"shoved", &"revive", &"shake", &"drain_stamina", &"set_possessed", &"inject"]
 ## Sounds each machine makes for itself; passing them on would only double them.
 const LOCAL_CUES: Array[StringName] = [&"equip", &"dry"]
 
@@ -75,6 +75,8 @@ func setup(main: Node) -> void:
 			_prop_sent.append(_props[i].global_transform)
 		GameState.objective_changed.connect(_on_progress_changed)
 		GameState.bank_changed.connect(_on_progress_changed)
+		GameState.loadout_changed.connect(_on_progress_changed)
+		GameState.archetype_changed.connect(_on_progress_changed)
 		NetworkManager.peer_ready.connect(_on_peer_ready)
 		GadgetAudio.relay = _relay_cue
 		DemonAudio.relay = _relay_demon_cue
@@ -451,7 +453,7 @@ func show_failure(report: Dictionary) -> void:
 func site_reset(tier: int) -> void:
 	_on_peer_ready(0)
 	for id in _host_clients():
-		_site_reset.rpc_id(id, tier)
+		_site_reset.rpc_id(id, tier, GameState.demon_archetype)
 
 
 func _host_clients() -> Array[int]:
@@ -470,9 +472,12 @@ func _failure(report: Dictionary) -> void:
 
 
 @rpc("authority", "call_remote", "reliable")
-func _site_reset(tier: int) -> void:
+func _site_reset(tier: int, archetype: int) -> void:
 	_prop_lerps.clear()
+	# Set quietly first, so the one respawn below already builds the right kind of demon.
+	GameState.demon_archetype = archetype
 	_main.get(&"contracts").call(&"remote_reset", tier)
+	GameState.archetype_changed.emit(archetype)
 
 
 # --- Effects ---------------------------------------------------------------------------
@@ -519,6 +524,8 @@ func _play_fx(kind: StringName, at: Vector3) -> void:
 			_burst(at, Parts.particles(Color(1.0, 0.62, 0.22), 46, 0.6, Vector2(1.5, 5.5), Vector2(0.012, 0.032), Vector3(0.0, -7.0, 0.0)))
 			_audio.play(&"snap", at, 4.0, 0.85)
 			_audio.play(&"rip", at, 2.0, 0.7)
+			if is_instance_valid(GameState.juice):
+				GameState.juice.call(&"play_fx", &"tape_crack", at, 1.0)
 		&"smoke":
 			_burst(at, Parts.particles(Color(0.05, 0.04, 0.04, 0.75), 60, 1.4, Vector2(0.6, 3.2), Vector2(0.22, 0.6), Vector3(0.0, 0.9, 0.0), 180.0, true, false))
 			_burst(at, Parts.particles(Color(1.0, 0.42, 0.08), 44, 0.9, Vector2(1.2, 4.6), Vector2(0.014, 0.04), Vector3(0.0, -2.5, 0.0)))
