@@ -1,0 +1,4281 @@
+{
+ "generator": "tools/fetch_assets.py",
+ "generated_utc": "2026-11-26T12:29:05Z",
+ "license_summary": "Every asset is CC0 1.0 (public domain dedication). Attribution is not required; authors are listed as a courtesy.",
+ "totals": {
+  "models": 81,
+  "texture_sets": 24,
+  "files": 175,
+  "model_bytes": 163116456,
+  "texture_bytes": 60717235,
+  "triangles": 1184754,
+  "failed": 0
+ },
+ "models": [
+  {
+   "name": "sofa",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "sofa_02",
+   "source_page": "https://polyhaven.com/a/sofa_02",
+   "title": "Sofa 02",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/sofa_02/sofa_02_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/sofa_02/sofa_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/sofa_02/sofa_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/sofa_02/sofa_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/sofa_02/sofa_02.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 2728,
+   "meshes": 2,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/sofa.glb",
+     "bytes": 425580,
+     "sha256": "db2bdf259b54a229cd8da123f6003bd46a2dbd36d846e39f80d53b2835d8bad6",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "armchair",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "ArmChair_01",
+   "source_page": "https://polyhaven.com/a/ArmChair_01",
+   "title": "Arm Chair 01",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/ArmChair_01/ArmChair_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ArmChair_01/Armchair_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/ArmChair_01/ArmChair_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ArmChair_01/Armchair_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ArmChair_01/Armchair_01_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 5626,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/armchair.glb",
+     "bytes": 768184,
+     "sha256": "b94c509feec89be4895529807d6c0258124f656d9bee91088d0e260c3c529a26",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "green_chair",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "GreenChair_01",
+   "source_page": "https://polyhaven.com/a/GreenChair_01",
+   "title": "Green Chair 01",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/GreenChair_01/GreenChair_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GreenChair_01/GreenChair_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GreenChair_01/GreenChair_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GreenChair_01/GreenChair_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/GreenChair_01/GreenChair_01.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 4213,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/green_chair.glb",
+     "bytes": 607076,
+     "sha256": "b20c2ec1cc8b94de3616cf30e2403e6e701ef48e090cce7f4e9521bfdcd26503",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "rocking_chair",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "Rockingchair_01",
+   "source_page": "https://polyhaven.com/a/Rockingchair_01",
+   "title": "Rockingchair 01",
+   "author": "Jorge Camacho",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/Rockingchair_01/Rockingchair_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Rockingchair_01/Rockingchair_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Rockingchair_01/Rockingchair_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Rockingchair_01/Rockingchair_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/Rockingchair_01/Rockingchair_01.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 11866,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/rocking_chair.glb",
+     "bytes": 803788,
+     "sha256": "b27ed310dea576ae764df53d4d084bd70aef9902e48dc77226a9cd4f272380df",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "dining_chair",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "painted_wooden_chair_02",
+   "source_page": "https://polyhaven.com/a/painted_wooden_chair_02",
+   "title": "Painted Wooden Chair 02",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/painted_wooden_chair_02/painted_wooden_chair_02_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_chair_02/painted_wooden_chair_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_chair_02/painted_wooden_chair_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_chair_02/painted_wooden_chair_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/painted_wooden_chair_02/painted_wooden_chair_02.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 1246,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/dining_chair.glb",
+     "bytes": 2395300,
+     "sha256": "c805b0a7ba940a3176aa881cb4805a2fe89f38bbbe195d0a8c58caa465210e3c",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "gothic_chair",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "WoodenChair_01",
+   "source_page": "https://polyhaven.com/a/WoodenChair_01",
+   "title": "Wooden Chair 01",
+   "author": "Jake Mobley",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/WoodenChair_01/WoodenChair_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenChair_01/WoodenChair_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenChair_01/WoodenChair_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/WoodenChair_01/WoodenChair_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenChair_01/WoodenChair_01_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 19992,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/gothic_chair.glb",
+     "bytes": 1078556,
+     "sha256": "f312f7fdf51ad24d7464b388f83e4081c16876f28ed0dd104cb892dbf583d90a",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "dining_table",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "WoodenTable_01",
+   "source_page": "https://polyhaven.com/a/WoodenTable_01",
+   "title": "Wooden Table 01",
+   "author": "Ethan Place",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/WoodenTable_01/WoodenTable_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/WoodenTable_01/WoodenTable_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenTable_01/WoodenTable_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenTable_01/WoodenTable_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenTable_01/WoodenTable_01_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 952,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/dining_table.glb",
+     "bytes": 553376,
+     "sha256": "1d630209095c81ce9a1df86ba01fa5b21b9603f1f7a4b60fb7116a12ec9533ff",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "coffee_table",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "gothic_coffee_table",
+   "source_page": "https://polyhaven.com/a/gothic_coffee_table",
+   "title": "Gothic Coffee Table",
+   "author": "Ulan Cabanilla",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/gothic_coffee_table/gothic_coffee_table_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/gothic_coffee_table/gothic_coffee_table_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/gothic_coffee_table/gothic_coffee_table_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/gothic_coffee_table/gothic_coffee_table_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/gothic_coffee_table/gothic_coffee_table.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 23836,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/coffee_table.glb",
+     "bytes": 3265684,
+     "sha256": "bf7172b971c47ded19620ab16a3ce025fbc9e5d3fed5696558c0366c2c6ee2c3",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "round_table",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "round_wooden_table_01",
+   "source_page": "https://polyhaven.com/a/round_wooden_table_01",
+   "title": "Round Wooden Table 01",
+   "author": "Ulan Cabanilla",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/round_wooden_table_01/round_wooden_table_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/round_wooden_table_01/round_wooden_table_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/round_wooden_table_01/round_wooden_table_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/round_wooden_table_01/round_wooden_table_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/round_wooden_table_01/round_wooden_table_01.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 8640,
+   "meshes": 2,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/round_table.glb",
+     "bytes": 548808,
+     "sha256": "800012b8131e9aa8659445d4b8dcb893675471fc08b3dfaa7f75c88c32f7efda",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "bookshelf",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "wooden_bookshelf_worn",
+   "source_page": "https://polyhaven.com/a/wooden_bookshelf_worn",
+   "title": "Wooden Bookshelf Worn",
+   "author": "Ulan Cabanilla",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/wooden_bookshelf_worn/wooden_bookshelf_worn_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_bookshelf_worn/wooden_bookshelf_worn_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/wooden_bookshelf_worn/wooden_bookshelf_worn.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_bookshelf_worn/wooden_bookshelf_worn_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_bookshelf_worn/wooden_bookshelf_worn_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 10106,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/bookshelf.glb",
+     "bytes": 2776164,
+     "sha256": "bb8dbc95e6e87e4bf032024e8fe584dc9c391aac80af7a7de997db4f77de5b3f",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "gothic_cabinet",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "GothicCabinet_01",
+   "source_page": "https://polyhaven.com/a/GothicCabinet_01",
+   "title": "Gothic Cabinet 01",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/GothicCabinet_01/GothicCabinet_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/GothicCabinet_01/GothicCabinet_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GothicCabinet_01/GothicCabinet_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GothicCabinet_01/GothicCabinet_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GothicCabinet_01/GothicCabinet_01_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 12170,
+   "meshes": 5,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/gothic_cabinet.glb",
+     "bytes": 1011844,
+     "sha256": "3b3131b060ec259c6e26a12a07f7bc31876dfaec0ffcbcff74beca962e3d049b",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "commode",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "GothicCommode_01",
+   "source_page": "https://polyhaven.com/a/GothicCommode_01",
+   "title": "Gothic Commode 01",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/GothicCommode_01/GothicCommode_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GothicCommode_01/GothicCommode_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GothicCommode_01/GothicCommode_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/GothicCommode_01/GothicCommode_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GothicCommode_01/GothicCommode_01_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 3897,
+   "meshes": 4,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/commode.glb",
+     "bytes": 601372,
+     "sha256": "c26e2dce8a8e3b4cf294a42e3acb3eebecd70183e9fac044194239cb2f3520a5",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "painted_cabinet",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "painted_wooden_cabinet",
+   "source_page": "https://polyhaven.com/a/painted_wooden_cabinet",
+   "title": "Painted Wooden Cabinet",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/painted_wooden_cabinet/painted_wooden_cabinet_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_cabinet/painted_wooden_cabinet_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_cabinet/painted_wooden_cabinet_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_cabinet/painted_wooden_cabinet_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/painted_wooden_cabinet/painted_wooden_cabinet.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 2227,
+   "meshes": 5,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/painted_cabinet.glb",
+     "bytes": 1858100,
+     "sha256": "30ec8089bfb55c5337046b12ffe461990a4f53e563196012c1d02019d41873b8",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "sideboard",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "WoodenTable_03",
+   "source_page": "https://polyhaven.com/a/WoodenTable_03",
+   "title": "Wooden Table 03",
+   "author": "Gabriel Radi\u0107",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/WoodenTable_03/WoodenTable_03_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenTable_03/WoodenTable_03_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/WoodenTable_03/WoodenTable_03.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenTable_03/WoodenTable_03_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenTable_03/WoodenTable_03_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 2298,
+   "meshes": 6,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/sideboard.glb",
+     "bytes": 634244,
+     "sha256": "d75416403fc2e89197e80233e9646436aa228432fa6bb9fb675e408c51f2adae",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "console_table",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "ClassicConsole_01",
+   "source_page": "https://polyhaven.com/a/ClassicConsole_01",
+   "title": "Classic Console 01",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/ClassicConsole_01/ClassicConsole_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ClassicConsole_01/ClassicConsole_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ClassicConsole_01/ClassicConsole_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/ClassicConsole_01/ClassicConsole_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ClassicConsole_01/ClassicConsole_01_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 7566,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/console_table.glb",
+     "bytes": 739708,
+     "sha256": "01b7667279e7cd7855ca2331bc9b35a7345ddca15e8311403febc47aba468fee",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "nightstand",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "ClassicNightstand_01",
+   "source_page": "https://polyhaven.com/a/ClassicNightstand_01",
+   "title": "Classic Nightstand 01",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/ClassicNightstand_01/ClassicNightstand_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ClassicNightstand_01/ClassicNightstand_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/ClassicNightstand_01/ClassicNightstand_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ClassicNightstand_01/ClassicNightstand_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ClassicNightstand_01/ClassicNightstand_01_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 2002,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/nightstand.glb",
+     "bytes": 443948,
+     "sha256": "f621e3334a465c845cf59ae19bf694436dc71b68a049cbc5219e8c77b33fb9a5",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "grandfather_clock",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "vintage_grandfather_clock_01",
+   "source_page": "https://polyhaven.com/a/vintage_grandfather_clock_01",
+   "title": "Vintage Grandfather Clock 01",
+   "author": "James Ray Cock, Yann Kervran",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/vintage_grandfather_clock_01/vintage_grandfather_clock_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_grandfather_clock_01/vintage_grandfather_clock_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_grandfather_clock_01/vintage_grandfather_clock_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_grandfather_clock_01/vintage_grandfather_clock_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/vintage_grandfather_clock_01/vintage_grandfather_clock_01.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 8582,
+   "meshes": 3,
+   "materials": 2,
+   "embedded_images": 4,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/grandfather_clock.glb",
+     "bytes": 2988068,
+     "sha256": "4524a210a04665d0f28b1260358ef32500176dc571c5c28efb2c19a65bc22bcb",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "desk",
+   "type": "model",
+   "category": "furniture",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "metal_office_desk",
+   "source_page": "https://polyhaven.com/a/metal_office_desk",
+   "title": "Metal Office Desk",
+   "author": "Ulan Cabanilla",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/metal_office_desk/metal_office_desk_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_office_desk/metal_office_desk_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_office_desk/metal_office_desk_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_office_desk/metal_office_desk_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/metal_office_desk/metal_office_desk.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 6898,
+   "meshes": 9,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/furniture/desk.glb",
+     "bytes": 1601008,
+     "sha256": "afc591a17be49bb928ba42738ab2d7a2951fa9c8849653d6d21599f426e648dd",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "chandelier",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "Chandelier_02",
+   "source_page": "https://polyhaven.com/a/Chandelier_02",
+   "title": "Chandelier 02",
+   "author": "Kirill Sannikov",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/Chandelier_02/Chandelier_02_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/Chandelier_02/Chandelier_02.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Chandelier_02/Chandelier_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Chandelier_02/Chandelier_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Chandelier_02/Chandelier_02_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 21514,
+   "meshes": 1,
+   "materials": 2,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/chandelier.glb",
+     "bytes": 1180472,
+     "sha256": "0f8fa19abb748795c911b2af5abef5eb84d87d270a3e61eebed2bcd5ef559eb4",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "hanging_lamp",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "hanging_industrial_lamp",
+   "source_page": "https://polyhaven.com/a/hanging_industrial_lamp",
+   "title": "Hanging Industrial Lamp",
+   "author": "Kuutti Siitonen",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/hanging_industrial_lamp/hanging_industrial_lamp_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_industrial_lamp/hanging_industrial_lamp_emissive_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_industrial_lamp/hanging_industrial_lamp_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_industrial_lamp/hanging_industrial_lamp_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_industrial_lamp/hanging_industrial_lamp_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_industrial_lamp/hanging_industrial_lamp_glass_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/hanging_industrial_lamp/hanging_industrial_lamp.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 9530,
+   "meshes": 1,
+   "materials": 2,
+   "embedded_images": 5,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/hanging_lamp.glb",
+     "bytes": 3241672,
+     "sha256": "4eddf0a56bf760bd8a47c1548eea259818d91f154cafe1e204f400e0ffa7c244",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "caged_light",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "caged_hanging_light",
+   "source_page": "https://polyhaven.com/a/caged_hanging_light",
+   "title": "Caged Hanging Light",
+   "author": "Ulan Cabanilla",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/caged_hanging_light/caged_hanging_light_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/caged_hanging_light/caged_hanging_light_emissive_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/caged_hanging_light/caged_hanging_light_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/caged_hanging_light/caged_hanging_light_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/caged_hanging_light/caged_hanging_light_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/caged_hanging_light/caged_hanging_light.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 22893,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 4,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/caged_light.glb",
+     "bytes": 3065412,
+     "sha256": "c87c8f093adcf34f9b3ffc2024d1ec106b8f465ab7649285b43557edbac09b8b",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "street_lamp",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "street_lamp_01",
+   "source_page": "https://polyhaven.com/a/street_lamp_01",
+   "title": "Street Lamp 01",
+   "author": "Josh Dean",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/street_lamp_01/street_lamp_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_01/street_lamp_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_01/street_lamp_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_01/street_lamp_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/street_lamp_01/street_lamp_01.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 30610,
+   "meshes": 1,
+   "materials": 3,
+   "embedded_images": 4,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/street_lamp.glb",
+     "bytes": 2471576,
+     "sha256": "72e98a03b083a384d843d0126565a2b35bf7fc964fb9822222b83b8c3b50b2db",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "wall_lantern",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "street_lamp_02",
+   "source_page": "https://polyhaven.com/a/street_lamp_02",
+   "title": "Street Lamp 02",
+   "author": "Josh Dean",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/street_lamp_02/street_lamp_02_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_02/street_lamp_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_02/street_lamp_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/street_lamp_02/street_lamp_02.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_02/street_lamp_02_nor_gl_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 20338,
+   "meshes": 1,
+   "materials": 3,
+   "embedded_images": 4,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/wall_lantern.glb",
+     "bytes": 2171484,
+     "sha256": "5a14f895be76eb964e0157d2ee229faf7060e0c7fe27cc420468b4200a20bc37",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "kerosene_lantern",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "Lantern_01",
+   "source_page": "https://polyhaven.com/a/Lantern_01",
+   "title": "Lantern 01",
+   "author": "Rajil Jose Macatangay",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/Lantern_01/Lantern_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Lantern_01/Lantern_01_brass_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/Lantern_01/Lantern_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Lantern_01/Lantern_01_brass_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Lantern_01/Lantern_01_brass_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 33902,
+   "meshes": 2,
+   "materials": 2,
+   "embedded_images": 4,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/kerosene_lantern.glb",
+     "bytes": 1559596,
+     "sha256": "866b3116efcbfe2bb667738774d3ee9d09acda9eb8833be311c85d4d43728318",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "wooden_lantern",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "wooden_lantern_01",
+   "source_page": "https://polyhaven.com/a/wooden_lantern_01",
+   "title": "Wooden Lantern 01",
+   "author": "James Ray Cock",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/wooden_lantern_01/wooden_lantern_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_lantern_01/wooden_lantern_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_lantern_01/wooden_lantern_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_lantern_01/wooden_lantern_01_glass_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_lantern_01/wooden_lantern_01_glass_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_lantern_01/wooden_lantern_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_lantern_01/wooden_lantern_01_glass_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/wooden_lantern_01/wooden_lantern_01.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 8321,
+   "meshes": 3,
+   "materials": 2,
+   "embedded_images": 6,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/wooden_lantern.glb",
+     "bytes": 3765136,
+     "sha256": "68d5c8d9fabfcf83092850a4e52d7a638e58ea83b6f71b8de5cbd71816b67b97",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "oil_lamp",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "vintage_oil_lamp",
+   "source_page": "https://polyhaven.com/a/vintage_oil_lamp",
+   "title": "Vintage Oil Lamp",
+   "author": "Monsta3D",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/vintage_oil_lamp/vintage_oil_lamp_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_oil_lamp/vintage_oil_lamp_glass_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_oil_lamp/vintage_oil_lamp_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_oil_lamp/vintage_oil_lamp_flame_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_oil_lamp/vintage_oil_lamp_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/vintage_oil_lamp/vintage_oil_lamp.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_oil_lamp/vintage_oil_lamp_glass_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_oil_lamp/vintage_oil_lamp_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/vintage_oil_lamp/vintage_oil_lamp_glass_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 7208,
+   "meshes": 3,
+   "materials": 3,
+   "embedded_images": 8,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/oil_lamp.glb",
+     "bytes": 2159576,
+     "sha256": "eceb77edda4ad7a4d8369a47b9ad702259fdc401846fd35c70b6c769b4ea21e9",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "candelabra_set",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "brass_candleholders",
+   "source_page": "https://polyhaven.com/a/brass_candleholders",
+   "title": "Brass Candleholders",
+   "author": "Tina",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/brass_candleholders/brass_candleholders_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_03_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_03_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_flame_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_candles_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_candles_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_03_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_candles_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_candleholders/brass_candleholders_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/brass_candleholders/brass_candleholders.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 41936,
+   "meshes": 3,
+   "materials": 5,
+   "embedded_images": 14,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/candelabra_set.glb",
+     "bytes": 9585504,
+     "sha256": "57b5f78b2c252bd6c7488bac913ddf32fd9bd407568550b4aa086c2e3e013d7f",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "flood_lights",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "flood_lights",
+   "source_page": "https://polyhaven.com/a/flood_lights",
+   "title": "Flood Lights",
+   "author": "James Ray Cock",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/flood_lights/flood_lights_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flood_lights/flood_lights_emissive_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flood_lights/flood_lights_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flood_lights/flood_lights_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flood_lights/flood_lights_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flood_lights/flood_lights_glass_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flood_lights/flood_lights_glass_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flood_lights/flood_lights_glass_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/flood_lights/flood_lights.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 76868,
+   "meshes": 60,
+   "materials": 2,
+   "embedded_images": 7,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/flood_lights.glb",
+     "bytes": 6837708,
+     "sha256": "65a1c82241274893dc42a689770abecf4ee0ca4131a7f909ce682f3057322d39",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "floor_lamp",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "9L6lLUl9sD",
+   "source_page": "https://poly.pizza/m/9L6lLUl9sD",
+   "title": "Light Stand",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/88fb336e-a7b0-4c76-8ca8-34c4655d7a87.glb"
+   ],
+   "triangles": 244,
+   "meshes": 1,
+   "materials": 2,
+   "embedded_images": 0,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/floor_lamp.glb",
+     "bytes": 10920,
+     "sha256": "95ee87d1ff55e6ca9fa8366bd665851e35bd8f41808a605d39d4041a2fcb0d86",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "candles",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "UCTYNYn7qk",
+   "source_page": "https://poly.pizza/m/UCTYNYn7qk",
+   "title": "Candles",
+   "author": "Kay Lousberg",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/0e91e8da-5607-4348-b4e6-0757f12f78e5.glb"
+   ],
+   "triangles": 198,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/candles.glb",
+     "bytes": 27132,
+     "sha256": "f851f5dcce17e9db59bd79a25c2e1e14689140fc7a9c741eb2a8070cf83fd73a",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "candle",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "asGVv9EuOr",
+   "source_page": "https://poly.pizza/m/asGVv9EuOr",
+   "title": "Candle",
+   "author": "Kay Lousberg",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/5233f089-0388-4b30-a859-0949496d229d.glb"
+   ],
+   "triangles": 66,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/candle.glb",
+     "bytes": 20512,
+     "sha256": "3537a3379002d448e8921db916d51cb01fac023b6554c73e5823b4467f90b17b",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "skull_candle",
+   "type": "model",
+   "category": "lighting",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "94tuTO5eJv",
+   "source_page": "https://poly.pizza/m/94tuTO5eJv",
+   "title": "Skull Candle",
+   "author": "Kay Lousberg",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/d61ccc1f-5a41-4acb-92d4-1a793399b659.glb"
+   ],
+   "triangles": 542,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/lighting/skull_candle.glb",
+     "bytes": 40808,
+     "sha256": "8702bfad2e9eeec653a1b9a3a49427060936b8ec4b8dc7cd380f7133b2845e7f",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "television",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "Television_01",
+   "source_page": "https://polyhaven.com/a/Television_01",
+   "title": "Television 01",
+   "author": "Gabriel Radi\u0107",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/Television_01/Television_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/Television_01/Television_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Television_01/Television_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Television_01/Television_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Television_01/Television_01_nor_gl_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 1918,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/television.glb",
+     "bytes": 530224,
+     "sha256": "2a81892e16bd16c0b8a4125e712b54450929f91d8b51d6fef4ee8f12bf9652ba",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "boombox",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "boombox",
+   "source_page": "https://polyhaven.com/a/boombox",
+   "title": "Boombox",
+   "author": "Thomas Paul Mouilleron",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/boombox/boombox_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/boombox/boombox_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/boombox/boombox_speakers_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/boombox/boombox_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/boombox/boombox.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/boombox/boombox_speakers_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/boombox/boombox_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 10168,
+   "meshes": 1,
+   "materials": 2,
+   "embedded_images": 5,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/boombox.glb",
+     "bytes": 3066608,
+     "sha256": "433424aa14726c4d5e162920559000a05af0c23034795cbd037b923fb5c89175",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "cardboard_box",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "cardboard_box_01",
+   "source_page": "https://polyhaven.com/a/cardboard_box_01",
+   "title": "Cardboard Box 01",
+   "author": "Rahul Chaudhary",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/cardboard_box_01/cardboard_box_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/cardboard_box_01/cardboard_box_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/cardboard_box_01/cardboard_box_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/cardboard_box_01/cardboard_box_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/cardboard_box_01/cardboard_box_01_nor_gl_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 16952,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/cardboard_box.glb",
+     "bytes": 2167376,
+     "sha256": "e35b7b1b9918ebd987a751e67be3a4eedaf8d07db0aeb55e5508511875c95ac3",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "wooden_crate",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "wooden_crate_01",
+   "source_page": "https://polyhaven.com/a/wooden_crate_01",
+   "title": "Wooden Crate 01",
+   "author": "James Ray Cock",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/wooden_crate_01/wooden_crate_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_crate_01/wooden_crate_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_crate_01/wooden_crate_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/wooden_crate_01/wooden_crate_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_crate_01/wooden_crate_01_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 6576,
+   "meshes": 3,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/wooden_crate.glb",
+     "bytes": 2274892,
+     "sha256": "7708c30c6839976fd3394285827d570f0300e002e96f628ebd15c7380d8e58e0",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "book_set",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "book_encyclopedia_set_01",
+   "source_page": "https://polyhaven.com/a/book_encyclopedia_set_01",
+   "title": "Book Encyclopedia Set 01",
+   "author": "John Malcolm",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/book_encyclopedia_set_01/book_encyclopedia_set_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/book_encyclopedia_set_01/book_encyclopedia_set_01_cover_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/book_encyclopedia_set_01/book_encyclopedia_set_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/book_encyclopedia_set_01/book_encyclopedia_set_01_paper_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/book_encyclopedia_set_01/book_encyclopedia_set_01_cover_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/book_encyclopedia_set_01/book_encyclopedia_set_01_cover_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/book_encyclopedia_set_01/book_encyclopedia_set_01_paper_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/book_encyclopedia_set_01/book_encyclopedia_set_01_paper_roughness_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 67306,
+   "meshes": 20,
+   "materials": 2,
+   "embedded_images": 6,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/book_set.glb",
+     "bytes": 3238308,
+     "sha256": "772ff173f291e248c072648346955a61c2b917f9fc304e67a4ee8aad9a1cbc8b",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "wine_bottles",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "wine_bottles_01",
+   "source_page": "https://polyhaven.com/a/wine_bottles_01",
+   "title": "Wine Bottles 01",
+   "author": "Jurita Burger, Rico Cilliers",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/wine_bottles_01/wine_bottles_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_label_ftero_vinea_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_label_ftero_vinea_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_label_intertwine_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_label_clearwater_crystals_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_label_ftero_vinea_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_label_clearwater_crystals_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_label_ftero_vinea_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_paper_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/wine_bottles_01/wine_bottles_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_label_intertwine_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wine_bottles_01/wine_bottles_01_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 28848,
+   "meshes": 4,
+   "materials": 12,
+   "embedded_images": 13,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/wine_bottles.glb",
+     "bytes": 4008084,
+     "sha256": "090934fe581ee5f4160fa97add96f4ab4df8aa1f6fad303949cd3379b59329c2",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "paint_can",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "can_rusted",
+   "source_page": "https://polyhaven.com/a/can_rusted",
+   "title": "Can Rusted",
+   "author": "Rahul Chaudhary",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/can_rusted/can_rusted_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/can_rusted/can_rusted_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/can_rusted/can_rusted_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/can_rusted/can_rusted.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/can_rusted/can_rusted_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 3520,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/paint_can.glb",
+     "bytes": 2112604,
+     "sha256": "58fa259511e0be0282b7541c6e7f047bbb91cb499acdbb01ba6816b3fe1da05e",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "spray_cans",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "spray_paint_bottles",
+   "source_page": "https://polyhaven.com/a/spray_paint_bottles",
+   "title": "Spray Paint Bottles",
+   "author": "James Ray Cock",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/spray_paint_bottles/spray_paint_bottles_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/spray_paint_bottles/spray_paint_bottles_dirty_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/spray_paint_bottles/spray_paint_bottles_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/spray_paint_bottles/spray_paint_bottles_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/spray_paint_bottles/spray_paint_bottles_dirty_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/spray_paint_bottles/spray_paint_bottles.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/spray_paint_bottles/spray_paint_bottles_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/spray_paint_bottles/spray_paint_bottles_dirty_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 5040,
+   "meshes": 2,
+   "materials": 2,
+   "embedded_images": 6,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/spray_cans.glb",
+     "bytes": 2255216,
+     "sha256": "0aa073d1039c992836e57542fa7a1612728f7fc3f9af3f7cfaeeacb3d86c89c4",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "bucket",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "wooden_bucket_01",
+   "source_page": "https://polyhaven.com/a/wooden_bucket_01",
+   "title": "Wooden Bucket 01",
+   "author": "James Ray Cock",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/wooden_bucket_01/wooden_bucket_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_bucket_01/wooden_bucket_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/wooden_bucket_01/wooden_bucket_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_bucket_01/wooden_bucket_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_bucket_01/wooden_bucket_01_nor_gl_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 5116,
+   "meshes": 2,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/bucket.glb",
+     "bytes": 2330016,
+     "sha256": "0e5514dec77f6aa0a9de7d4c263f4c049286b9036341099371414935a4749146",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "toolbox",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "metal_toolbox",
+   "source_page": "https://polyhaven.com/a/metal_toolbox",
+   "title": "Metal Toolbox",
+   "author": "Mateusz Sadek",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/metal_toolbox/metal_toolbox_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_toolbox/metal_toolbox_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_toolbox/metal_toolbox_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_toolbox/metal_toolbox_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/metal_toolbox/metal_toolbox.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 14228,
+   "meshes": 6,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/toolbox.glb",
+     "bytes": 2742548,
+     "sha256": "918abb89085c48f88f22b18b3c6cc3e7ba9065cf5c1638a22717a493e57722e1",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tool_chest",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "metal_tool_chest",
+   "source_page": "https://polyhaven.com/a/metal_tool_chest",
+   "title": "Metal Tool Chest",
+   "author": "John Hutcheson, Yann Kervran",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/metal_tool_chest/metal_tool_chest_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/metal_tool_chest/metal_tool_chest.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_tool_chest/metal_tool_chest_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_tool_chest/metal_tool_chest_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_tool_chest/metal_tool_chest_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 13360,
+   "meshes": 7,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/tool_chest.glb",
+     "bytes": 2354472,
+     "sha256": "2a03b5062fbab2e30a04dff1e71f79c54101d2b9fb2d3bde32dab94de7959b34",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "goblets",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "brass_goblets",
+   "source_page": "https://polyhaven.com/a/brass_goblets",
+   "title": "Brass Goblets",
+   "author": "Tina",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/brass_goblets/brass_goblets_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_goblets/brass_goblet_03_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_goblets/brass_goblet_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_goblets/brass_goblet_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_goblets/brass_goblet_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/brass_goblets/brass_goblets.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_goblets/brass_goblet_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_goblets/brass_goblet_03_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_goblets/brass_goblet_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_goblets/brass_goblet_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/brass_goblets/brass_goblet_03_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 9600,
+   "meshes": 3,
+   "materials": 3,
+   "embedded_images": 9,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/goblets.glb",
+     "bytes": 4773704,
+     "sha256": "322fb8b5d2194872f729bbc898a79a6efc89bcf0258c55f47668428f2f3c6c25",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "picture_landscape",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "fancy_picture_frame_01",
+   "source_page": "https://polyhaven.com/a/fancy_picture_frame_01",
+   "title": "Fancy Picture Frame 01",
+   "author": "Rico Cilliers, Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/fancy_picture_frame_01/fancy_picture_frame_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fancy_picture_frame_01/fancy_picture_frame_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fancy_picture_frame_01/fancy_picture_frame_01_canvas_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/fancy_picture_frame_01/fancy_picture_frame_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fancy_picture_frame_01/fancy_picture_frame_01_canvas_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fancy_picture_frame_01/fancy_picture_frame_01_canvas_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fancy_picture_frame_01/fancy_picture_frame_01_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fancy_picture_frame_01/fancy_picture_frame_01_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 938,
+   "meshes": 2,
+   "materials": 2,
+   "embedded_images": 6,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/picture_landscape.glb",
+     "bytes": 739640,
+     "sha256": "6105b2380247135956841abccdaefc13751a8fe162d0b910e07dd810c4e2c9ca",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "picture_estate",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "hanging_picture_frame_02",
+   "source_page": "https://polyhaven.com/a/hanging_picture_frame_02",
+   "title": "Hanging Picture Frame 02",
+   "author": "James Ray Cock",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/hanging_picture_frame_02/hanging_picture_frame_02_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_02/hanging_picture_frame_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_02/hanging_picture_frame_02_artwork_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_02/hanging_picture_frame_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_02/hanging_picture_frame_02_artwork_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_02/hanging_picture_frame_02_artwork_roughness_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/hanging_picture_frame_02/hanging_picture_frame_02.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_02/hanging_picture_frame_02_nor_gl_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 3678,
+   "meshes": 1,
+   "materials": 3,
+   "embedded_images": 6,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/picture_estate.glb",
+     "bytes": 693588,
+     "sha256": "68c17c69c769a1859d94e34d592df97c7d585d1dd6fad773c924c3afb22d523f",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "picture_oval",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "hanging_picture_frame_03",
+   "source_page": "https://polyhaven.com/a/hanging_picture_frame_03",
+   "title": "Hanging Picture Frame 03",
+   "author": "James Ray Cock",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/hanging_picture_frame_03/hanging_picture_frame_03_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_03/hanging_picture_frame_03_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_03/hanging_picture_frame_03_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_03/hanging_picture_frame_03_artwork_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_03/hanging_picture_frame_03_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_03/hanging_picture_frame_03_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_03/hanging_picture_frame_03_artwork_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hanging_picture_frame_03/hanging_picture_frame_03_artwork_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/hanging_picture_frame_03/hanging_picture_frame_03.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 24348,
+   "meshes": 2,
+   "materials": 3,
+   "embedded_images": 8,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/picture_oval.glb",
+     "bytes": 1369828,
+     "sha256": "af1f9da0bf558ce682c2586288976023a5c5d73b00c752333d5a7bf22c3cc20c",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "mirror",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "ornate_mirror_01",
+   "source_page": "https://polyhaven.com/a/ornate_mirror_01",
+   "title": "Ornate Mirror 01",
+   "author": "James Ray Cock",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/ornate_mirror_01/ornate_mirror_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ornate_mirror_01/ornate_mirror_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/ornate_mirror_01/ornate_mirror_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ornate_mirror_01/ornate_mirror_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ornate_mirror_01/ornate_mirror_01_nor_gl_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 14246,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/mirror.glb",
+     "bytes": 676260,
+     "sha256": "788db0343d5625d152ab1aa559017fb0387b3cbd85b58b58bb96478b30503329",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "marble_bust",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "marble_bust_01",
+   "source_page": "https://polyhaven.com/a/marble_bust_01",
+   "title": "Marble Bust 01",
+   "author": "Rico Cilliers",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/marble_bust_01/marble_bust_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/marble_bust_01/marble_bust_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/marble_bust_01/marble_bust_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/marble_bust_01/marble_bust_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/marble_bust_01/marble_bust_01_rough_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 17456,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/marble_bust.glb",
+     "bytes": 897260,
+     "sha256": "77f1ecf2a3d3e4ed31b0a9c9c07c31d02093f735ced6216b64369fadb8ad478d",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "gothic_statue",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "gothic_statue",
+   "source_page": "https://polyhaven.com/a/gothic_statue",
+   "title": "Gothic Statue",
+   "author": "Benny Weimer",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/gothic_statue/gothic_statue_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/gothic_statue/gothic_statue_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/gothic_statue/gothic_statue_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/gothic_statue/gothic_statue_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/gothic_statue/gothic_statue.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 27739,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/gothic_statue.glb",
+     "bytes": 3977588,
+     "sha256": "1d3cd8eea9cdcd24cdf82c2ca7bffd6195f81425961e2bc50886e5139d513496",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "wheelchair",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "wheelchair_01",
+   "source_page": "https://polyhaven.com/a/wheelchair_01",
+   "title": "Wheelchair 01",
+   "author": "Garreth Dean",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/wheelchair_01/wheelchair_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wheelchair_01/wheelchair_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wheelchair_01/wheelchair_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/wheelchair_01/wheelchair_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wheelchair_01/wheelchair_01_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 40252,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/wheelchair.glb",
+     "bytes": 1747428,
+     "sha256": "038b27ebfdf78170b71e90f5250f093f10288ee39810e025a2b94ecd08a71229",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "skull",
+   "type": "model",
+   "category": "props",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "7clFQGz5jH",
+   "source_page": "https://poly.pizza/m/7clFQGz5jH",
+   "title": "Skull",
+   "author": "Kay Lousberg",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/609fe90a-933c-437c-a883-2598b71a243d.glb"
+   ],
+   "triangles": 344,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/props/skull.glb",
+     "bytes": 29756,
+     "sha256": "18475b9d5690b5e3b9e762918aa01c181a9009a7f8c98f545a513d43a30bae1f",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "traffic_cone",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "lAx8JytxGD",
+   "source_page": "https://poly.pizza/m/lAx8JytxGD",
+   "title": "Traffic Cone",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/4e13551a-b2fb-4117-9b57-22b2b7db394e.glb"
+   ],
+   "triangles": 168,
+   "meshes": 1,
+   "materials": 2,
+   "embedded_images": 0,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/traffic_cone.glb",
+     "bytes": 8280,
+     "sha256": "70fd5c97f107914f96dfa3f197041c910c0a441ec43dc2f9db07967c3761afa2",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "generator",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "portable_generator",
+   "source_page": "https://polyhaven.com/a/portable_generator",
+   "title": "Portable Generator",
+   "author": "James Ray Cock",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/portable_generator/portable_generator_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/portable_generator/portable_generator_spec_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/portable_generator/portable_generator_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/portable_generator/portable_generator_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/portable_generator/portable_generator_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/portable_generator/portable_generator.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 26419,
+   "meshes": 4,
+   "materials": 2,
+   "embedded_images": 5,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/generator.glb",
+     "bytes": 4185568,
+     "sha256": "7ffec8f85344a84c8f0b63498af70465f76ba72359baf18ce5b1ea16f8d5b199",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "hand_truck",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "hand_truck",
+   "source_page": "https://polyhaven.com/a/hand_truck",
+   "title": "Hand Truck",
+   "author": "Mutanzom3D",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/hand_truck/hand_truck_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hand_truck/hand_truck_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hand_truck/hand_truck_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/hand_truck/hand_truck_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/hand_truck/hand_truck.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 13220,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/hand_truck.glb",
+     "bytes": 3178360,
+     "sha256": "ce3aa53bb72621ac65b54ef64155b56fa2a74e50fe26c8425d415f335c80b5d7",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "old_tyre",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "old_tyre",
+   "source_page": "https://polyhaven.com/a/old_tyre",
+   "title": "Old Tyre",
+   "author": "MP",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/old_tyre/old_tyre_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/old_tyre/old_tyre_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/old_tyre/old_tyre_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/old_tyre/old_tyre.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/old_tyre/old_tyre_nor_gl_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 2880,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/old_tyre.glb",
+     "bytes": 2236212,
+     "sha256": "c389217d855d68fb7d4cddb2952492aa9a4dde2530b9539c5c73087d5b8e2495",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "trash_can",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "metal_trash_can",
+   "source_page": "https://polyhaven.com/a/metal_trash_can",
+   "title": "Metal Trash Can",
+   "author": "GurJas Studios",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/metal_trash_can/metal_trash_can_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_rust_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_rust_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/metal_trash_can/metal_trash_can.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_rust_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 13960,
+   "meshes": 8,
+   "materials": 3,
+   "embedded_images": 6,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/trash_can.glb",
+     "bytes": 4988804,
+     "sha256": "27c4e8647522147ca9921638fa6527e061cae247c3917c7dccd0eebdb0764f3f",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "covered_car",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "covered_car",
+   "source_page": "https://polyhaven.com/a/covered_car",
+   "title": "Covered Car",
+   "author": "MP",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/covered_car/covered_car_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/covered_car/covered_car.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/covered_car/covered_car_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/covered_car/covered_car_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/covered_car/covered_car_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 12592,
+   "meshes": 5,
+   "materials": 2,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/covered_car.glb",
+     "bytes": 2345388,
+     "sha256": "7c8c1745669c043febe4d17482208df8655adcf25b1e3e0b44ac86f238eb57fc",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "iron_gate",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "large_iron_gate",
+   "source_page": "https://polyhaven.com/a/large_iron_gate",
+   "title": "Large Iron Gate",
+   "author": "Josh Dean",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/large_iron_gate/large_iron_gate_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/large_iron_gate/large_iron_gate_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/large_iron_gate/large_iron_gate_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/large_iron_gate/large_iron_gate.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/large_iron_gate/large_iron_gate_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 38140,
+   "meshes": 4,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/iron_gate.glb",
+     "bytes": 3125400,
+     "sha256": "5481cfdf0a7057bbc29210ce4db4fba89350adbd770ae6a2280c0bd6b72229f3",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "mailbox",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "2olZ0G8iur",
+   "source_page": "https://poly.pizza/m/2olZ0G8iur",
+   "title": "Mailbox",
+   "author": "CreativeTrio",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/2077ee81-a657-45a1-9809-84890a3fdc34.glb"
+   ],
+   "triangles": 242,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/mailbox.glb",
+     "bytes": 25264,
+     "sha256": "cd8819e46fec234f1d0c68d3af92a4ec5ec4e607b06f91f6f9681e5eaf03a531",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "sign_hanging",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "AsEgIQcQfw",
+   "source_page": "https://poly.pizza/m/AsEgIQcQfw",
+   "title": "Wooden Sign",
+   "author": "iPoly3D",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/d6415862-2de4-4ca6-8745-0b4377de3ab6.glb"
+   ],
+   "triangles": 724,
+   "meshes": 1,
+   "materials": 4,
+   "embedded_images": 0,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/sign_hanging.glb",
+     "bytes": 55764,
+     "sha256": "532c9eebf67d9a28e8e06e7a0f84d0c44390c4535b3c91b636a85a16ab600021",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "sign_board",
+   "type": "model",
+   "category": "yard",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "3MStJYAez7",
+   "source_page": "https://poly.pizza/m/3MStJYAez7",
+   "title": "Wooden Sign",
+   "author": "iPoly3D",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/3285a3bd-9fbb-4d5d-83c9-bb74c8f5c70b.glb"
+   ],
+   "triangles": 860,
+   "meshes": 1,
+   "materials": 4,
+   "embedded_images": 0,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/yard/sign_board.glb",
+     "bytes": 67960,
+     "sha256": "df29213a0d3958f83a108e291f4885785a50404ea61c5857b967ca25d3656062",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "dead_tree_a",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "Mcd2zYqyww",
+   "source_page": "https://poly.pizza/m/Mcd2zYqyww",
+   "title": "Dead Tree",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/d12c21bd-a5d1-41c9-b370-28e3708e61cc.glb"
+   ],
+   "triangles": 6557,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 2,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/dead_tree_a.glb",
+     "bytes": 2623500,
+     "sha256": "7650b888de1b85a3310aeec3f2ff16c2f7f0f4244f807f45655ec564a80c415d",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "dead_tree_b",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "MlmK5488ou",
+   "source_page": "https://poly.pizza/m/MlmK5488ou",
+   "title": "Dead Tree",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/41121684-abaa-4298-a42e-5b538184d11e.glb"
+   ],
+   "triangles": 6169,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 2,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/dead_tree_b.glb",
+     "bytes": 2607636,
+     "sha256": "ef1ccb1f47ace965df22a2db38e931f92aca8a5243c9506d23621a8566f352ab",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "dead_tree_c",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "n8FhMgMldD",
+   "source_page": "https://poly.pizza/m/n8FhMgMldD",
+   "title": "Dead Tree",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/c02771ac-10db-420b-9426-86f26ae0869a.glb"
+   ],
+   "triangles": 5702,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 2,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/dead_tree_c.glb",
+     "bytes": 2600420,
+     "sha256": "df3d6af947238439fe8cf954546ce0eff53a8902674221757a79ae253cf3ab12",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "pine_a",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "699sFuLCN2",
+   "source_page": "https://poly.pizza/m/699sFuLCN2",
+   "title": "Pine",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/c55b8641-4679-4a85-8bd8-2a20e79abecd.glb"
+   ],
+   "triangles": 4964,
+   "meshes": 1,
+   "materials": 2,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/pine_a.glb",
+     "bytes": 2261060,
+     "sha256": "3a5db923999bd47281f1f38cf8451c1544acfad33d953892fa95ca74765be361",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "pine_b",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "igSu0cPoBz",
+   "source_page": "https://poly.pizza/m/igSu0cPoBz",
+   "title": "Pine",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/712aaefa-ae7f-4cb3-8834-a1b8860df3b2.glb"
+   ],
+   "triangles": 1646,
+   "meshes": 1,
+   "materials": 2,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/pine_b.glb",
+     "bytes": 2147312,
+     "sha256": "b2cc7f2e672f94a41925ba831af8b3db9cbe6621172fb6f2717881c81c074e18",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tall_grass",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "JSIYtscPmP",
+   "source_page": "https://poly.pizza/m/JSIYtscPmP",
+   "title": "Tall Grass",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/83f8e6d6-fa7e-4cd8-a0ef-8c51d0ff4e88.glb"
+   ],
+   "triangles": 326,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/tall_grass.glb",
+     "bytes": 88020,
+     "sha256": "497f6303b662b2f65eea4f158d9f02d18a672d4f1422c7ba1df36be3be9caaa3",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "dead_bushes",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "shrub_02",
+   "source_page": "https://polyhaven.com/a/shrub_02",
+   "title": "Shrub 02",
+   "author": "Rico Cilliers",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/shrub_02/shrub_02_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/shrub_02/shrub_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/shrub_02/shrub_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/shrub_02/shrub_02.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/shrub_02/shrub_02_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 27254,
+   "meshes": 4,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/dead_bushes.glb",
+     "bytes": 1963264,
+     "sha256": "fffb8218d61d11a22da2cba0e6ca8baf2bada017c29d3f7d6744e6f5a675b8f2",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "dry_bushes",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "wild_rooibos_bush",
+   "source_page": "https://polyhaven.com/a/wild_rooibos_bush",
+   "title": "Wild Rooibos Bush",
+   "author": "James Ray Cock, Jenelle van Heerden",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/wild_rooibos_bush/wild_rooibos_bush_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wild_rooibos_bush/wild_rooibos_bush_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wild_rooibos_bush/wild_rooibos_bush_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wild_rooibos_bush/wild_rooibos_bush_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/wild_rooibos_bush/wild_rooibos_bush.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 27519,
+   "meshes": 5,
+   "materials": 3,
+   "embedded_images": 5,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/dry_bushes.glb",
+     "bytes": 3203156,
+     "sha256": "d0c8bf949e33eac4ffdb6bc6dacf3e28c507be576fdaa00606d67a77256d3838",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "fern",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "fern_02",
+   "source_page": "https://polyhaven.com/a/fern_02",
+   "title": "Fern 02",
+   "author": "Rico Cilliers, Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/fern_02/fern_02_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fern_02/fern_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fern_02/fern_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fern_02/fern_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/fern_02/fern_02.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 6232,
+   "meshes": 4,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/fern.glb",
+     "bytes": 1143580,
+     "sha256": "7e4a4ff2f8b53f946968d824d5bc799ccbcc1bf30c766a8513e9e1d38486ce73",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "dry_branches",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "dry_branches_medium_01",
+   "source_page": "https://polyhaven.com/a/dry_branches_medium_01",
+   "title": "Dry Branches Medium 01",
+   "author": "Rico Cilliers",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/dry_branches_medium_01/dry_branches_medium_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dry_branches_medium_01/dry_branches_medium_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dry_branches_medium_01/dry_branches_medium_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dry_branches_medium_01/dry_branches_medium_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/dry_branches_medium_01/dry_branches_medium_01.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 16803,
+   "meshes": 3,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/dry_branches.glb",
+     "bytes": 3249380,
+     "sha256": "b97d49317522b3ca0ecbdbe7ecc028117cfe7b719db5a25a31e42cf3da34cf2e",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tree_stump",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "tree_stump_01",
+   "source_page": "https://polyhaven.com/a/tree_stump_01",
+   "title": "Tree Stump 01",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/tree_stump_01/tree_stump_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/tree_stump_01/tree_stump_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/tree_stump_01/tree_stump_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/tree_stump_01/tree_stump_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/tree_stump_01/tree_stump_01_arm_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 41046,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/tree_stump.glb",
+     "bytes": 3938668,
+     "sha256": "d8f3225dc15ab7dc0594ea126814d528f1ee8c80dc37d4fce35c34da79756494",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "fallen_log",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "dead_tree_trunk",
+   "source_page": "https://polyhaven.com/a/dead_tree_trunk",
+   "title": "Dead Tree Trunk",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/dead_tree_trunk/dead_tree_trunk_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dead_tree_trunk/dead_tree_trunk_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dead_tree_trunk/dead_tree_trunk_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dead_tree_trunk/dead_tree_trunk_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/dead_tree_trunk/dead_tree_trunk.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 101802,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/fallen_log.glb",
+     "bytes": 4786520,
+     "sha256": "6d71aad27e7b68669122850a3154a1cd18c861497a25b040baa4d188025b93b1",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "rock_a",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "moon_rock_02",
+   "source_page": "https://polyhaven.com/a/moon_rock_02",
+   "title": "Moon Rock 02",
+   "author": "Greg Zaal, Jenelle van Heerden, Rico Cilliers",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/moon_rock_02/moon_rock_02_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/moon_rock_02/moon_rock_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/moon_rock_02/moon_rock_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/moon_rock_02/moon_rock_02_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/moon_rock_02/moon_rock_02.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 3304,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/rock_a.glb",
+     "bytes": 1516572,
+     "sha256": "c9bfb2fc465c66dd7e6b220c70d2e1810744f752aa21ef51b16bb03230237f86",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "rock_b",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "moon_rock_03",
+   "source_page": "https://polyhaven.com/a/moon_rock_03",
+   "title": "Moon Rock 03",
+   "author": "Greg Zaal, Jenelle van Heerden, Rico Cilliers",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/moon_rock_03/moon_rock_03_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/moon_rock_03/moon_rock_03_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/moon_rock_03/moon_rock_03_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/moon_rock_03/moon_rock_03_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/moon_rock_03/moon_rock_03.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 5598,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/rock_b.glb",
+     "bytes": 1467320,
+     "sha256": "923e0fb4dff1e2a41704285cd7bbb6b36f1b57f50bfad4f10f332db168ce97b1",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "rock_set",
+   "type": "model",
+   "category": "nature",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "rock_moss_set_01",
+   "source_page": "https://polyhaven.com/a/rock_moss_set_01",
+   "title": "Rock Moss Set 01",
+   "author": "Kless Gyzen",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/rock_moss_set_01/rock_moss_set_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_01/rock_moss_set_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/rock_moss_set_01/rock_moss_set_01.bin",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_01/rock_moss_set_01_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_01/rock_moss_set_01_diff_1k.jpg"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 63127,
+   "meshes": 6,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/nature/rock_set.glb",
+     "bytes": 1933008,
+     "sha256": "451599a92e375059fda4c11fc9265e35dde547df6dbc65a6f0572b4d72ae9e88",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "van_truck",
+   "type": "model",
+   "category": "vehicles",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "cXw6oiFtZ8",
+   "source_page": "https://poly.pizza/m/cXw6oiFtZ8",
+   "title": "Truck",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/f4b28921-b45e-4653-b54c-c3976e4ea0fe.glb"
+   ],
+   "triangles": 7474,
+   "meshes": 4,
+   "materials": 3,
+   "embedded_images": 1,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/vehicles/van_truck.glb",
+     "bytes": 326828,
+     "sha256": "a5d107b5b06f8ca2d8d7e66ae6309f2e1a25cac577c5db8ebb661b3f0ca5ed8f",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "exorcist",
+   "type": "model",
+   "category": "characters",
+   "status": "ok",
+   "source": "Poly Pizza",
+   "source_id": "Yg2bQZO6Hj",
+   "source_page": "https://poly.pizza/m/Yg2bQZO6Hj",
+   "title": "Worker",
+   "author": "Quaternius",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://static.poly.pizza/3a5f3056-ffe6-42eb-bd52-122afcbd22b2.glb"
+   ],
+   "triangles": 5240,
+   "meshes": 4,
+   "materials": 11,
+   "embedded_images": 0,
+   "animations": 24,
+   "skins": 4,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/characters/exorcist.glb",
+     "bytes": 1344928,
+     "sha256": "9c28614f465b7dc105f908c20c22fc045f4b07caf8c5ef0e9f8049eceb6dd38d",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "gas_mask",
+   "type": "model",
+   "category": "characters",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "old_gas_mask",
+   "source_page": "https://polyhaven.com/a/old_gas_mask",
+   "title": "Old Gas Mask",
+   "author": "Micha\u0142 Wi\u015bniewski",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/old_gas_mask/old_gas_mask_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/old_gas_mask/old_gas_mask_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/old_gas_mask/old_gas_mask_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/old_gas_mask/old_gas_mask_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/old_gas_mask/old_gas_mask.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 18900,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/characters/gas_mask.glb",
+     "bytes": 2261456,
+     "sha256": "f19f93de45d1864f0c31bf1fde5928908e88c08057248f40f1139c429ccf1611",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "gas_canister",
+   "type": "model",
+   "category": "characters",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "propane_tank",
+   "source_page": "https://polyhaven.com/a/propane_tank",
+   "title": "Propane Tank",
+   "author": "Slinc",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/propane_tank/propane_tank_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/propane_tank/propane_tank_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/propane_tank/propane_tank_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/propane_tank/propane_tank_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/propane_tank/propane_tank.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 5238,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/models/characters/gas_canister.glb",
+     "bytes": 2213112,
+     "sha256": "6ebb27572ff2a1c7984c2549e9d80afa51b93cd9c0a685ba02cbe4b0fdcafb3d",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  }
+ ],
+ "textures": [
+  {
+   "name": "asphalt_cracked",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "asphalt_02",
+   "source_page": "https://polyhaven.com/a/asphalt_02",
+   "title": "Asphalt 02",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/asphalt_cracked/asphalt_cracked_albedo.jpg",
+     "bytes": 731707,
+     "sha256": "1aa5ce99f58a625c71d48cfc3e68b65ca85ccb00f39e045c0a928608a0ea25ed",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/asphalt_cracked/asphalt_cracked_normal.jpg",
+     "bytes": 1240122,
+     "sha256": "42a1c381b53204e83a982db2864479a30bc127bbdeebb1006f8ee51bff099df3",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/asphalt_cracked/asphalt_cracked_roughness.jpg",
+     "bytes": 544032,
+     "sha256": "70ba3edc65525eb4dc366cf010ca7ae0bd34e0251ff0225c2dad627a873d0712",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/asphalt_cracked/asphalt_cracked_ao.jpg",
+     "bytes": 533336,
+     "sha256": "c7397b4187c53203592c68d1d52ce92cc42981c2154b15b9a685f2b5205a260d",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "gravel_tarred",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "tarred_gravel",
+   "source_page": "https://polyhaven.com/a/tarred_gravel",
+   "title": "Tarred Gravel",
+   "author": "Dimitrios Savva",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/tarred_gravel/tarred_gravel_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/tarred_gravel/tarred_gravel_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/tarred_gravel/tarred_gravel_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/tarred_gravel/tarred_gravel_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/gravel_tarred/gravel_tarred_albedo.jpg",
+     "bytes": 729189,
+     "sha256": "7b866b32d73f74f2e493f98828391587aed5b2cd24c47619ce7188b40079e627",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/gravel_tarred/gravel_tarred_normal.jpg",
+     "bytes": 991812,
+     "sha256": "7b88d5d9e36f9f5978ec94b7b0a5b9d419eb43093bb94b001ced8605914931e8",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/gravel_tarred/gravel_tarred_roughness.jpg",
+     "bytes": 780847,
+     "sha256": "6bee83214bea834b4b0270649a6bd6707f46a9fc7343fc31c56ee17e90edf66a",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/gravel_tarred/gravel_tarred_ao.jpg",
+     "bytes": 889421,
+     "sha256": "26cc08d8be318d87968a39b920fe1bbad555291282bc6e4d9ee756ec990206d8",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "ground_dead_grass",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "burned_ground_01",
+   "source_page": "https://polyhaven.com/a/burned_ground_01",
+   "title": "Burned Ground 01",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/burned_ground_01/burned_ground_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/burned_ground_01/burned_ground_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/burned_ground_01/burned_ground_01_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/burned_ground_01/burned_ground_01_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/ground_dead_grass/ground_dead_grass_albedo.jpg",
+     "bytes": 1033112,
+     "sha256": "be83310cad64d23539e628f14525af651a03646f5a1cc6029bd19a9446ea72f9",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/ground_dead_grass/ground_dead_grass_normal.jpg",
+     "bytes": 366727,
+     "sha256": "86125af02b64b05b0079dd6fa08ffae11878a3f9f50326a265e94c7a64cba865",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/ground_dead_grass/ground_dead_grass_roughness.jpg",
+     "bytes": 319073,
+     "sha256": "4dbbb69dc3391d5b98b4346ffe5f2b46340ad0307c3d1d7311b59407146753f5",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/ground_dead_grass/ground_dead_grass_ao.jpg",
+     "bytes": 572417,
+     "sha256": "513cceafc5b418b64e28c395903b575538b34b89422741c6b0c7b5ba12c226a3",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "siding_clapboard",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "weathered_plank_siding",
+   "source_page": "https://polyhaven.com/a/weathered_plank_siding",
+   "title": "Weathered Plank Siding",
+   "author": "Dimitrios Savva",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_plank_siding/weathered_plank_siding_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_plank_siding/weathered_plank_siding_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_plank_siding/weathered_plank_siding_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_plank_siding/weathered_plank_siding_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/siding_clapboard/siding_clapboard_albedo.jpg",
+     "bytes": 567956,
+     "sha256": "dad0442114f1efd9a25195f2e2ac480693c2a6199f3987f4cfac4002b2820fbd",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/siding_clapboard/siding_clapboard_normal.jpg",
+     "bytes": 609905,
+     "sha256": "229440bb21992d7f97bbbe03f6488e21cc061119ab3774ad0c30e352c9690a74",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/siding_clapboard/siding_clapboard_roughness.jpg",
+     "bytes": 381425,
+     "sha256": "1f4707c748102d1faf275d35dea798e2e51dcc0d425ddd2121643b08d2b3af3e",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/siding_clapboard/siding_clapboard_ao.jpg",
+     "bytes": 378752,
+     "sha256": "19d391bf1c8f961a7d13037b95128c5c98880c67c3d6ac590eba751e5eb39e78",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "roof_slates",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "roof_slates_03",
+   "source_page": "https://polyhaven.com/a/roof_slates_03",
+   "title": "Roof Slates 03",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_03/roof_slates_03_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_03/roof_slates_03_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_03/roof_slates_03_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_03/roof_slates_03_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/roof_slates/roof_slates_albedo.jpg",
+     "bytes": 654296,
+     "sha256": "ad7caff0fae22a67c2429021129840d3d9247ec4370bafadc2c031e1693fe8a9",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/roof_slates/roof_slates_normal.jpg",
+     "bytes": 788841,
+     "sha256": "0eb010215ea6e2de800adf6cf86fd5fb9e9a24b0d12d1297bb4b8d56b205c87d",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/roof_slates/roof_slates_roughness.jpg",
+     "bytes": 12644,
+     "sha256": "7c0ba13dd4695647e2ac6fd0dbceb457497ce853d879a1d1d860a6301832bf8f",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/roof_slates/roof_slates_ao.jpg",
+     "bytes": 676244,
+     "sha256": "176906e9cba1b09f9de51ee18bd8737ecdcd297e2236de0fb53ce7f06258048b",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "brick_foundation",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "mixed_brick_wall",
+   "source_page": "https://polyhaven.com/a/mixed_brick_wall",
+   "title": "Mixed Brick Wall",
+   "author": "Dimitrios Savva",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mixed_brick_wall/mixed_brick_wall_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mixed_brick_wall/mixed_brick_wall_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mixed_brick_wall/mixed_brick_wall_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mixed_brick_wall/mixed_brick_wall_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/brick_foundation/brick_foundation_albedo.jpg",
+     "bytes": 919324,
+     "sha256": "1eb497b35a79fef16d53186e8fc2a419c2233585c15eb8900193c6a9e0dd85eb",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/brick_foundation/brick_foundation_normal.jpg",
+     "bytes": 1155142,
+     "sha256": "38f185283c21ffe8a9c1b01f5a47a62a16f1c69c8ff3d5fcc0a43b121e42e839",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/brick_foundation/brick_foundation_roughness.jpg",
+     "bytes": 306860,
+     "sha256": "b5ea4ee7e0a6b8ec67e5486a1a3d573aebb02cd24e5646c224c8b12a05098178",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/brick_foundation/brick_foundation_ao.jpg",
+     "bytes": 859765,
+     "sha256": "7c1798e67bf1881246a8a4d89336d5cc8991cb3270025f16918dcf8f55562129",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "iron_rusted",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "rusty_metal_04",
+   "source_page": "https://polyhaven.com/a/rusty_metal_04",
+   "title": "Rusty Metal 04",
+   "author": "Amal Kumar",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_04/rusty_metal_04_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_04/rusty_metal_04_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_04/rusty_metal_04_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_04/rusty_metal_04_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/iron_rusted/iron_rusted_albedo.jpg",
+     "bytes": 938338,
+     "sha256": "37c6757c5b6b2229f61423c7e5013f970e4dafb48070d35f53ed6d08958ed288",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/iron_rusted/iron_rusted_normal.jpg",
+     "bytes": 896980,
+     "sha256": "9c432bee334e65e73ff0b20676dd3f0efbed3f91d261a13dc03b9c8c1a4f4eec",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/iron_rusted/iron_rusted_roughness.jpg",
+     "bytes": 686008,
+     "sha256": "02c2fe5dfd5f4f7a692659261b8c99e103f33fb1a4c363c3e763542fae32d4fe",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/iron_rusted/iron_rusted_ao.jpg",
+     "bytes": 346574,
+     "sha256": "af1733e6b00b89853a885a53dea36cc445f8a8b5d0364fb0da4fd11cf1006531",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "concrete_worn",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "concrete_floor_worn_001",
+   "source_page": "https://polyhaven.com/a/concrete_floor_worn_001",
+   "title": "Concrete Floor Worn 001",
+   "author": "Dimitrios Savva, Rico Cilliers",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/concrete_worn/concrete_worn_albedo.jpg",
+     "bytes": 118806,
+     "sha256": "6e40c0fc908f4d66431836f5abe203f3a4eb064e88824378a91a46a26e2f464c",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/concrete_worn/concrete_worn_normal.jpg",
+     "bytes": 110906,
+     "sha256": "523bd94a1be5dd2f11c2ae2b7d7c77445cf5bd9e41604db515a7c8364dcba067",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/concrete_worn/concrete_worn_roughness.jpg",
+     "bytes": 181942,
+     "sha256": "069efe4ca018e0ef61fd8cc9964395ba8272284ae239da68d7f87988e2e9f488",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/concrete_worn/concrete_worn_ao.jpg",
+     "bytes": 124987,
+     "sha256": "6e8d38ec3df66c496d08ec62fa721e70c1274528cddc3bfecdcf6f1266a2bde5",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "bark",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "bark_brown_02",
+   "source_page": "https://polyhaven.com/a/bark_brown_02",
+   "title": "Bark Brown 02",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/bark/bark_albedo.jpg",
+     "bytes": 659592,
+     "sha256": "920fa0bed0c9d78c1d530e99795113afd532d7db746de440f4a85d7c83ed0f1a",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/bark/bark_normal.jpg",
+     "bytes": 1015623,
+     "sha256": "0d5e691e8ad8bcd093a3587887fda2a6b4a948b5708a4f256f7919584c6eb857",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/bark/bark_roughness.jpg",
+     "bytes": 337946,
+     "sha256": "68125592de36e15bae7aa6db85c4d135aeb7e5653199ba226483a70f6d69837d",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/bark/bark_ao.jpg",
+     "bytes": 514586,
+     "sha256": "f3572613f143ca84885f4b4e03332d9a8723420c740a12750ab538fad7f39552",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "wood_peeling_paint",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "wood_peeling_paint_weathered",
+   "source_page": "https://polyhaven.com/a/wood_peeling_paint_weathered",
+   "title": "Wood Peeling Paint Weathered",
+   "author": "Dimitrios Savva, Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_peeling_paint_weathered/wood_peeling_paint_weathered_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_peeling_paint_weathered/wood_peeling_paint_weathered_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_peeling_paint_weathered/wood_peeling_paint_weathered_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_peeling_paint_weathered/wood_peeling_paint_weathered_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/wood_peeling_paint/wood_peeling_paint_albedo.jpg",
+     "bytes": 890162,
+     "sha256": "7311e60ec0ca3de10383dd5f2d398819e2198ea78244cf4f6627d1cb26cf4b53",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/wood_peeling_paint/wood_peeling_paint_normal.jpg",
+     "bytes": 892366,
+     "sha256": "5828f259fc99aa2bde31f778a0084ce8d0c83faa60306f6b998ac82c120ccffa",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/wood_peeling_paint/wood_peeling_paint_roughness.jpg",
+     "bytes": 357967,
+     "sha256": "f340ff19ca797c51d98a074f199df0d031159e8d765be25a07b75a4e208dc460",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/wood_peeling_paint/wood_peeling_paint_ao.jpg",
+     "bytes": 498321,
+     "sha256": "09d63283f912a0957d7d24e0440564655b10e0c22fdb1ce162ccd5bcb5491776",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "wallpaper_mouldy",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "ambientCG",
+   "source_id": "Wallpaper002C",
+   "source_page": "https://ambientcg.com/view?id=Wallpaper002C",
+   "title": "Wallpaper 002 C",
+   "author": "ambientCG (Lennart Demes)",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://ambientcg.com/get?file=Wallpaper002C_1K-JPG.zip"
+   ],
+   "note": "maps extracted from the 1K-JPG zip",
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/wallpaper_mouldy/wallpaper_mouldy_albedo.jpg",
+     "bytes": 1007578,
+     "sha256": "3ec49797c56758499ac54a3e1bfeaf4599f5b9a3a1b76b293989970a8b577421",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/wallpaper_mouldy/wallpaper_mouldy_normal.jpg",
+     "bytes": 1736075,
+     "sha256": "3659ff17c8b3788f2e80e41ef60757c799920b15fe3949c64b592e5c64ba735d",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/wallpaper_mouldy/wallpaper_mouldy_roughness.jpg",
+     "bytes": 481900,
+     "sha256": "5114e6fc9dbe9d06ac7d50ebea5c01bf1be3f7fea73b229b289c838501255907",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    }
+   ]
+  },
+  {
+   "name": "wallpaper_decrepit",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "decrepit_wallpaper",
+   "source_page": "https://polyhaven.com/a/decrepit_wallpaper",
+   "title": "Decrepit Wallpaper",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/decrepit_wallpaper/decrepit_wallpaper_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/decrepit_wallpaper/decrepit_wallpaper_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/decrepit_wallpaper/decrepit_wallpaper_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/decrepit_wallpaper/decrepit_wallpaper_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/wallpaper_decrepit/wallpaper_decrepit_albedo.jpg",
+     "bytes": 814172,
+     "sha256": "895823967eba5296c0928694d1299964aa1884184215c510515fb246f5bbe4ec",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/wallpaper_decrepit/wallpaper_decrepit_normal.jpg",
+     "bytes": 691701,
+     "sha256": "dcb75f00c055b23f82250ef5c7ced71a5e28e197a563ff69011d8deb2c45a83c",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/wallpaper_decrepit/wallpaper_decrepit_roughness.jpg",
+     "bytes": 402582,
+     "sha256": "25dd0dfc2021fe98fa40fbeaed8e634e420c2a34fa9227f36525d56b01cec22d",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/wallpaper_decrepit/wallpaper_decrepit_ao.jpg",
+     "bytes": 454453,
+     "sha256": "8aeb11915fe479837a58ea4fa5807adae325843e1b6a0a978ce4593035f3fac0",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "plaster_damaged",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "damaged_plaster",
+   "source_page": "https://polyhaven.com/a/damaged_plaster",
+   "title": "Damaged Plaster",
+   "author": "Amal Kumar",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/damaged_plaster/damaged_plaster_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/damaged_plaster/damaged_plaster_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/damaged_plaster/damaged_plaster_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/damaged_plaster/damaged_plaster_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/plaster_damaged/plaster_damaged_albedo.jpg",
+     "bytes": 850524,
+     "sha256": "391649dbb391c978b0d95cdd2351617fe3b7a577e432b94171208e576c9b2c63",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/plaster_damaged/plaster_damaged_normal.jpg",
+     "bytes": 959148,
+     "sha256": "9d2e4c261211c951fc424fe695483596e821f86b13d1d05485551ef0240d6b67",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/plaster_damaged/plaster_damaged_roughness.jpg",
+     "bytes": 421151,
+     "sha256": "595b9cc69e163687c27681f73fae4a34f5f82ecd70a1ce3867fc8026a0db76cb",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/plaster_damaged/plaster_damaged_ao.jpg",
+     "bytes": 488395,
+     "sha256": "0ba66b4332444c076629206fe0442207224ca3259ef969842910bf5d3495b0e5",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "plaster_stained",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "grey_plaster_02",
+   "source_page": "https://polyhaven.com/a/grey_plaster_02",
+   "title": "Grey Plaster 02",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_plaster_02/grey_plaster_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_plaster_02/grey_plaster_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_plaster_02/grey_plaster_02_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_plaster_02/grey_plaster_02_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/plaster_stained/plaster_stained_albedo.jpg",
+     "bytes": 772312,
+     "sha256": "c455b6513a37908480eedd59f697719649aca97d3c76525718a77d7d600e2d22",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/plaster_stained/plaster_stained_normal.jpg",
+     "bytes": 636432,
+     "sha256": "f827876a78beebdbfca173ded1cd448117b433a0f9772a7c866bca91cb27884a",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/plaster_stained/plaster_stained_roughness.jpg",
+     "bytes": 626062,
+     "sha256": "bc72ae4ba0d4330af80bc140dab4e3d97f850b9e545b36d21ccb9d9ffa5ef420",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/plaster_stained/plaster_stained_ao.jpg",
+     "bytes": 408585,
+     "sha256": "5b247e7b045b8cfc8e6a4ed79abeaf2cb00677d5b3fb7fcaa70743c48af310b3",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "floor_dark_planks",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "dark_wooden_planks",
+   "source_page": "https://polyhaven.com/a/dark_wooden_planks",
+   "title": "Dark Wooden Planks",
+   "author": "Amal Kumar",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_wooden_planks/dark_wooden_planks_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_wooden_planks/dark_wooden_planks_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_wooden_planks/dark_wooden_planks_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_wooden_planks/dark_wooden_planks_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/floor_dark_planks/floor_dark_planks_albedo.jpg",
+     "bytes": 701221,
+     "sha256": "e8216baa6b2d701b5523fcb904d45570acf7b96d160ef815e96e2dbfa82bdd9b",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/floor_dark_planks/floor_dark_planks_normal.jpg",
+     "bytes": 658444,
+     "sha256": "87a7b26bc674477865d4589c6589200bfa649a6461422bf56f5600c05a470206",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/floor_dark_planks/floor_dark_planks_roughness.jpg",
+     "bytes": 673968,
+     "sha256": "a10ea0b52fe395a7ad205cacfd28bd1aea48ef8545d171209f528dcf58d0a8d3",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/floor_dark_planks/floor_dark_planks_ao.jpg",
+     "bytes": 300758,
+     "sha256": "afa6cee23c80dacb65c0039ef61ae067699a27d4b86e736166055f44bf1800fd",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "floor_old_wood",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "old_wood_floor",
+   "source_page": "https://polyhaven.com/a/old_wood_floor",
+   "title": "Old Wood Floor",
+   "author": "Guillaume Monsergent",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/old_wood_floor/old_wood_floor_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/old_wood_floor/old_wood_floor_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/old_wood_floor/old_wood_floor_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/old_wood_floor/old_wood_floor_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/floor_old_wood/floor_old_wood_albedo.jpg",
+     "bytes": 755937,
+     "sha256": "e6952149cd1bb02e485a183f526e9dbe8d90d2a22bfac564cc3874cfb8eddd03",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/floor_old_wood/floor_old_wood_normal.jpg",
+     "bytes": 714487,
+     "sha256": "617f2b20da0af0304ccf55194beb31a9f30ff1acf793a41a61a43d9d0f3bf886",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/floor_old_wood/floor_old_wood_roughness.jpg",
+     "bytes": 519577,
+     "sha256": "ab7c16727ac2672a029c2441796a6b3524b90b3ddbb5e5085ed32dd961a6f1ca",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/floor_old_wood/floor_old_wood_ao.jpg",
+     "bytes": 490005,
+     "sha256": "a18c920f7f18da1903cc4e228d199bb0f642e2e07c54f89ab7c5c58305f83a34",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "rug_jacquard",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "quatrefoil_jacquard_fabric",
+   "source_page": "https://polyhaven.com/a/quatrefoil_jacquard_fabric",
+   "title": "Quatrefoil Jacquard Fabric",
+   "author": "Rico Cilliers, colormass",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_rough_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/rug_jacquard/rug_jacquard_albedo.jpg",
+     "bytes": 581799,
+     "sha256": "674e9d4c2c116099b79ab364eb04e2101031745f2eb27e4a9e198a81e31c8cd7",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/rug_jacquard/rug_jacquard_normal.jpg",
+     "bytes": 919702,
+     "sha256": "9320e4ce8f986d26d30711dbb654e8d88371dc1ea28337f7bb373b243ea30286",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/rug_jacquard/rug_jacquard_roughness.jpg",
+     "bytes": 909070,
+     "sha256": "87f300df50b8819d067fe3dbd9c995b123b333b29f923fb1c5ad291e0d7fd395",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    }
+   ]
+  },
+  {
+   "name": "rug_dirty_carpet",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "dirty_carpet",
+   "source_page": "https://polyhaven.com/a/dirty_carpet",
+   "title": "Dirty Carpet",
+   "author": "Rohit Seervi",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dirty_carpet/dirty_carpet_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dirty_carpet/dirty_carpet_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dirty_carpet/dirty_carpet_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dirty_carpet/dirty_carpet_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/rug_dirty_carpet/rug_dirty_carpet_albedo.jpg",
+     "bytes": 978020,
+     "sha256": "b0ef2b248cb7dfa1d33f1b2215fb3b83e815527d4091a2c3a423bdcd63bef60a",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/rug_dirty_carpet/rug_dirty_carpet_normal.jpg",
+     "bytes": 1089297,
+     "sha256": "ba96f6f098ac64456f4cc310469200ff702596a9070d2553f990da8f7b86d29f",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/rug_dirty_carpet/rug_dirty_carpet_roughness.jpg",
+     "bytes": 434062,
+     "sha256": "a2e13692bd7e5af9875150130ce9904c11879e693e70753d417b93121cf65be4",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/rug_dirty_carpet/rug_dirty_carpet_ao.jpg",
+     "bytes": 1157894,
+     "sha256": "36222745d86f5b94be98f2bd03cb1d7aa653e0cf5167c100b13a27b26ded9fbd",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "wood_worn",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "wood_cabinet_worn_long",
+   "source_page": "https://polyhaven.com/a/wood_cabinet_worn_long",
+   "title": "Wood Cabinet Worn Long",
+   "author": "Dimitrios Savva, Rico Cilliers",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_cabinet_worn_long/wood_cabinet_worn_long_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_cabinet_worn_long/wood_cabinet_worn_long_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_cabinet_worn_long/wood_cabinet_worn_long_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_cabinet_worn_long/wood_cabinet_worn_long_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/wood_worn/wood_worn_albedo.jpg",
+     "bytes": 420840,
+     "sha256": "97edb74098efc27ca9891cb9dbab6d74b91f635d9fad5eba4f317b1e8e408a55",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/wood_worn/wood_worn_normal.jpg",
+     "bytes": 443331,
+     "sha256": "3e77e82f34f5d527f63299c8154905a7e3e9a87644b2054ab6194ac776adc7db",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/wood_worn/wood_worn_roughness.jpg",
+     "bytes": 325276,
+     "sha256": "4a3201cdc2b1e6d0e20532fc1249998ff7a4f312601590e46fb58c0fb26315cb",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/wood_worn/wood_worn_ao.jpg",
+     "bytes": 258250,
+     "sha256": "d1e2ab934bdfba223dcc3be27220c3c27884ab4c5f8ce5d24911120f58844257",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "stone_blocks",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "medieval_blocks_03",
+   "source_page": "https://polyhaven.com/a/medieval_blocks_03",
+   "title": "Medieval Blocks 03",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_03/medieval_blocks_03_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_03/medieval_blocks_03_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_03/medieval_blocks_03_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_03/medieval_blocks_03_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/stone_blocks/stone_blocks_albedo.jpg",
+     "bytes": 954113,
+     "sha256": "3852b4a60e0f62d2914c895f884df8d58d8d12d788851d814859dae05b7620cf",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/stone_blocks/stone_blocks_normal.jpg",
+     "bytes": 1352681,
+     "sha256": "52350ed4b577c9fd6b03effda069181ca0ed39ee99d88b912685266f6270c943",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/stone_blocks/stone_blocks_roughness.jpg",
+     "bytes": 460951,
+     "sha256": "9eba5fed68b8a705c5280a274a9d8238be89bf82fa783154b25325211d67373b",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/stone_blocks/stone_blocks_ao.jpg",
+     "bytes": 507517,
+     "sha256": "2d1ca5693fcc8a9ce51aa1325cd6f3de90c48dd59cd19dd5d33b619799cab8f1",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "stone_cobble_floor",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "cobblestone_floor_08",
+   "source_page": "https://polyhaven.com/a/cobblestone_floor_08",
+   "title": "Cobblestone Floor 08",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_08/cobblestone_floor_08_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_08/cobblestone_floor_08_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_08/cobblestone_floor_08_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_08/cobblestone_floor_08_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/stone_cobble_floor/stone_cobble_floor_albedo.jpg",
+     "bytes": 585727,
+     "sha256": "ec131f7a99a1e7f9df25d4725609c55a6dad1df487630685e9a66ecbf41ec33a",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/stone_cobble_floor/stone_cobble_floor_normal.jpg",
+     "bytes": 1002410,
+     "sha256": "26bfff70b266a4e86983814c7e56a9b48daf93cd34dcdc16a5db13e4fabcfbb6",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/stone_cobble_floor/stone_cobble_floor_roughness.jpg",
+     "bytes": 408718,
+     "sha256": "f92bcaf897cd98bc3cf11e6409b3e42145e7d0f659eaaad8807dfb0c5d16afc6",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/stone_cobble_floor/stone_cobble_floor_ao.jpg",
+     "bytes": 239355,
+     "sha256": "5616a4d5129890186691732982b62fc51653eb204024f9447b8be9fa5d47f613",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "metal_tread_plate",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "metal_plate",
+   "source_page": "https://polyhaven.com/a/metal_plate",
+   "title": "Metal Plate",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/metal_tread_plate/metal_tread_plate_albedo.jpg",
+     "bytes": 692234,
+     "sha256": "c6b6739eac2c75ccc898e753d7833df24eafbdb9aa92fb6eabfb92abd1a680a5",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/metal_tread_plate/metal_tread_plate_normal.jpg",
+     "bytes": 770307,
+     "sha256": "994f851a84d52b51e97906021a1b7070ee6eac9a789fef041132268de47d8e6b",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/metal_tread_plate/metal_tread_plate_roughness.jpg",
+     "bytes": 775206,
+     "sha256": "756308485ce742a52831453c296452f48cf0adead7d85adfffd34c08dce23ec1",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/metal_tread_plate/metal_tread_plate_ao.jpg",
+     "bytes": 565996,
+     "sha256": "715f90d663af5366ff7839369161b6ad42786aed5f3fc1409ba20fa635aaeacd",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "metal_painted_rusty",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "rusty_metal_02",
+   "source_page": "https://polyhaven.com/a/rusty_metal_02",
+   "title": "Rusty Metal 02",
+   "author": "Rob Tuytel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/metal_painted_rusty/metal_painted_rusty_albedo.jpg",
+     "bytes": 564932,
+     "sha256": "adaf094391518b6afe787a123942110aa88ef521c844f970b124420f5ed5d3d9",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/metal_painted_rusty/metal_painted_rusty_normal.jpg",
+     "bytes": 403156,
+     "sha256": "995197a62cac6fbb000e6e6591a3330a3b77ef069c4ac58f505b586b9bdbd97b",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/metal_painted_rusty/metal_painted_rusty_roughness.jpg",
+     "bytes": 135023,
+     "sha256": "178deb5896232f0498555676e55a3be1d6d197e2211d8d17cb8386a868bfd54a",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/metal_painted_rusty/metal_painted_rusty_ao.jpg",
+     "bytes": 458330,
+     "sha256": "706691cbf624dd4591f1b66435efea48023f9bb04dd685110219cb4fe864d0f0",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "fabric_suit",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "terlenka",
+   "source_page": "https://polyhaven.com/a/terlenka",
+   "title": "Terlenka",
+   "author": "Rico Cilliers, colormass",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/terlenka/terlenka_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/terlenka/terlenka_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/terlenka/terlenka_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/terlenka/terlenka_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "cached": true,
+   "files": [
+    {
+     "path": "res://assets/textures/fabric_suit/fabric_suit_albedo.jpg",
+     "bytes": 691195,
+     "sha256": "74c4333ed05e133928b0cf6d52e732135c8c0ce6dc8623efa590fb31b90f15c0",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/fabric_suit/fabric_suit_normal.jpg",
+     "bytes": 877301,
+     "sha256": "05d7152ff680a6699018f5c37456a14e16eb1e70014a79d4d500dfd2e099c8f9",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/fabric_suit/fabric_suit_roughness.jpg",
+     "bytes": 856303,
+     "sha256": "ec726afa814ff6bb92ae27e916bcbfc4d467acb5203d324355531a57cba4910d",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/fabric_suit/fabric_suit_ao.jpg",
+     "bytes": 718719,
+     "sha256": "c4dd922f7b63989badddc88069a1a6b47e3fac59e5af1259cd73de41d1c454ee",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  }
+ ]
+}
