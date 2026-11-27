@@ -8,6 +8,9 @@ extends SceneTree
 ## Stage 2.5: the rigged demon .glb (bones, height, hidden colliders), skin-to-physics
 ##          alignment and pose validity on every tick, mood glow, the full-length
 ##          collapse, and the first-person arms.
+## Stage 3: the extraction loop: doors sealed on the demon, the van rocking, the payout
+##          card, KEEP EXPLORING, NEXT CONTRACT (site reset, tougher demon).
+##          The gadgets themselves are exercised by tools/stage3_test.gd.
 ## Exits 0 when every check passes, 1 otherwise.
 
 const ENRAGED := 2
@@ -45,6 +48,15 @@ var _gap_total := 0.0
 var _gap_samples := 0
 var _bad_poses := 0
 var _rage_glow := 0.0
+var _contracts: Node
+var _bind_at_capture := 0
+var _van_rest := Transform3D.IDENTITY
+var _peak_tilt := 0.0
+var _peak_bounce := 0.0
+var _old_demon: Node3D
+var _old_demon_cues: Dictionary = {}
+var _prop_home := Transform3D.IDENTITY
+var _charge_speed := 0.0
 
 
 func _initialize() -> void:
@@ -148,6 +160,8 @@ func _physics_process(_delta: float) -> bool:
 		_brain = _demon.get_node("AI")
 		_driver = _demon.get_node_or_null("Driver")
 		_van = (_main.get("level") as Node).get("van")
+		_contracts = _main.get("contracts")
+		_charge_speed = float(_brain.get("charge_speed"))
 		# Keep the demon lurking until the Stage 2 half of the run.
 		_brain.set("passive", true)
 		# Pin it to the dais: its random peeking spots can be in view of the front hall,
@@ -164,11 +178,13 @@ func _physics_process(_delta: float) -> bool:
 			if _step_tick == 40:
 				_check("player stands at spawn", _player.is_on_floor(), str(_player.global_position))
 				_check("contract starts empty", not _done(&"open_van") and not _done(&"locate_demon"))
-				# Going in before opening the van must not leave the tracker stuck on the doors.
+				# The contract chain starts at the demon; the van doors and the house are milestones on the way.
+				_check("tracker starts on finding the demon", str(_state.call("get_current_task")).begins_with("Enter the cursed house"), str(_state.call("get_current_task")))
 				_state.call("complete_step", &"enter_house")
-				_check("tracker follows the demon if the van was skipped", str(_state.call("get_current_task")).begins_with("Locate the demon"), str(_state.call("get_current_task")))
+				_check("milestones do not advance the contract", _done(&"enter_house") and is_zero_approx(float(_state.call("get_progress")))
+						and str(_state.call("get_current_task")).begins_with("Enter the cursed house"))
 				_state.call("revoke_step", &"enter_house")
-				_check("tracker starts on the van", str(_state.call("get_current_task")).begins_with("Open the van"))
+				_check("a milestone can be taken back", not _done(&"enter_house"))
 				_check_demon_layout()
 				_check_demon_model()
 				var left: Node3D = _van.get("left_door")
@@ -402,13 +418,111 @@ func _physics_process(_delta: float) -> bool:
 				_check("it thrashed while being dragged", not _struggles.is_empty() and _struggles.max() >= 0.99, str(_struggles))
 				Input.action_release(&"grab")
 				_next()
-		11:  # shut the doors on it
+		11:  # shut the doors on it: the seal lands once both leaves have swung home
+			if _step_tick == 1:
+				_bind_at_capture = int(_demon.get("bind_level"))
+				_check("an open van with the demon inside is not sealed yet", not _brain.get("is_sealed") and not _van.get("is_sealed"))
 			if _step_tick == 20:
 				(_van.get("left_door") as Node).call("set_open", false)
-			if _step_tick == 60:
-				_check("closing the doors seals the capture", _brain.get("is_sealed") == true and _done(&"seal_van"))
+			if _step_tick > 20 and (_brain.get("is_sealed") == true or _step_tick == 260):
+				_check("closing the doors seals the capture", _brain.get("is_sealed") == true and _done(&"seal_van"), "%.1f s after F" % ((_step_tick - 20) / 60.0))
 				_check("contract complete", _state.call("is_contract_complete"))
 				_check("caged demon stays stunned", _demon.get("is_stunned") and float(_demon.get("stun_meter")) > 50.0)
+				_van_rest = _van.transform
+				_next()
+		12:  # Stage 3: the van is bolted and sealed, and rocks while the cargo objects
+			_peak_tilt = maxf(_peak_tilt, _van_rest.basis.get_rotation_quaternion().angle_to(_van.transform.basis.get_rotation_quaternion()))
+			_peak_bounce = maxf(_peak_bounce, absf(_van.position.y - _van_rest.origin.y))
+			if _step_tick == 3:
+				var left: Node = _van.get("left_door")
+				var right: Node = _van.get("right_door")
+				_check("the van is sealed and both doors are bolted", _van.get("is_sealed") == true and left.get("locked") == true and right.get("locked") == true)
+				left.call("interact", _player)
+				_check("F cannot open a sealed van", left.get("is_open") == false and str(left.call("get_prompt")).begins_with("Sealed"), str(left.call("get_prompt")))
+				_check("a golden containment seal shows across the doors", (_van.get("_seal") as Node3D).visible and (_van.get("_seal_light") as Node3D).visible)
+				_check("the van starts rocking", _van.call("is_rocking") == true)
+				_check("the demon is silent cargo: CAPTURED and contained", int(_brain.get("state")) == CAPTURED and _demon.get("contained") == true)
+				_check("contract manager is running the seal sequence", int(_contracts.get("phase")) == 1 and _player.get("controls_locked") == false)
+			if _step_tick == 170:
+				var cues: Dictionary = (_contracts.get("audio") as Node).get("cue_counts")
+				_check("the van rocked on its springs for 2.5 s", not _van.call("is_rocking") and _peak_tilt > 0.01 and _peak_bounce > 0.004,
+						"peak tilt %.1f deg, bounce %.1f cm" % [rad_to_deg(_peak_tilt), _peak_bounce * 100.0])
+				_check("the van settles back exactly where it was parked", _van.transform.is_equal_approx(_van_rest))
+				_check("bangs from inside the cargo box", int(_van.get("bangs")) >= 4, "%d bangs" % int(_van.get("bangs")))
+				_check("door slam and muffled banging were heard", int(cues.get(&"slam", 0)) == 1 and int(cues.get(&"bang", 0)) == int(_van.get("bangs")), str(cues))
+				_check("no payout before the summary", int(_state.get("bank_cash")) == 0)
+			if _step_tick == 200:
+				var summary: Node = _contracts.get("summary")
+				var payout: Dictionary = _state.get("last_payout")
+				var cues: Dictionary = (_contracts.get("audio") as Node).get("cue_counts")
+				_check("the payout card comes up", summary.call("is_showing") == true and int(_contracts.get("phase")) == 2)
+				_check("the card owns the mouse and the controls", _player.get("controls_locked") == true)
+				_check("payout: $500 bounty on contract #0413", int(payout.get("base", 0)) == 500 and int(payout.get("contract", 0)) == 413, str(payout))
+				_check("payout: speed bonus up to $200", int(payout.get("speed", -1)) >= 0 and int(payout.get("speed", -1)) <= 200, "$%d for %.0f s" % [int(payout.get("speed", -1)), float(payout.get("time", 0.0))])
+				_check("payout: $50 per bind level", int(payout.get("bind", -1)) == 50 * _bind_at_capture and int(payout.get("bind_level", -1)) == _bind_at_capture, "bind %d" % _bind_at_capture)
+				_check("payout: thrown props are on the bill", int(payout.get("damaged", 0)) > 0 and int(payout.get("care", 0)) < 100, "%d props, +$%d: %s" % [int(payout.get("damaged", 0)), int(payout.get("care", 0)), str(payout.get("care_note", ""))])
+				var total := int(payout.get("base", 0)) + int(payout.get("speed", 0)) + int(payout.get("bind", 0)) + int(payout.get("care", 0))
+				_check("payout total is the sum of its lines, and it is banked", int(payout.get("total", -1)) == total and int(_state.get("bank_cash")) == total and int(payout.get("bank", -1)) == total, "$%d" % total)
+				_check("cash register rings", int(cues.get(&"chaching", 0)) == 1)
+				_final_demon_checks()
+			if _step_tick == 330:
+				var payout: Dictionary = _state.get("last_payout")
+				_check("HUD bank counts up to the payout", str(_hud.call("get_bank_text")).replace(",", "") == "$%d" % int(payout["total"]), str(_hud.call("get_bank_text")))
+				_next()
+		13:  # KEEP EXPLORING leaves the site as it is; N brings the card back without paying twice
+			var summary: Node = _contracts.get("summary")
+			if _step_tick == 1:
+				(summary.call("get_explore_button") as Button).pressed.emit()
+			if _step_tick == 5:
+				_check("KEEP EXPLORING closes the card and hands the controls back", summary.call("is_showing") == false and _player.get("controls_locked") == false
+						and int(_contracts.get("phase")) == 3)
+				_check("banner reads CONTRACT COMPLETE!", str(_state.call("get_current_task")).begins_with("CONTRACT COMPLETE!"), str(_state.call("get_current_task")))
+				_check("the van stays sealed while exploring", _van.get("is_sealed") == true)
+				_tap(KEY_N)
+			if _step_tick == 9:
+				var payout: Dictionary = _state.get("last_payout")
+				_check("N brings the card back, and the crew is paid once", summary.call("is_showing") == true and int(_state.get("bank_cash")) == int(payout["total"]))
+				_old_demon = _demon
+				_old_demon_cues = (_demon.get_node("Audio").get("cue_counts") as Dictionary).duplicate()
+				_prop_home = (_prop.get_parent() as Node3D).global_transform * (_prop.get_meta(&"spawn_transform") as Transform3D)
+				_check("the thrown prop is nowhere near where it started", _prop.global_position.distance_to(_prop_home.origin) > 1.0)
+				(summary.call("get_next_button") as Button).pressed.emit()
+				# The old demon is gone as of this call: follow the new one from here on.
+				_demon = _main.get("demon")
+				_brain = _demon.get_node("AI")
+				_driver = _demon.get_node_or_null("Driver")
+				_brain.set("passive", true)
+				_bad_poses = 0
+				_next()
+		14:  # NEXT CONTRACT: site reset in place, new number, a tougher demon on the dais
+			if _step_tick == 2:
+				var level: Node = _main.get("level")
+				_check("contract #0414 is live", int(_state.get("contract_number")) == 414 and str(_hud.get("_title").text).contains("#0414") and int(_contracts.get("phase")) == 0,
+						str(_hud.get("_title").text))
+				_check("objectives start over", not _state.call("is_contract_complete") and not _done(&"locate_demon") and not _done(&"seal_van")
+						and str(_state.call("get_current_task")).begins_with("Enter the cursed house"))
+				_check("the card is gone and the controls are back", (_contracts.get("summary") as Node).call("is_showing") == false and _player.get("controls_locked") == false)
+				_check("the van is unsealed with its doors shut", _van.get("is_sealed") == false and _van.get("left_door").get("locked") == false
+						and _van.get("left_door").get("is_open") == false and not (_van.get("_seal") as Node3D).visible)
+				_check("player is back at the kerb with full stamina", _player.global_position.distance_to((level.get("player_spawn") as Transform3D).origin) < 0.5
+						and is_equal_approx(float(_player.get("stamina")), float(_player.get("max_stamina"))), str(_player.global_position))
+				_check("a new demon replaced the old one", _demon != _old_demon and (not is_instance_valid(_old_demon) or _old_demon.is_queued_for_deletion()) and _demon.is_inside_tree())
+				_check("it wakes on the dais, unbound and unseen", _torso().global_position.distance_to((level.get("demon_spawn") as Transform3D).origin + Vector3.UP * 1.3) < 1.2
+						and not _demon.get("is_stunned") and int(_demon.get("bind_level")) == 0 and not _brain.get("is_discovered") and not _hud.call("is_demon_status_visible"),
+						str(_torso().global_position))
+				_check("it is tougher and faster than the last", float(_demon.get("stun_scale")) < 1.0 and float(_brain.get("charge_speed")) > _charge_speed,
+						"stun x%.2f, charge %.2f -> %.2f m/s" % [float(_demon.get("stun_scale")), _charge_speed, float(_brain.get("charge_speed"))])
+				_check("the clock and the damage bill start again", float(_contracts.get("elapsed")) < 0.2 and int(_contracts.get("damaged_props")) == 0)
+				_check("props are back where the level put them", _prop.global_position.distance_to(_prop_home.origin) < 0.05, "%.2f m off" % _prop.global_position.distance_to(_prop_home.origin))
+				_worst_gap = 0.0
+				_gap_total = 0.0
+				_gap_samples = 0
+			if _step_tick == 150:
+				var height := _demon_height()
+				_check("the new demon stands at full height", height > 1.1 and int(_demon.get("fault_count")) == 0, "torso %.2f m above its soles" % height)
+				_check("resetting the house did not count as wrecking it", int(_contracts.get("damaged_props")) == 0, "%d" % int(_contracts.get("damaged_props")))
+				_check("props settled where they were reset", _prop.global_position.distance_to(_prop_home.origin) < 0.3, "%.2f m off" % _prop.global_position.distance_to(_prop_home.origin))
+				_final_demon_checks()
 				_finish()
 				return true
 	if _tick > 6000:
@@ -505,7 +619,7 @@ func _is_under(node: Node, type: String) -> bool:
 	return false
 
 
-func _finish() -> void:
+func _final_demon_checks() -> void:
 	var finite := true
 	for body: RigidBody3D in _demon.call("get_bodies"):
 		if not (body.global_position.is_finite() and body.linear_velocity.is_finite() and body.angular_velocity.is_finite()):
@@ -519,7 +633,10 @@ func _finish() -> void:
 	var typical_gap := _gap_total / maxf(1.0, _gap_samples)
 	_check("skin stays on its physics segments", typical_gap < 0.03 and _worst_gap < 0.5,
 			"%.3f m on average, %.3f m at worst (%s)" % [typical_gap, _worst_gap, _worst_gap_bone])
-	var cues: Dictionary = _demon.get_node("Audio").get("cue_counts")
+
+
+func _finish() -> void:
+	var cues: Dictionary = _old_demon_cues
 	_check("audio cues fired", int(cues["roar"]) > 0 and int(cues["whoosh"]) > 0 and int(cues["buzz"]) > 0, str(cues))
 	var loader := root.get_node("ModelLoader")
 	_check("no missing models", int(loader.call("get_missing_count")) == 0, "%d loaded" % int(loader.call("get_loaded_count")))

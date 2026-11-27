@@ -1,6 +1,7 @@
 extends Node3D
 ## Entry point. Builds the night atmosphere (environment, fog, moon), asks the
-## LevelBuilder for the site, then drops in the player, the HUD and the demon.
+## LevelBuilder for the site, then drops in the player, the HUD, the demon and
+## the ContractManager that runs the capture-to-payout loop.
 ## Main.tscn contains only this script: everything else is constructed on run.
 
 const LevelBuilder := preload("res://scripts/LevelBuilder.gd")
@@ -8,10 +9,11 @@ const PlayerScene := preload("res://scenes/Player.tscn")
 const ExorcistModel := preload("res://scripts/ExorcistModel.gd")
 const HudScene := preload("res://scenes/HUD.tscn")
 const DemonScene := preload("res://scenes/Demon.tscn")
+const ContractManager := preload("res://scripts/ContractManager.gd")
 
 const FOG_COLOR := Color(0.16, 0.20, 0.27)
 const KILL_PLANE_Y := -25.0
-const DEBUG_KEYS := "Stage 2 test keys:  K stun / wake demon   J cycle AI (lurking > enraged > poltergeist throw)   L cycle bind level 0-3   F1 show on HUD"
+const DEBUG_KEYS := "Test keys:  K stun / wake demon   J cycle AI (lurking > enraged > poltergeist throw)   L cycle bind level 0-3   P summon demon   F1 show on HUD"
 
 ## 0 orange, 1 teal, 2 olive, 3 purple.
 @export var suit_variant := 0
@@ -20,6 +22,7 @@ var level: LevelBuilder
 var player: CharacterBody3D
 var hud: CanvasLayer
 var demon: Node3D
+var contracts: ContractManager
 
 
 func _ready() -> void:
@@ -39,22 +42,46 @@ func _ready() -> void:
 	add_child(hud)
 	hud.call(&"bind_player", player)
 
-	demon = DemonScene.instantiate() as Node3D
-	demon.transform = level.demon_spawn
-	add_child(demon)
-	demon.get_node("AI").call(&"setup", level, player)
-	hud.call(&"bind_demon", demon)
+	_spawn_demon(0)
 	print(DEBUG_KEYS)
 
 	_spawn_squad()
 	_build_interior_air()
 	_tune_lights(self)
 
+	contracts = ContractManager.new()
+	contracts.name = "Contracts"
+	add_child(contracts)
+	contracts.setup(self)
 
-## Stage 2 test keys. They act on the demon's brain, exactly as gameplay would.
+
+## Clears out the last demon (sealed in the van or not) and wakes a new one on the dais.
+## `tier` is the number of contracts already paid out: each one makes the next demon worse.
+func respawn_demon(tier: int) -> Node3D:
+	if is_instance_valid(demon):
+		# Out of the tree at once, so it cannot report progress on the new contract.
+		remove_child(demon)
+		demon.queue_free()
+	_spawn_demon(tier)
+	_tune_lights(demon)
+	return demon
+
+
+func _spawn_demon(tier: int) -> void:
+	demon = DemonScene.instantiate() as Node3D
+	demon.name = "Demon"
+	demon.transform = level.demon_spawn
+	add_child(demon)
+	var brain := demon.get_node("AI")
+	brain.call(&"setup", level, player)
+	brain.call(&"apply_difficulty", tier)
+	hud.call(&"bind_demon", demon)
+
+
+## Test keys (listed on the HUD under F1). They act on the demon's brain, exactly as gameplay would.
 func _unhandled_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
-	if key == null or not key.pressed or key.echo:
+	if key == null or not key.pressed or key.echo or not is_instance_valid(demon) or player.get(&"controls_locked"):
 		return
 	var brain := demon.get_node("AI")
 	match key.physical_keycode:
@@ -64,6 +91,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			brain.call(&"debug_cycle_state")
 		KEY_L:
 			brain.call(&"debug_cycle_bind")
+		KEY_P:
+			brain.call(&"debug_summon")
 
 
 func _physics_process(_delta: float) -> void:
