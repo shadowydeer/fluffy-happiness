@@ -32,6 +32,9 @@ uniform float pulse : hint_range(0.0, 1.0) = 0.0;
 uniform mat4 chest_from_model;
 uniform vec3 chest_center = vec3(0.0);
 uniform float chest_radius = 0.45;
+// Electric rim while the taser has hold of it.
+uniform vec3 shock_color : source_color = vec3(0.3, 0.92, 1.0);
+uniform float shock = 0.0;
 
 varying vec3 chest_position;
 
@@ -70,6 +73,7 @@ void fragment() {
 	vec3 veins = texture(vein_map, UV * vein_scale).rgb;
 	vec3 glow = veins * (chest * core_energy * (0.65 + 0.35 * pulse) + limb_energy);
 	glow += ember_color * painted * paint_energy * (0.7 + 0.3 * pulse);
-	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), rim_power);
-	EMISSION = glow + rim_color * fresnel * rim_energy;
+	float grazing = 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0);
+	float fresnel = pow(grazing, rim_power);
+	EMISSION = glow + rim_color * fresnel * rim_energy + shock_color * (pow(grazing, 1.5) * 5.0 + 0.2) * shock;
 }
