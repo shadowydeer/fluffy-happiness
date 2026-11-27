@@ -10,8 +10,13 @@ extends Node3D
 ## Local frame: nose toward +Z, rear doors at -Z, wheels on y = 0.
 
 signal cargo_loaded(body: RigidBody3D)
+## The doors have been bolted on a captured demon.
+signal sealed_shut
+## Something inside hit the bodywork; `strength` is 0..1.
+signal banged(strength: float)
 
 const Mats := preload("res://scripts/MaterialLibrary.gd")
+const Parts := preload("res://scripts/gadgets/GadgetParts.gd")
 const HingedDoor := preload("res://scripts/HingedDoor.gd")
 const FlickerLight := preload("res://scripts/FlickerLight.gd")
 const CAB_SHADER := preload("res://shaders/van_cab.gdshader")
@@ -41,10 +46,29 @@ const DOOR_OPEN_DEGREES := 112.0
 const BEACON_SPIN := 5.2
 const PAINT_TINT := Color(0.80, 0.80, 0.76)
 const LIVERY := Color(0.86, 0.34, 0.07)
+## Seconds the van rocks on its springs after the doors are sealed on a demon.
+const ROCK_TIME := 2.5
+const SEAL_COLOR := Color(1.0, 0.72, 0.26)
 
 var left_door: HingedDoor
 var right_door: HingedDoor
 var cargo_zone: Area3D
+var is_sealed := false
+var bangs := 0
+
+var _rest := Transform3D.IDENTITY
+var _rock_left := 0.0
+var _bang_left := 0.0
+## Roll and pitch of the body on its suspension (radians), and its ride height (metres).
+var _lean := Vector2.ZERO
+var _lean_velocity := Vector2.ZERO
+var _bounce := 0.0
+var _bounce_velocity := 0.0
+var _seal: MeshInstance3D
+var _seal_material: StandardMaterial3D
+var _seal_light: OmniLight3D
+var _seal_flash := 0.0
+var _dust: Array[GPUParticles3D] = []
 
 var _body: StaticBody3D
 var _beacon_pivot: Node3D
@@ -69,6 +93,7 @@ func _ready() -> void:
 	_build_branding()
 	_build_doors()
 	_build_cargo_zone()
+	_build_seal()
 
 
 func _process(delta: float) -> void:
@@ -78,11 +103,116 @@ func _process(delta: float) -> void:
 	var pulse := 0.65 + 0.35 * sin(_time * BEACON_SPIN * 2.0)
 	_beacon_material.emission_energy_multiplier = 1.2 + 2.2 * pulse
 	_beacon_glow.light_energy = 0.5 + 0.7 * pulse
+	_update_seal(delta)
 
 
 ## True when both rear doors are (being driven) open.
 func are_doors_open() -> bool:
 	return left_door.is_open and right_door.is_open
+
+
+## True once both rear doors have physically swung home.
+func are_doors_shut() -> bool:
+	return not left_door.is_open and not right_door.is_open and absf(left_door.get_angle()) < 0.1 and absf(right_door.get_angle()) < 0.1
+
+
+## Bolts the doors on a captured demon: a containment seal flares across them and the
+## whole van rocks on its springs for `ROCK_TIME` while the cargo objects.
+func seal() -> void:
+	if is_sealed:
+		return
+	is_sealed = true
+	left_door.lock()
+	right_door.lock()
+	_rest = transform
+	_rock_left = ROCK_TIME
+	_bang_left = 0.3
+	_seal.visible = true
+	_seal_light.visible = true
+	_seal_flash = 1.0
+	sealed_shut.emit()
+
+
+## Breaks the seal and shuts the doors, ready for the next contract.
+func release() -> void:
+	if is_sealed:
+		transform = _rest
+	is_sealed = false
+	_rock_left = 0.0
+	_lean = Vector2.ZERO
+	_lean_velocity = Vector2.ZERO
+	_bounce = 0.0
+	_bounce_velocity = 0.0
+	_seal.visible = false
+	_seal_light.visible = false
+	left_door.unlock()
+	right_door.unlock()
+	left_door.set_open(false)
+
+
+func is_rocking() -> bool:
+	return _rock_left > 0.0
+
+
+func _update_seal(delta: float) -> void:
+	if not _seal.visible:
+		return
+	_seal_flash = maxf(0.0, _seal_flash - delta * 1.3)
+	var glow := 0.5 + 0.18 * sin(_time * 2.4) + _seal_flash * 5.0
+	_seal_material.albedo_color = Color(SEAL_COLOR.r * glow, SEAL_COLOR.g * glow, SEAL_COLOR.b * glow)
+	_seal_light.light_energy = 0.35 + _seal_flash * 5.0
+	if _rock_left <= 0.0:
+		return
+	_rock_left -= delta
+	_bang_left -= delta
+	if _bang_left <= 0.0 and _rock_left > 0.25:
+		# The demon throws itself at a wall: the body kicks over and the springs take it up.
+		_bang_left = randf_range(0.26, 0.5)
+		var strength := randf_range(0.55, 1.0)
+		_lean_velocity += Vector2((-1.0 if randf() < 0.5 else 1.0) * 0.85, randf_range(-0.22, 0.22)) * strength
+		_bounce_velocity += 0.5 * strength
+		for puff in _dust:
+			puff.restart()
+		bangs += 1
+		banged.emit(strength)
+	_lean_velocity += (-_lean * 115.0 - _lean_velocity * 8.0) * delta
+	_lean += _lean_velocity * delta
+	_bounce_velocity += (-_bounce * 170.0 - _bounce_velocity * 10.0) * delta
+	_bounce += _bounce_velocity * delta
+	if _rock_left <= 0.0:
+		transform = _rest
+	else:
+		transform = _rest * Transform3D(Basis(Vector3.BACK, _lean.x) * Basis(Vector3.RIGHT, _lean.y), Vector3(0.0, maxf(_bounce, -0.02), 0.0))
+
+
+func _build_seal() -> void:
+	_seal_material = Parts.additive(Parts.sigil(512))
+	_seal_material.vertex_color_use_as_albedo = false
+	var plate := QuadMesh.new()
+	plate.size = Vector2(1.95, 1.95)
+	_seal = MeshInstance3D.new()
+	_seal.name = "ContainmentSeal"
+	_seal.mesh = plate
+	_seal.material_override = _seal_material
+	_seal.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_seal.position = Vector3(0.0, (ROOF_TOP + FLOOR_TOP) * 0.5, REAR_Z - 0.16)
+	_seal.rotation.y = PI
+	_seal.visible = false
+	add_child(_seal)
+	_seal_light = OmniLight3D.new()
+	_seal_light.name = "SealGlow"
+	_seal_light.light_color = SEAL_COLOR
+	_seal_light.omni_range = 6.0
+	_seal_light.shadow_enabled = false
+	_seal_light.position = Vector3(0.0, 1.7, REAR_Z - 0.8)
+	_seal_light.visible = false
+	add_child(_seal_light)
+	# Dust shaken off the chassis at each wheel when the van rocks.
+	for corner: Vector3 in [Vector3(-1.2, 0.12, AXLE_Z), Vector3(1.2, 0.12, AXLE_Z), Vector3(-1.2, 0.12, 1.75), Vector3(1.2, 0.12, 1.75)]:
+		var puff := Parts.particles(Color(0.42, 0.38, 0.33, 0.55), 14, 1.0, Vector2(0.3, 1.3), Vector2(0.08, 0.24), Vector3(0.0, 0.25, 0.0), 75.0, true, false)
+		puff.position = corner
+		add_child(puff)
+		_dust.append(puff)
 
 
 # --- Cab (from the truck model) -------------------------------------------------
