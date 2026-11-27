@@ -17,6 +17,8 @@ extends Node
 
 signal state_changed(state: int)
 signal discovered
+## The van's doors have shut on it.
+signal sealed
 
 enum State { LURKING, STALKING, ENRAGED, POLTERGEIST_THROW, STUNNED, CAPTURED }
 
@@ -117,6 +119,7 @@ var _casts: Array[Dictionary] = []
 var _cast_left := 0.0
 var _cast_launched := false
 var _recover_left := 0.0
+var _closing_time := 0.0
 
 
 ## Wires the brain to the level and its prey. Called by Main after everything exists.
@@ -142,6 +145,7 @@ func setup(level: Node, player: Node) -> void:
 	_ragdoll.stun_changed.connect(_on_stun_changed)
 	_ragdoll.grabbed.connect(_on_grabbed)
 	_ragdoll.struggled.connect(_on_struggled)
+	_ragdoll.provoked.connect(_on_provoked)
 	_fx_root = Node3D.new()
 	_fx_root.name = "PoltergeistFx"
 	add_child(_fx_root)
@@ -158,7 +162,21 @@ func get_state_name() -> String:
 	return STATE_NAMES[state]
 
 
-# --- Debug hotkeys (K / J / L in Main) -------------------------------------------------
+## Each contract the crew survives, the next demon is a little quicker, meaner and harder
+## to put down. `tier` is the number of contracts already paid out.
+func apply_difficulty(tier: int) -> void:
+	var step := clampf(float(tier), 0.0, 8.0)
+	var quick := 1.0 + 0.06 * step
+	lurk_speed *= quick
+	stalk_speed *= quick
+	charge_speed *= quick
+	swipe_cooldown /= 1.0 + 0.05 * step
+	throw_interval_min /= 1.0 + 0.07 * step
+	throw_interval_max /= 1.0 + 0.07 * step
+	_ragdoll.stun_scale = 1.0 / (1.0 + 0.08 * step)
+
+
+# --- Debug hotkeys (K / J / L / P in Main) ---------------------------------------------
 
 ## K: instant stun, or wake if already stunned.
 func debug_toggle_stun() -> void:
@@ -200,6 +218,19 @@ func debug_cycle_bind() -> void:
 	GameState.post_notice("DEBUG  bind level %d / 3" % _ragdoll.bind_level)
 
 
+## P: stands the demon a few steps in front of the player, to try the gadgets without the walk.
+func debug_summon() -> void:
+	if is_sealed:
+		GameState.post_notice("DEBUG  the demon is sealed in the van")
+		return
+	_discover()
+	var ahead := -_player.global_transform.basis.z
+	_ragdoll.place(Transform3D(Basis.looking_at(-ahead), _player.global_position + ahead * 3.2))
+	_route.clear()
+	_stuck_anchor = _ragdoll.get_ground_position()
+	GameState.post_notice("DEBUG  demon summoned")
+
+
 # --- Main loop ---------------------------------------------------------------------------
 
 func _physics_process(delta: float) -> void:
@@ -208,7 +239,7 @@ func _physics_process(delta: float) -> void:
 	_state_time += delta
 	_sense(delta)
 	_haunt_lights(delta)
-	_update_van()
+	_update_van(delta)
 	match state:
 		State.LURKING:
 			_tick_lurking(delta)
@@ -465,8 +496,8 @@ func _on_stun_changed(stunned: bool) -> void:
 	_enter(State.ENRAGED)
 
 
-## Stunned with the torso in the cargo cage = captured. Shutting both doors seals it.
-func _update_van() -> void:
+## Stunned with the torso in the cargo cage = captured. Shutting both doors on it seals it in.
+func _update_van(delta: float) -> void:
 	if not _ragdoll.is_stunned:
 		return
 	var van := _level.van
@@ -481,9 +512,28 @@ func _update_van() -> void:
 		_ragdoll.stun_locked = false
 		_enter(State.STUNNED)
 		GameState.revoke_step(GameState.STEP_LOAD_DEMON)
-	if state == State.CAPTURED and not is_sealed and not van.left_door.is_open and not van.right_door.is_open:
+	if state != State.CAPTURED or is_sealed or van.left_door.is_open or van.right_door.is_open:
+		_closing_time = 0.0
+		return
+	# The doors are swinging shut. Limbs hanging out over the sill are shoved back in; the
+	# seal lands when both leaves are home, or after a moment if something still jams them.
+	_closing_time += delta
+	var inward := van.global_transform.basis.z
+	for body in _ragdoll.get_bodies():
+		if van.to_local(body.global_position).z < van.REAR_Z + 0.3:
+			body.apply_central_force(inward * body.mass * 34.0)
+	if van.are_doors_shut() or _closing_time > 1.4:
 		is_sealed = true
+		_ragdoll.contained = true
+		sealed.emit()
 		GameState.complete_step(GameState.STEP_SEAL_VAN)
+
+
+## A rope round a limb or a jolt of current: whatever it was doing, it is angry now.
+func _on_provoked(by: Node) -> void:
+	_discover()
+	if by == _player and (state == State.LURKING or state == State.STALKING):
+		_enter(State.ENRAGED)
 
 
 ## Laying hands on a conscious demon is answered at once.
