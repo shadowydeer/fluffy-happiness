@@ -8,12 +8,16 @@ extends CanvasLayer
 ## $0, head office's remarks, and RETRY CONTRACT / MAIN MENU (`retry_pressed`,
 ## `menu_pressed`). In co-op only the host decides what happens next, so a client's
 ## first button is greyed out until the host has pressed theirs.
+## Both cards name the kind of demon the job was about (the payout adds its hazard
+## bonus as a line item) and carry OPEN FIELD SHOP, which anyone may press.
 ## The whole screen swallows mouse clicks while the card is up.
 
 signal next_pressed
 signal explore_pressed
 signal retry_pressed
 signal menu_pressed
+
+const DemonArchetypes := preload("res://scripts/DemonArchetypes.gd")
 
 const INK := Color(0.93, 0.95, 0.92)
 const DIM := Color(0.60, 0.67, 0.68)
