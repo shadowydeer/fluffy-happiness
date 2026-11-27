@@ -20,6 +20,8 @@ config/features=PackedStringArray("4.3", "Forward Plus")
 GameState="*res://autoload/GameState.gd"
 NetworkManager="*res://autoload/NetworkManager.gd"
 ModelLoader="*res://scripts/ModelLoader.gd"
+SoundManager="*res://autoload/SoundManager.gd"
+Loc="*res://autoload/Loc.gd"
 
 [display]
 
