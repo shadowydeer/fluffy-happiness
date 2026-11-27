@@ -145,6 +145,9 @@ func _run() -> void:
 	await _frames(3)
 	_net = root.get_node("NetworkManager")
 	_state = root.get_node("GameState")
+	# Stage 1-4 numbers are checked against the classic demon. Only the host's pin counts:
+	# the client is told what the contract is about, like everything else.
+	_state.set("archetype_lock", 3)
 	_state.connect(&"notice_posted", func(text: String) -> void: _notices.append(text))
 	if _role == "host":
 		await _host()
