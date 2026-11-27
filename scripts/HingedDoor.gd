@@ -14,6 +14,8 @@ const LATCH_SPIN := 0.8          # rad/s: ...and moving this slowly
 const LATCH_HOLD_RATE := 45.0    # 1/s: how firmly the latch pulls the leaf back to shut
 const LIMIT_SLOP := 0.03         # rad of give past either end of the swing arc
 const LIMIT_RETURN_RATE := 9.0   # 1/s: how hard an over-swung leaf is steered back
+const SOUND_WARMUP := 30         # physics frames after _ready in which the level is still arranging its doors
+const CREAK_SPACING := 6         # physics frames between any two hinge creaks (double doors, a level reset)
 
 ## Signed swing angle around local +Y. Positive carries local +X toward local -Z.
 @export var open_angle := deg_to_rad(110.0)
@@ -23,6 +25,10 @@ const LIMIT_RETURN_RATE := 9.0   # 1/s: how hard an over-swung leaf is steered b
 @export var max_angular_acceleration := 30.0
 ## Shown in the interaction prompt: "Open <noun>" / "Close <noun>".
 @export var noun := "door"
+## Steel leaves (the van) squeal and clunk instead of creaking like wood. Set from the noun when left alone.
+@export var metal := false
+
+static var _last_creak_frame := -1000
 
 var is_open := false
 ## A locked leaf ignores F and stays shut (the sealed extraction van).
@@ -35,11 +41,14 @@ var _hinge_inertia := 1.0
 # A shut leaf is latched: it cannot be barged open, only opened by interaction.
 var _latched := true
 var _joint: HingeJoint3D
+var _width := 1.0
+var _ready_frame := 0
 
 
 ## Builds the leaf's collider and base panel. Call before adding to the tree.
 func configure(width: float, height: float, thickness: float, door_mass: float, material: Material) -> void:
 	mass = door_mass
+	_width = width
 	_hinge_inertia = door_mass * width * width / 3.0
 	var shape := BoxShape3D.new()
 	shape.size = Vector3(width, height, thickness)
@@ -64,6 +73,8 @@ func _ready() -> void:
 	can_sleep = false
 	angular_damp = 0.4
 	_closed_local = transform.basis.orthonormalized()
+	_ready_frame = Engine.get_physics_frames()
+	metal = metal or noun.begins_with("rear")
 
 
 ## Pins the leaf to `anchor` (or to the world when null). Call once both are in the tree.
@@ -119,8 +130,40 @@ func set_open(open: bool, sync_partner: bool = true) -> void:
 		_latched = false
 	sleeping = false
 	toggled.emit(is_open)
+	_creak()
 	if sync_partner and partner and partner.has_method("set_open"):
 		partner.call("set_open", open, false)
+
+
+## Hinges complaining as the leaf starts to swing. The host's sound reaches every client;
+## a client's own mirror of the door stays quiet (see SoundManager.play_net).
+func _creak() -> void:
+	var frame := Engine.get_physics_frames()
+	if not _may_sound() or frame - _last_creak_frame < CREAK_SPACING:
+		return
+	_last_creak_frame = frame
+	if metal:
+		SoundManager.play_net(&"amb_creak", _sound_point(), -12.0, randf_range(1.4, 1.6))
+	else:
+		SoundManager.play_net(&"amb_creak", _sound_point(), -8.0, randf_range(0.88, 1.06))
+
+
+## The leaf meeting its frame.
+func _clunk() -> void:
+	if not _may_sound():
+		return
+	if metal:
+		SoundManager.play_net(&"van_door_slam", _sound_point(), -8.0, 1.12)
+	else:
+		SoundManager.play_net(&"impact_wood", _sound_point(), -9.0, 0.8)
+
+
+func _may_sound() -> bool:
+	return is_inside_tree() and Engine.get_physics_frames() - _ready_frame > SOUND_WARMUP
+
+
+func _sound_point() -> Vector3:
+	return global_transform * Vector3(_width * 0.5, 0.0, 0.0)
 
 
 ## Current swing angle in radians (0 = closed).
@@ -148,6 +191,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 
 	if not is_open and not _latched and absf(angle) < LATCH_ANGLE and absf(spin) < LATCH_SPIN:
 		_latched = true
+		_clunk.call_deferred()
 	if _latched:
 		# Pin the leaf shut: overwrite the hinge-axis spin instead of fighting it with torque.
 		state.angular_velocity += axis * (-angle * LATCH_HOLD_RATE - spin)

@@ -60,6 +60,8 @@ const CRAWL_SPEED := 0.95
 ## A standing crewmate holding E this close for this long gets a downed player up.
 const REVIVE_RANGE := 2.3
 const REVIVE_TIME := 3.0
+## Share of REVIVE_TIME a revive takes once the crew has bought an auto-injector.
+const REVIVE_BOOST := 0.5
 const REVIVE_HP := 55.0
 const SECOND_WIND_TIME := 2.5
 const SECOND_WIND_HP := 50.0
@@ -1149,7 +1151,7 @@ func _update_revive(delta: float) -> void:
 	revive_seat = int(target.get(&"seat")) if target else -1
 	if target == null:
 		return
-	revive_progress += delta / REVIVE_TIME
+	revive_progress += delta / (REVIVE_TIME * (REVIVE_BOOST if GameState.revive_boost else 1.0))
 	if revive_progress >= 1.0:
 		revive_progress = 0.0
 		_revive_target = null
@@ -1174,6 +1176,20 @@ func revive(amount: float) -> void:
 	health_changed.emit(hp, max_hp)
 	downed_changed.emit(false)
 	recovered.emit()
+
+
+## The field shop's auto-injector: `amount` HP back and the solo second wind re-armed.
+## Someone who is down gets back up on it instead.
+func inject(amount: float) -> void:
+	if not is_local:
+		_send_owner(&"inject", [amount])
+		return
+	second_wind_ready = true
+	if is_downed:
+		revive(amount)
+		return
+	hp = minf(max_hp, hp + amount)
+	health_changed.emit(hp, max_hp)
 
 
 # --- Health -----------------------------------------------------------------------
