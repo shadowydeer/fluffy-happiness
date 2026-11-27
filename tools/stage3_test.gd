@@ -22,7 +22,7 @@ const TORSO := 1
 const ARENA := Vector3(-13.0, 0.1, 9.0)
 const EAST := Vector3.RIGHT
 const SOUTH := Vector3.BACK
-const MAIN_CHILDREN: Array[String] = ["WorldEnvironment", "Moonlight", "Moon", "Level", "Player", "HUD", "Demon", "InteriorAir", "Contracts", "Possession", "Net", "PauseMenu"]
+const MAIN_CHILDREN: Array[String] = ["WorldEnvironment", "Moonlight", "Moon", "Level", "Player", "HUD", "Demon", "InteriorAir", "Juice", "Contracts", "Possession", "Net", "Shop", "PauseMenu"]
 
 var _main: Node
 var _state: Node
@@ -74,6 +74,8 @@ var _tuning: Array[Dictionary] = []
 
 
 func _initialize() -> void:
+	# Stage 1-4 numbers are checked against the classic demon; tools/stage5_*_test.gd cover the archetypes.
+	root.get_node("GameState").set("archetype_lock", 3)
 	_main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
 	root.add_child(_main)
 	_state = root.get_node("GameState")
