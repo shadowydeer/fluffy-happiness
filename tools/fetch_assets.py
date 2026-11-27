@@ -1,27 +1,42 @@
 #!/usr/bin/env python3
 """Download and verify every third-party asset used by BIND & DELIVER.
 
-Standard library only. Run from anywhere:
+Standard library only; ffmpeg is used when it is on PATH to trim, loop and
+encode sound effects. Run from anywhere:
 
-    python3 tools/fetch_assets.py            # fetch whatever is missing, then verify
-    python3 tools/fetch_assets.py --force    # re-download everything
-    python3 tools/fetch_assets.py --verify   # offline: re-check local files against the manifest
+    python3 tools/fetch_assets.py                   # fetch whatever is missing, then verify
+    python3 tools/fetch_assets.py --force           # re-download everything
+    python3 tools/fetch_assets.py --verify-offline  # re-check local files against the manifest (alias: --verify)
 
-Sources (all CC0 1.0 / public domain; licence is re-checked against each API):
-  * Poly Haven  https://api.polyhaven.com   models (glTF packed into one .glb) and PBR textures
-  * Poly Pizza  https://poly.pizza          .glb models by Quaternius, Kay Lousberg, CreativeTrio, iPoly3D
-  * ambientCG   https://ambientcg.com/api   PBR textures
-  * vibeassets  https://vibeassets.io/api   rigged .glb characters (the demon)
+Models, textures and audio are all CC0 1.0 / public domain and the licence is
+re-checked against each API or asset page on every download:
+  * Poly Haven    https://api.polyhaven.com   models (glTF packed into one .glb) and PBR textures
+  * Poly Pizza    https://poly.pizza          .glb models by Quaternius, Kay Lousberg, CreativeTrio, iPoly3D
+  * ambientCG     https://ambientcg.com/api   PBR textures
+  * vibeassets    https://vibeassets.io/api   rigged .glb characters (the three demon archetypes)
+  * KayKit        https://github.com/KayKit-Game-Assets   glTF props by Kay Lousberg, pinned to a commit
+  * OpenGameArt   https://opengameart.org     CC0 entries: monster roars, an OBJ prop converted to .glb
+  * BigSoundBank  https://bigsoundbank.com    field recordings and foley by Joseph Sardin
+  * Freesound     https://freesound.org       CC0 sounds (the Ogg previews, which need no account)
+  * Kenney        https://kenney.nl           impact and interface sound packs
+Fonts are SIL Open Font License 1.1 static .ttf files from their upstream
+GitHub repositories, stored next to a copy of each licence text.
 
 Nothing is fetched from a guessed URL: every download link comes out of the
-source's own API response for the asset id listed in the catalog below.
+source's own API response or asset page for the id listed in the catalogs
+below, or is a commit-pinned file that was checked when it was added.
 Each file is checked for HTTP 200, a non-trivial size and the right magic
-bytes (glTF / JPEG / PNG), and the result is written to
-assets/asset_manifest.json.
+bytes (glTF / JPEG / PNG / Ogg Vorbis / RIFF WAVE / sfnt), fonts must cover
+Basic Latin and Russian Cyrillic in their cmap table, and the result is
+written to assets/asset_manifest.json.
 
 Rigged models listed in RIGGED_MODELS are also checked for a skin, skinned
 vertices and every bone the game maps by name; their bone hierarchy, rest
 positions and bounding box are printed and stored in the manifest.
+
+A download that fails never stops the run: the slot is recorded as failed (the
+game has a procedural fallback for each one) and a file left by an earlier
+good run is kept.
 """
 
 from __future__ import annotations
@@ -30,12 +45,17 @@ import argparse
 import concurrent.futures
 import datetime
 import hashlib
+import html
 import io
 import json
 import os
 import re
+import shutil
 import struct
+import subprocess
 import sys
+import tempfile
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -46,7 +66,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(ROOT, "assets")
 MODELS = os.path.join(ASSETS, "models")
 TEXTURES = os.path.join(ASSETS, "textures")
+AUDIO = os.path.join(ASSETS, "audio")
+FONTS = os.path.join(ASSETS, "fonts")
 MANIFEST = os.path.join(ASSETS, "asset_manifest.json")
+FFMPEG = shutil.which("ffmpeg")
 
 USER_AGENT = "BindAndDeliver-AssetFetcher/2.0 (Godot indie project; contact via repository)"
 BROWSER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) " + USER_AGENT
@@ -145,18 +168,33 @@ MODEL_CATALOG = [
     ("gas_canister", "polyhaven", "propane_tank", "characters"),
     # --- The demon: skinned humanoid, drives the Stage 2 ragdoll ------------
     ("demon", "vibeassets", "6lgzyditwz", "demon"),
+    # --- Stage 5 archetypes: same auto-rig, so they drop into that ragdoll ---
+    ("scuttler", "vibeassets", "ooq775xp55", "demon"),
+    ("poltergeist", "vibeassets", "k6bdm27lba", "demon"),
+    # --- Stage 5 van field shop ------------------------------------------
+    ("terminal", "polyhaven", "classic_laptop", "shop"),
+    ("medkit", "polyhaven", "medical_box", "shop"),
+    ("tape_roll", "polyhaven", "medical_tape", "shop"),
+    ("shelf", "polyhaven", "worn_metal_rack", "shop"),
+    # No CC0 coil of rope turned up; a hose coiled on a wall hook reads the same on the rack.
+    ("rope_coil", "polyhaven", "garden_hose_wall_mounted_01", "shop"),
+    ("salt_jar", "kaykit", "KayKit-Restaurant-Bits-1.0@153c8a7535b48237854cb54ff6890679f8c574d1:"
+                           "addons/kaykit_restaurant_bits/Assets/gltf/jar_A_medium.gltf", "shop"),
+    ("battery", "opengameart", "battery-for-rc-cars-etc:battery.zip:battery/battery.obj:battery/battery.png", "shop"),
 ]
 
-# Rigged models and the bones scripts/DemonSkeletonDriver.gd looks up by name.
-RIGGED_MODELS = {
-    "demon": [
-        "Hips", "Spine02", "Spine01", "Spine", "neck", "Head", "head_end",
-        "LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand",
-        "RightShoulder", "RightArm", "RightForeArm", "RightHand",
-        "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase",
-        "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase",
-    ],
-}
+# The bones scripts/DemonSkeletonDriver.gd looks up by name.
+DEMON_BONES = [
+    "Hips", "Spine02", "Spine01", "Spine", "neck", "Head", "head_end",
+    "LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand",
+    "RightShoulder", "RightArm", "RightForeArm", "RightHand",
+    "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase",
+    "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase",
+]
+RIGGED_MODELS = {"demon": DEMON_BONES, "scuttler": DEMON_BONES, "poltergeist": DEMON_BONES}
+# The game falls back to the demon rig for these, so a missing bone is recorded
+# as "rig_compatible": false in the manifest instead of failing the download.
+OPTIONAL_RIGS = {"scuttler", "poltergeist"}
 
 # (local name, source, source id)
 TEXTURE_CATALOG = [
@@ -196,6 +234,98 @@ TEXTURE_CATALOG = [
 POLYHAVEN_MAPS = [("Diffuse", "albedo"), ("nor_gl", "normal"), ("Rough", "roughness"), ("AO", "ao")]
 # ambientCG file-name token -> our file suffix.
 AMBIENTCG_MAPS = [("_Color", "albedo"), ("_NormalGL", "normal"), ("_Roughness", "roughness"), ("_AmbientOcclusion", "ao")]
+
+# (file name, source, source id, edit) -> assets/audio/<file name>.ogg (or .wav when stored untouched).
+# autoload/SoundManager.gd looks slots up by name; "<slot>_2" .. "<slot>_4" are extra takes of one slot.
+# Source ids: bigsoundbank = page slug, freesound = user/sound number,
+# opengameart = content slug:attached file, kenney = pack slug:zip member.
+# Edit keys, all in seconds / dB and applied with ffmpeg: "trim": (start, end), "fade_in", "fade_out",
+# "loop": cross-fade length that folds the audio after the trim window back over its start so the
+# file repeats without a seam, "gain", "stereo": keep both channels (everything else is mixed to mono
+# for AudioStreamPlayer3D).
+AUDIO_CATALOG = [
+    # --- Horror atmosphere -----------------------------------------------
+    ("amb_drone", "freesound", "Nox_Sound/674735", {"trim": (1.0, 29.0), "loop": 3.0, "gain": 9, "stereo": True}),
+    ("amb_drone_2", "freesound", "gerainsan/457046", {"gain": 6, "stereo": True}),
+    ("amb_thunder", "bigsoundbank", "thunder-2-s3113", {"trim": (0.25, 4.9), "fade_in": 0.05, "fade_out": 0.6}),
+    ("amb_thunder_2", "bigsoundbank", "thunder-3-s3114", {"trim": (0.0, 10.6), "fade_in": 0.3, "fade_out": 1.5}),
+    ("amb_thunder_3", "bigsoundbank", "thunder-6-s3179", {"trim": (0.2, 8.6), "fade_in": 0.1, "fade_out": 1.2}),
+    ("amb_creak", "bigsoundbank", "squeaking-parquet-1-s3051", {"trim": (0.18, 0.98), "fade_out": 0.08}),
+    ("amb_creak_2", "bigsoundbank", "squeaking-parquet-10-s3060", {}),
+    ("amb_creak_3", "bigsoundbank", "creaking-door-s0302", {}),
+    ("amb_creak_4", "bigsoundbank", "squeaking-parquet-3-s3053", {"trim": (0.2, 0.8), "fade_out": 0.08, "gain": 3}),
+    ("amb_hum", "bigsoundbank", "neon-or-transformer-1-s2118", {"trim": (1.0, 7.0), "loop": 1.0, "gain": -8}),
+    # --- Furniture impacts -----------------------------------------------
+    ("impact_wood", "kenney", "impact-sounds:Audio/impactWood_heavy_000.ogg", {}),
+    ("impact_wood_2", "kenney", "impact-sounds:Audio/impactPlank_medium_000.ogg", {}),
+    ("impact_wood_3", "bigsoundbank", "wooden-chair-falling-on-carpet-s0516", {"trim": (4.08, 4.9), "fade_out": 0.1}),
+    ("impact_wood_4", "bigsoundbank", "wooden-chair-falling-on-carpet-s0516", {"trim": (12.25, 13.05), "fade_out": 0.1}),
+    ("impact_metal", "kenney", "impact-sounds:Audio/impactMetal_heavy_000.ogg", {}),
+    ("impact_metal_2", "kenney", "impact-sounds:Audio/impactTin_medium_000.ogg", {}),
+    ("impact_metal_3", "bigsoundbank", "falling-sheet-steel-bar-4-s1774", {"trim": (0.0, 1.3), "fade_out": 0.3, "gain": -2}),
+    ("impact_metal_4", "bigsoundbank", "falling-sheet-steel-bar-1-s1771", {"trim": (0.0, 0.6), "fade_out": 0.15}),
+    ("impact_thud", "kenney", "impact-sounds:Audio/impactSoft_heavy_000.ogg", {}),
+    ("impact_thud_2", "kenney", "impact-sounds:Audio/impactSoft_heavy_002.ogg", {}),
+    ("impact_thud_3", "kenney", "impact-sounds:Audio/impactPunch_heavy_000.ogg", {}),
+    ("impact_glass", "kenney", "impact-sounds:Audio/impactGlass_medium_000.ogg", {}),
+    ("impact_glass_2", "kenney", "impact-sounds:Audio/impactGlass_heavy_001.ogg", {}),
+    ("impact_glass_3", "kenney", "impact-sounds:Audio/impactGlass_light_002.ogg", {}),
+    # --- Holy Lasso ------------------------------------------------------
+    ("lasso_whip", "bigsoundbank", "complete-whip-1-s2961", {"trim": (0.2, 0.95), "fade_out": 0.15}),
+    ("lasso_creak", "bigsoundbank", "big-rope-s3426", {"trim": (4.0, 9.0), "loop": 0.75}),
+    ("lasso_clink", "freesound", "Rudmer_Rotteveel/457461", {"trim": (0.3, 0.77)}),
+    ("lasso_snap", "bigsoundbank", "whip-crack-1-s2949", {"trim": (0.15, 0.8), "fade_out": 0.3, "gain": -1}),
+    # --- Holy Taser ------------------------------------------------------
+    ("taser_arc", "freesound", "Sclolex/210878", {"trim": (0.6, 4.1), "loop": 0.5}),
+    ("taser_zap", "freesound", "AnthonyChan0/264779", {"gain": -1}),
+    ("taser_hiss", "bigsoundbank", "hiss-of-steam-train-1-s0227", {"trim": (0.0, 2.5), "fade_out": 0.9}),
+    ("taser_beep", "bigsoundbank", "beep-of-a-cash-register-s1417", {"gain": -6}),
+    # --- Duct tape -------------------------------------------------------
+    ("tape_rip", "freesound", "cj_ascoli/444366", {"gain": -1}),
+    ("tape_rip_2", "freesound", "AlaskaRobotics/245200", {"gain": -1}),
+    ("tape_rip_3", "bigsoundbank", "adhesive-tape-1-s0297", {"trim": (4.3, 7.45), "fade_in": 0.03, "fade_out": 0.1}),
+    ("tape_snap", "freesound", "_natiKatz/223375", {"gain": -1}),
+    ("tape_snap_2", "freesound", "baidonovan/187338", {"trim": (0.12, 0.46), "gain": 6}),
+    # --- Salt grenade ----------------------------------------------------
+    ("salt_shatter", "bigsoundbank", "broken-glass-of-champagne-s1591", {"trim": (0.0, 1.2), "fade_out": 0.3, "gain": -1}),
+    ("salt_shatter_2", "bigsoundbank", "glass-burst-s0148", {}),
+    ("salt_burst", "freesound", "Qvantor/880771", {"gain": 8}),
+    # --- Demon and contract ----------------------------------------------
+    ("demon_roar", "opengameart", "big-scary-troll-sounds:troll-roars.ogg", {"trim": (7.0, 8.85), "fade_out": 0.1, "gain": -1}),
+    ("demon_roar_2", "opengameart", "cc0-deep-monster-roar:monster_roar.wav", {"trim": (0.08, 4.4), "fade_out": 0.8}),
+    ("demon_roar_3", "opengameart", "big-scary-troll-sounds:troll-roars.ogg", {"trim": (3.55, 4.9), "fade_out": 0.1, "gain": -1}),
+    ("demon_roar_4", "freesound", "uagadugu/222523", {"trim": (0.2, 3.6), "fade_out": 0.3}),
+    ("demon_screech", "bigsoundbank", "barn-owl-s1400", {"trim": (0.1, 2.0), "fade_out": 0.15, "gain": -1}),
+    ("demon_screech_2", "bigsoundbank", "sika-deer-rut-call-2-s3618", {"trim": (1.0, 4.6), "fade_in": 0.15, "fade_out": 0.6, "gain": -1}),
+    ("tk_whoosh", "freesound", "TheEndOfACycle/674292", {"trim": (0.4, 2.69)}),
+    ("ragdoll_thud", "bigsoundbank", "body-fall-2-s2453", {"trim": (0.0, 1.0), "fade_out": 0.15, "gain": -1}),
+    ("ragdoll_thud_2", "bigsoundbank", "body-fall-1-s2452", {"trim": (0.0, 1.15), "fade_out": 0.1, "gain": -1}),
+    ("van_door_slam", "bigsoundbank", "car-door-3-s1524", {"trim": (1.85, 2.85), "fade_out": 0.2, "gain": -1}),
+    ("van_door_slam_2", "bigsoundbank", "car-sliding-door-2-s1494", {"trim": (0.12, 1.89), "gain": -1}),
+    ("van_bang", "freesound", "kyles/637480", {"trim": (0.08, 1.45), "fade_out": 0.12}),
+    ("van_bang_2", "freesound", "dster777/344565", {"trim": (0.15, 1.25), "fade_out": 0.2}),
+    ("heartbeat", "bigsoundbank", "heartbeat-2-s0244", {"trim": (0.0, 0.75), "fade_out": 0.2}),
+    ("heartbeat_2", "bigsoundbank", "heartbeat-1-s0243", {"trim": (0.0, 0.8), "fade_out": 0.15}),
+    ("cash_register", "freesound", "clubmydia+/584168", {"trim": (1.42, 4.5), "fade_out": 0.3}),
+    ("cash_register_2", "freesound", "CapsLok/184438", {"trim": (0.0, 1.45), "fade_out": 0.2}),
+    # --- Interface -------------------------------------------------------
+    ("ui_click", "kenney", "interface-sounds:Audio/click_001.ogg", {}),
+    ("ui_buy", "kenney", "interface-sounds:Audio/confirmation_001.ogg", {}),
+    ("ui_deny", "kenney", "interface-sounds:Audio/error_004.ogg", {}),
+]
+
+# (file name, licence file name, source, source id, licence id) -> assets/fonts/<file name>.ttf
+# github = owner/repo@commit:path, github-release = owner/repo@tag:asset.zip:member;
+# the licence id is a path in the same commit or a member of the same zip.
+FONT_CATALOG = [
+    ("Oswald-Bold", "OFL-Oswald", "github",
+     "googlefonts/OswaldFont@89795261ac9eeb9aa8cd99f43982c4e4b0e53261:fonts/ttf/Oswald-Bold.ttf", "OFL.txt"),
+    ("Inter-Medium", "OFL-Inter", "github-release", "rsms/inter@v4.1:Inter-4.1.zip:extras/ttf/Inter-Medium.ttf", "LICENSE.txt"),
+    ("JetBrainsMono-Medium", "OFL-JetBrainsMono", "github",
+     "JetBrains/JetBrainsMono@19371302b95d218af43299bce79ddbddd0bc364d:fonts/ttf/JetBrainsMono-Medium.ttf", "OFL.txt"),
+]
+# Every HUD and menu string is English or Russian: Basic Latin plus А-я, Ё and ё.
+FONT_REQUIRED = list(range(0x20, 0x7F)) + list(range(0x410, 0x450)) + [0x401, 0x451]
 
 
 class FetchError(Exception):
