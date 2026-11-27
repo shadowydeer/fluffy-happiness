@@ -20,6 +20,7 @@ signal contract_failed(report: Dictionary)
 
 const SummaryScene := preload("res://scenes/ContractSummaryUI.tscn")
 const GadgetAudio := preload("res://scripts/gadgets/GadgetAudio.gd")
+const DemonArchetypes := preload("res://scripts/DemonArchetypes.gd")
 
 enum Phase { RUNNING, SEALING, SUMMARY, EXPLORING, FAILED }
 
@@ -114,17 +115,22 @@ func compute_payout() -> Dictionary:
 		care_note = "PROPERTY CARE  (%d scuffed)" % damaged_props
 	elif damaged_props <= 8:
 		care_note = "ROUGHED UP  (%d props knocked about)" % damaged_props
+	var kind := GameState.demon_archetype
+	var hazard := DemonArchetypes.bounty(kind)
 	return {
 		"contract": GameState.contract_number,
 		"time": elapsed,
 		"base": BASE_BOUNTY,
+		"archetype": kind,
+		"archetype_name": DemonArchetypes.title(kind),
+		"archetype_bonus": hazard,
 		"speed": speed,
 		"bind_level": bind,
 		"bind": bind * BIND_BONUS,
 		"care": care,
 		"care_note": care_note,
 		"damaged": damaged_props,
-		"total": BASE_BOUNTY + speed + bind * BIND_BONUS + care,
+		"total": BASE_BOUNTY + hazard + speed + bind * BIND_BONUS + care,
 	}
 
 
@@ -169,6 +175,8 @@ func _reset_site(advance: bool) -> void:
 	summary.call(&"hide_summary")
 	if advance:
 		GameState.advance_contract()
+		# A new job is about a new kind of demon; a retry faces the same one again.
+		GameState.set_archetype(GameState.pick_archetype())
 	else:
 		GameState.reset()
 	_level.reset_props()
