@@ -1649,8 +1649,43 @@ func _prop(kind: StringName, at: Vector3, yaw_degrees: float = 0.0, tilt_degrees
 	prop.position = at + Vector3.UP * lift
 	prop.rotation = Vector3(deg_to_rad(tilt_degrees.x), deg_to_rad(yaw_degrees), deg_to_rad(tilt_degrees.z))
 	_props.add_child(prop, true)
+	prop.set_meta(&"spawn_transform", prop.transform)
 	prop_count += 1
 	return prop
+
+
+## Puts every loose prop back where the level first dropped it, at rest.
+func reset_props() -> void:
+	for child in _props.get_children():
+		var prop := child as RigidBody3D
+		if prop == null or not prop.has_meta(&"spawn_transform"):
+			continue
+		var home: Transform3D = _props.global_transform * (prop.get_meta(&"spawn_transform") as Transform3D)
+		prop.linear_velocity = Vector3.ZERO
+		prop.angular_velocity = Vector3.ZERO
+		prop.global_transform = home
+		PhysicsServer3D.body_set_state(prop.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, home)
+		PhysicsServer3D.body_set_state(prop.get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, Vector3.ZERO)
+		PhysicsServer3D.body_set_state(prop.get_rid(), PhysicsServer3D.BODY_STATE_ANGULAR_VELOCITY, Vector3.ZERO)
+		prop.sleeping = false
+
+
+## Shuts the house up again and breaks the seal on the van.
+func reset_doors() -> void:
+	for door in front_doors:
+		door.set_open(false)
+	for door in interior_doors:
+		door.set_open(false)
+	van.release()
+
+
+## Every loose prop the level spawned.
+func get_props() -> Array[RigidBody3D]:
+	var props: Array[RigidBody3D] = []
+	for child in _props.get_children():
+		if child is RigidBody3D:
+			props.append(child as RigidBody3D)
+	return props
 
 
 # =============================================================================

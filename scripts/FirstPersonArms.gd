@@ -176,6 +176,8 @@ func _add(parent: Node3D, mesh: Mesh, material: Material) -> MeshInstance3D:
 	var instance := MeshInstance3D.new()
 	instance.mesh = mesh
 	instance.material_override = material
+	# Also on the held-tool layer, so the hand lamp picks the gloves out of the dark.
+	instance.layers = 1 | (1 << 11)
 	# Posed after the skeleton each frame; generous bounds keep the arms from being culled.
 	instance.extra_cull_margin = 0.5
 	parent.add_child(instance)
