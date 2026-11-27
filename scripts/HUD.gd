@@ -1,12 +1,13 @@
 extends CanvasLayer
 ## Minimal helmet-display HUD, built in code:
 ##   top-right    contract banner (number, bank balance, task text, progress bar);
-##                once the demon has been found, a status strip under it (AI state,
-##                stun decay bar, bind pips)
+##                once the demon has been found, a status strip under it (which
+##                archetype it is, AI state, stun decay bar, bind pips)
 ##   bottom-left  health bar (with the solo second-wind pip), stamina bar and the
-##                gadget belt: three drawn slot icons with their keys, the taser's
-##                battery and the lasso's status
-##   bottom-right control hints for whatever is in hand
+##                gadget belt: four drawn slot icons with their keys, the taser's
+##                battery, the lasso's status and the salt grenades left
+##   bottom-right control hints for whatever is in hand, on a dark backdrop that
+##                keeps them readable over the salt circle or the tape roll
 ##   centre       reactive crosshair with a context prompt underneath and the
 ##                duct tape's wrap ring round it
 ##   top-left     collapsible list of the test keys (F1); in co-op, the crew roster
@@ -17,6 +18,7 @@ extends CanvasLayer
 
 const Crosshair := preload("res://scripts/Crosshair.gd")
 const SlotIcon := preload("res://scripts/GadgetSlotIcon.gd")
+const DemonArchetypes := preload("res://scripts/DemonArchetypes.gd")
 
 const INK := Color(0.93, 0.95, 0.92)
 const DIM := Color(0.60, 0.67, 0.68)
@@ -25,9 +27,14 @@ const ACCENT := Color(0.95, 0.42, 0.08)
 const TEAL := Color(0.25, 0.92, 0.82)
 const WARN := Color(0.95, 0.27, 0.15)
 const GOLD := Color(1.0, 0.78, 0.3)
-const CONTROLS_HINT := "WASD move   SHIFT sprint   SPACE jump   CTRL crouch   F use   Q shove   V camera   T torch   ESC menu\n1 lasso   2 taser   3 duct tape   0 / wheel: hands   E always grabs by hand (hold on a downed crewmate to revive)"
+const CONTROLS_HINT := "WASD move   SHIFT sprint   SPACE jump   CTRL crouch   F use   Q shove   V camera   T torch   ESC menu\n1 lasso   2 taser   3 duct tape   4 salt grenade   0 / wheel: hands\nE always grabs by hand (hold on a downed crewmate to revive)"
 const DEBUG_HINT_CLOSED := "F1  test keys"
-const DEBUG_HINT_OPEN := "F1  hide test keys\nK   stun / wake the demon\nJ   cycle AI: lurking > enraged > poltergeist throw\nL   cycle bind level 0-3\nP   summon the demon in front of you"
+const DEBUG_HINT_OPEN := "F1  hide test keys\nK   stun / wake the demon\nJ   cycle AI: lurking > enraged > poltergeist throw\nL   cycle bind level 0-3\nP   summon the demon in front of you\nM   next demon archetype\nG   +$1000 test cash"
+## Behind the key hints: dark enough that they stay crisp over the white salt circle or the silver tape roll.
+const HINT_BACKDROP := Color(0.05, 0.06, 0.08, 0.72)
+## Key hints run on one line up to this width, then wrap (the Russian ones are about a third longer).
+const HINT_MAX_WIDTH := 800.0
+const HINT_INK := Color(0.8, 0.85, 0.85)
 const HINT_DURATION := 16.0
 const NOTICE_DURATION := 3.5
 ## Demon AI state index -> label colour (LURKING, STALKING, ENRAGED, POLTERGEIST, STUNNED, CAPTURED).
@@ -48,7 +55,9 @@ var _crosshair: Crosshair
 var _prompt: Label
 var _notice: Label
 var _hint: Label
+var _hint_panel: PanelContainer
 var _debug_hint: Label
+var _debug_panel: PanelContainer
 var _vignette: TextureRect
 var _slots: Array[SlotIcon] = []
 var _tool_title: Label
@@ -57,7 +66,11 @@ var _progress_label: Label
 var _bank: Label
 var _top_right: VBoxContainer
 var _demon_panel: PanelContainer
+var _demon_style: StyleBoxFlat
+var _demon_caption: Label
 var _demon_state: Label
+var _stun_caption: Label
+var _bind_caption: Label
 var _stun_bar: ProgressBar
 var _stun_value: Label
 var _bind_pips: Array[StyleBoxFlat] = []
@@ -112,9 +125,15 @@ func _ready() -> void:
 	GameState.objective_changed.connect(_on_objective_changed)
 	GameState.notice_posted.connect(_on_notice_posted)
 	GameState.bank_changed.connect(_on_bank_changed)
+	GameState.loadout_changed.connect(_on_loadout_changed)
+	GameState.archetype_changed.connect(_on_archetype_changed)
+	Loc.language_changed.connect(_on_language_changed)
 	_bank_target = GameState.bank_cash
 	_bank_shown = float(_bank_target)
 	_bank.text = _money(_bank_target)
+	_on_loadout_changed()
+	_refresh_archetype()
+	_refit()
 	GameState.refresh()
 
 
@@ -140,6 +159,7 @@ func bind_demon(demon: Node) -> void:
 	_demon_panel.visible = false
 	_demon_panel.modulate.a = 0.0
 	_stun_bar.value = 0.0
+	_refresh_archetype()
 	_demon_ai.connect(&"state_changed", _on_demon_state_changed)
 	_demon_ai.connect(&"discovered", _on_demon_discovered)
 	demon.connect(&"bind_changed", _on_bind_changed)
@@ -149,8 +169,11 @@ func bind_demon(demon: Node) -> void:
 		_on_demon_discovered()
 
 
-## One of the three belt slots (0-2, for keys 1-3).
+## One of the four belt slots (0-3, for keys 1-4). The salt grenade's also answers to
+## its key number, 4.
 func get_gadget_slot(index: int) -> Control:
+	if index == SlotIcon.Kind.SALT and _slots.size() == SlotIcon.Kind.SALT:
+		index -= 1
 	return _slots[index] if index >= 0 and index < _slots.size() else null
 
 
@@ -172,6 +195,16 @@ func get_bank_text() -> String:
 
 func is_demon_status_visible() -> bool:
 	return _demon_panel.visible
+
+
+## The status strip's first line ("DEMON // BRUTE"); "" until the demon has been found.
+func get_archetype_text() -> String:
+	return _demon_caption.text if _demon_panel.visible else ""
+
+
+## The dark rounded panel behind the bottom-right key hints.
+func get_hint_backdrop() -> PanelContainer:
+	return _hint_panel
 
 
 func get_health_bar() -> ProgressBar:
@@ -197,6 +230,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_debug_open = not _debug_open
 		_debug_hint.text = DEBUG_HINT_OPEN if _debug_open else DEBUG_HINT_CLOSED
 		_debug_hint.modulate.a = 0.9 if _debug_open else 0.5
+		_debug_panel.self_modulate.a = 1.0 if _debug_open else 0.55
 
 
 func _process(delta: float) -> void:
@@ -210,6 +244,9 @@ func _process(delta: float) -> void:
 	if _hint_left > 0.0:
 		_hint_left -= delta
 		_hint.modulate.a = clampf(_hint_left / 2.0, 0.0, 1.0) * 0.85
+		# Once faded the lines fold away, and the backdrop shrinks to the gadget's own hint.
+		_hint.visible = _hint_left > 0.0
+	_hint_panel.visible = _hint.visible or not _gadget_hint.text.is_empty()
 
 	_clock += delta
 	_health.value = lerpf(_health.value, _health_target, minf(1.0, delta * 10.0))
@@ -243,7 +280,10 @@ func _update_gadgets(_delta: float) -> void:
 	_slots[1].battery = float(_gadgets.call(&"get_battery"))
 	_tool_title.text = str(_gadgets.call(&"get_title"))
 	_tool_title.modulate = GOLD if active != 0 else DIM
-	_gadget_hint.text = str(_gadgets.call(&"get_hint"))
+	var hint := str(_gadgets.call(&"get_hint"))
+	if hint != _gadget_hint.text:
+		_gadget_hint.text = hint
+		_fit(_gadget_hint, HINT_MAX_WIDTH)
 	var caption := str(_gadgets.call(&"get_progress_label"))
 	_progress_label.text = caption
 	_progress_label.visible = not caption.is_empty()
@@ -306,6 +346,7 @@ func _build_objective() -> void:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(column)
 	_title = _label("", 12, DIM)
+	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_title)
 	# The crew's bank balance, right under the contract header.
 	var bank_row := _row(column)
@@ -313,8 +354,10 @@ func _build_objective() -> void:
 	bank_row.add_child(_label("BANK", 11, DIM))
 	_bank = _label("$0", 16, GOLD)
 	_bank.name = "BankCash"
+	Loc.style_header(_bank)
 	bank_row.add_child(_bank)
-	_task = _label("", 19, INK)
+	_task = _label("", 20, INK)
+	Loc.style_header(_task)
 	_task.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_task)
 	var row := HBoxContainer.new()
@@ -334,7 +377,8 @@ func _build_demon_status() -> void:
 	_demon_panel = PanelContainer.new()
 	_demon_panel.name = "DemonStatus"
 	_demon_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_demon_panel.add_theme_stylebox_override(&"panel", _panel_style(WARN))
+	_demon_style = _panel_style(WARN)
+	_demon_panel.add_theme_stylebox_override(&"panel", _demon_style)
 	_demon_panel.visible = false
 	_demon_panel.modulate.a = 0.0
 	_top_right.add_child(_demon_panel)
@@ -343,17 +387,23 @@ func _build_demon_status() -> void:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_demon_panel.add_child(column)
 
+	# Which archetype it turned out to be ("DEMON // BRUTE", in its own colours), and its mood.
 	var head := _row(column)
-	var caption := _label("DEMON", 11, DIM)
-	caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(caption)
+	_demon_caption = _label("DEMON", 13, DIM)
+	_demon_caption.name = "Archetype"
+	_demon_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_demon_caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	Loc.style_header(_demon_caption)
+	head.add_child(_demon_caption)
 	_demon_state = _label("LURKING", 15, DIM)
+	_demon_state.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	Loc.style_header(_demon_state)
 	head.add_child(_demon_state)
 
 	var stun := _row(column)
-	var stun_caption := _label("STUN", 11, DIM)
-	stun_caption.custom_minimum_size = Vector2(40.0, 0.0)
-	stun.add_child(stun_caption)
+	_stun_caption = _label("STUN", 11, DIM)
+	_stun_caption.custom_minimum_size = Vector2(40.0, 0.0)
+	stun.add_child(_stun_caption)
 	_stun_bar = _bar(TEAL, 7.0)
 	_stun_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_stun_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -364,9 +414,9 @@ func _build_demon_status() -> void:
 	stun.add_child(_stun_value)
 
 	var bind := _row(column)
-	var bind_caption := _label("BIND", 11, DIM)
-	bind_caption.custom_minimum_size = Vector2(40.0, 0.0)
-	bind.add_child(bind_caption)
+	_bind_caption = _label("BIND", 11, DIM)
+	_bind_caption.custom_minimum_size = Vector2(40.0, 0.0)
+	bind.add_child(_bind_caption)
 	for i in 3:
 		var style := StyleBoxFlat.new()
 		style.bg_color = Color(0.0, 0.0, 0.0, 0.6)
@@ -447,13 +497,13 @@ func _build_status() -> void:
 	slots.add_theme_constant_override(&"separation", 9)
 	slots.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(slots)
-	for i in 3:
+	for i in SlotIcon.Kind.size():
 		var slot := SlotIcon.new()
 		slot.name = "GadgetSlot%d" % (i + 1)
 		slot.kind = i + 1
 		slots.add_child(slot)
 		_slots.append(slot)
-	# Slot 2 carries the taser's battery bar.
+	# Slot 2 carries the taser's battery bar; slot 4 counts the crew's salt grenades.
 	_slots[1].battery = 1.0
 
 
@@ -480,6 +530,8 @@ func _build_reticle() -> void:
 	_progress_label.offset_right = 320.0
 	_progress_label.offset_top = -74.0
 	_progress_label.offset_bottom = -50.0
+	_progress_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_progress_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_progress_label.visible = false
 	_root.add_child(_progress_label)
@@ -494,6 +546,7 @@ func _build_reticle() -> void:
 	_prompt.offset_top = 46.0
 	_prompt.offset_bottom = 70.0
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_root.add_child(_prompt)
 
 
@@ -507,42 +560,65 @@ func _build_messages() -> void:
 	_notice.offset_top = 84.0
 	_notice.offset_bottom = 110.0
 	_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_notice.modulate.a = 0.0
 	_root.add_child(_notice)
-	_hint = _label(CONTROLS_HINT, 12, DIM)
+	# Bottom-right key hints share one backdrop pinned to the corner: it grows up and
+	# to the left with its text, and shrinks again when the opening lines fade.
+	_hint_panel = PanelContainer.new()
+	_hint_panel.name = "HintBackdrop"
+	_hint_panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_hint_panel.offset_left = -18.0
+	_hint_panel.offset_right = -18.0
+	_hint_panel.offset_top = -16.0
+	_hint_panel.offset_bottom = -16.0
+	_hint_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_hint_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_hint_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hint_panel.add_theme_stylebox_override(&"panel", _backdrop_style())
+	_root.add_child(_hint_panel)
+	var hints := VBoxContainer.new()
+	hints.add_theme_constant_override(&"separation", 6)
+	hints.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hint_panel.add_child(hints)
+	_hint = _label(CONTROLS_HINT, 12, HINT_INK)
 	_hint.name = "ControlsHint"
-	_hint.anchor_left = 1.0
-	_hint.anchor_right = 1.0
-	_hint.anchor_top = 1.0
-	_hint.anchor_bottom = 1.0
-	_hint.offset_left = -760.0
-	_hint.offset_right = -24.0
-	_hint.offset_top = -96.0
-	_hint.offset_bottom = -52.0
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_hint.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	_root.add_child(_hint)
+	_hint.add_theme_font_override(&"font", Loc.mono_font())
+	hints.add_child(_hint)
 	# What the buttons do right now, for whatever is in hand. Always on.
-	_gadget_hint = _label("", 13, Color(INK, 0.9))
+	_gadget_hint = _label("", 13, INK)
 	_gadget_hint.name = "GadgetHint"
-	_gadget_hint.anchor_left = 1.0
-	_gadget_hint.anchor_right = 1.0
-	_gadget_hint.anchor_top = 1.0
-	_gadget_hint.anchor_bottom = 1.0
-	_gadget_hint.offset_left = -900.0
-	_gadget_hint.offset_right = -24.0
-	_gadget_hint.offset_top = -46.0
-	_gadget_hint.offset_bottom = -22.0
 	_gadget_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_gadget_hint.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	_root.add_child(_gadget_hint)
-	# Test keys: one dim line in the corner until F1 unfolds it.
+	_gadget_hint.add_theme_font_override(&"font", Loc.mono_font())
+	hints.add_child(_gadget_hint)
+	# Top-left: the test keys (one dim line until F1 unfolds it) on the same backdrop,
+	# with the co-op roster stacked under it however tall the list gets.
+	var corner := VBoxContainer.new()
+	corner.name = "TopLeft"
+	corner.offset_left = 18.0
+	corner.offset_top = 14.0
+	corner.add_theme_constant_override(&"separation", 10)
+	corner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(corner)
+	_debug_panel = PanelContainer.new()
+	_debug_panel.name = "DebugBackdrop"
+	_debug_panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_debug_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_debug_panel.add_theme_stylebox_override(&"panel", _backdrop_style())
+	_debug_panel.self_modulate.a = 0.55
+	corner.add_child(_debug_panel)
 	_debug_hint = _label(DEBUG_HINT_CLOSED, 11, DIM)
 	_debug_hint.name = "DebugHint"
-	_debug_hint.offset_left = 24.0
-	_debug_hint.offset_top = 20.0
+	_debug_hint.add_theme_font_override(&"font", Loc.mono_font())
 	_debug_hint.modulate.a = 0.5
-	_root.add_child(_debug_hint)
+	_debug_panel.add_child(_debug_hint)
+	_roster = VBoxContainer.new()
+	_roster.name = "Crew"
+	_roster.add_theme_constant_override(&"separation", 4)
+	_roster.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_roster.visible = false
+	corner.add_child(_roster)
 
 
 ## Everything Stage 4 can do to a player: the centre-screen status line and its meter,
@@ -563,31 +639,34 @@ func _build_conditions() -> void:
 	_root.add_child(_eyes)
 	_root.move_child(_eyes, 2)
 
+	# The status line and its meter are stacked, so the meter stays under the text
+	# however many lines the text wraps to.
+	var condition := VBoxContainer.new()
+	condition.name = "Condition"
+	condition.anchor_left = 0.5
+	condition.anchor_right = 0.5
+	condition.anchor_top = 0.5
+	condition.anchor_bottom = 0.5
+	condition.offset_left = -480.0
+	condition.offset_right = 480.0
+	condition.offset_top = 104.0
+	condition.offset_bottom = 104.0
+	condition.add_theme_constant_override(&"separation", 6)
+	condition.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(condition)
 	_status = _label("", 26, WARN)
 	_status.name = "Status"
-	_status.anchor_left = 0.5
-	_status.anchor_right = 0.5
-	_status.anchor_top = 0.5
-	_status.anchor_bottom = 0.5
-	_status.offset_left = -480.0
-	_status.offset_right = 480.0
-	_status.offset_top = 104.0
-	_status.offset_bottom = 172.0
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	Loc.style_header(_status)
 	_status.visible = false
-	_root.add_child(_status)
+	condition.add_child(_status)
 	_status_bar = _bar(WARN, 9.0)
 	_status_bar.name = "StatusMeter"
-	_status_bar.anchor_left = 0.5
-	_status_bar.anchor_right = 0.5
-	_status_bar.anchor_top = 0.5
-	_status_bar.anchor_bottom = 0.5
-	_status_bar.offset_left = -150.0
-	_status_bar.offset_right = 150.0
-	_status_bar.offset_top = 178.0
-	_status_bar.offset_bottom = 187.0
+	_status_bar.custom_minimum_size = Vector2(300.0, 9.0)
+	_status_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_status_bar.visible = false
-	_root.add_child(_status_bar)
+	condition.add_child(_status_bar)
 	_synergy = _label("", 14, GOLD)
 	_synergy.name = "Synergy"
 	_synergy.anchor_left = 0.5
@@ -601,15 +680,6 @@ func _build_conditions() -> void:
 	_synergy.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_synergy.visible = false
 	_root.add_child(_synergy)
-
-	_roster = VBoxContainer.new()
-	_roster.name = "Crew"
-	_roster.offset_left = 24.0
-	_roster.offset_top = 128.0
-	_roster.add_theme_constant_override(&"separation", 4)
-	_roster.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_roster.visible = false
-	_root.add_child(_roster)
 
 
 ## How red the edge of the screen should be for the player's condition alone.
@@ -828,6 +898,58 @@ func _on_demon_discovered() -> void:
 	_demon_panel.visible = true
 
 
+func _on_loadout_changed() -> void:
+	_slots[SlotIcon.Kind.SALT - 1].count = GameState.salt_charges
+
+
+func _on_archetype_changed(_kind: int) -> void:
+	_refresh_archetype()
+
+
+## Names the contract's demon on the status strip and dresses the strip in its colours.
+## CLASSIC (the regression tools' demon) has no name of its own: it is just the DEMON.
+func _refresh_archetype() -> void:
+	var kind := GameState.demon_archetype
+	var named := DemonArchetypes.PLAYABLE.has(kind)
+	var look := DemonArchetypes.profile(kind)
+	_demon_caption.text = ("DEMON // %s" % DemonArchetypes.title(kind)) if named else "DEMON"
+	var eye: Color = look.get("eye_color", DIM)
+	var glow: Color = look.get("glow_color", WARN)
+	# Lifted towards white a little: saturated eye colours are hard to read as small text.
+	_demon_caption.add_theme_color_override(&"font_color", eye.lerp(Color.WHITE, 0.2) if named else DIM)
+	_demon_style.border_color = glow if named else WARN
+
+
+func _on_language_changed(_code: String) -> void:
+	# After the labels have picked up the new language.
+	_refit.call_deferred()
+
+
+## Re-measures everything whose width depends on the words on screen.
+func _refit() -> void:
+	_fit(_hint, HINT_MAX_WIDTH)
+	_fit(_gadget_hint, HINT_MAX_WIDTH)
+	# STUN and BIND share a column so their bars line up, whatever the words are.
+	var width := 40.0
+	for caption: Label in [_stun_caption, _bind_caption]:
+		width = maxf(width, ceilf(_text_width(caption)))
+	_stun_caption.custom_minimum_size.x = width
+	_bind_caption.custom_minimum_size.x = width
+
+
+## Lets `label` run on one line up to `max_width` and wraps it there beyond that.
+func _fit(label: Label, max_width: float) -> void:
+	var wrap := _text_width(label) > max_width
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if wrap else TextServer.AUTOWRAP_OFF
+	label.custom_minimum_size.x = max_width if wrap else 0.0
+
+
+## Width of the label's text as drawn, in the language on screen.
+func _text_width(label: Label) -> float:
+	var font := label.get_theme_font(&"font")
+	return font.get_multiline_string_size(tr(label.text), HORIZONTAL_ALIGNMENT_LEFT, -1.0, label.get_theme_font_size(&"font_size")).x
+
+
 func _on_demon_state_changed(state: int) -> void:
 	var names: Array = _demon_ai.get(&"STATE_NAMES")
 	_demon_state.text = str(names[state])
@@ -865,6 +987,20 @@ func _panel_style(stripe: Color) -> StyleBoxFlat:
 	style.content_margin_right = 14.0
 	style.content_margin_top = 10.0
 	style.content_margin_bottom = 12.0
+	return style
+
+
+## The key hints' backdrop: dark, rounded, with a hairline edge.
+func _backdrop_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = HINT_BACKDROP
+	style.border_color = Color(INK, 0.16)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(8)
+	style.content_margin_left = 14.0
+	style.content_margin_right = 14.0
+	style.content_margin_top = 8.0
+	style.content_margin_bottom = 9.0
 	return style
 
 

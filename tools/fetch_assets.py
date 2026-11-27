@@ -1,41 +1,62 @@
 #!/usr/bin/env python3
 """Download and verify every third-party asset used by BIND & DELIVER.
 
-Standard library only. Run from anywhere:
+Standard library only; ffmpeg is used when it is on PATH to trim, loop and
+encode sound effects. Run from anywhere:
 
-    python3 tools/fetch_assets.py            # fetch whatever is missing, then verify
-    python3 tools/fetch_assets.py --force    # re-download everything
-    python3 tools/fetch_assets.py --verify   # offline: re-check local files against the manifest
+    python3 tools/fetch_assets.py                   # fetch whatever is missing, then verify
+    python3 tools/fetch_assets.py --force           # re-download everything
+    python3 tools/fetch_assets.py --verify-offline  # re-check local files against the manifest (alias: --verify)
 
-Sources (all CC0 1.0 / public domain; licence is re-checked against each API):
-  * Poly Haven  https://api.polyhaven.com   models (glTF packed into one .glb) and PBR textures
-  * Poly Pizza  https://poly.pizza          .glb models by Quaternius, Kay Lousberg, CreativeTrio, iPoly3D
-  * ambientCG   https://ambientcg.com/api   PBR textures
-  * vibeassets  https://vibeassets.io/api   rigged .glb characters (the demon)
+Models, textures and audio are all CC0 1.0 / public domain and the licence is
+re-checked against each API or asset page on every download:
+  * Poly Haven    https://api.polyhaven.com   models (glTF packed into one .glb) and PBR textures
+  * Poly Pizza    https://poly.pizza          .glb models by Quaternius, Kay Lousberg, CreativeTrio, iPoly3D
+  * ambientCG     https://ambientcg.com/api   PBR textures
+  * vibeassets    https://vibeassets.io/api   rigged .glb characters (the three demon archetypes)
+  * KayKit        https://github.com/KayKit-Game-Assets   glTF props by Kay Lousberg, pinned to a commit
+  * OpenGameArt   https://opengameart.org     CC0 entries: monster roars, an OBJ prop converted to .glb
+  * BigSoundBank  https://bigsoundbank.com    field recordings and foley by Joseph Sardin
+  * Freesound     https://freesound.org       CC0 sounds (the Ogg previews, which need no account)
+  * Kenney        https://kenney.nl           impact and interface sound packs
+Fonts are SIL Open Font License 1.1 static .ttf files from their upstream
+GitHub repositories, stored next to a copy of each licence text.
 
 Nothing is fetched from a guessed URL: every download link comes out of the
-source's own API response for the asset id listed in the catalog below.
+source's own API response or asset page for the id listed in the catalogs
+below, or is a commit-pinned file that was checked when it was added.
 Each file is checked for HTTP 200, a non-trivial size and the right magic
-bytes (glTF / JPEG / PNG), and the result is written to
-assets/asset_manifest.json.
+bytes (glTF / JPEG / PNG / Ogg Vorbis / RIFF WAVE / sfnt), fonts must cover
+Basic Latin and Russian Cyrillic in their cmap table, and the result is
+written to assets/asset_manifest.json.
 
 Rigged models listed in RIGGED_MODELS are also checked for a skin, skinned
 vertices and every bone the game maps by name; their bone hierarchy, rest
 positions and bounding box are printed and stored in the manifest.
+
+A download that fails never stops the run: the slot is recorded as failed (the
+game has a procedural fallback for each one) and a file left by an earlier
+good run is kept.
 """
 
 from __future__ import annotations
 
 import argparse
+import array
 import concurrent.futures
 import datetime
 import hashlib
+import html
 import io
 import json
 import os
 import re
+import shutil
 import struct
+import subprocess
 import sys
+import tempfile
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -46,7 +67,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(ROOT, "assets")
 MODELS = os.path.join(ASSETS, "models")
 TEXTURES = os.path.join(ASSETS, "textures")
+AUDIO = os.path.join(ASSETS, "audio")
+FONTS = os.path.join(ASSETS, "fonts")
 MANIFEST = os.path.join(ASSETS, "asset_manifest.json")
+FFMPEG = shutil.which("ffmpeg")
+AUDIO_RATE = 44100
 
 USER_AGENT = "BindAndDeliver-AssetFetcher/2.0 (Godot indie project; contact via repository)"
 BROWSER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) " + USER_AGENT
@@ -145,18 +170,33 @@ MODEL_CATALOG = [
     ("gas_canister", "polyhaven", "propane_tank", "characters"),
     # --- The demon: skinned humanoid, drives the Stage 2 ragdoll ------------
     ("demon", "vibeassets", "6lgzyditwz", "demon"),
+    # --- Stage 5 archetypes: same auto-rig, so they drop into that ragdoll ---
+    ("scuttler", "vibeassets", "ooq775xp55", "demon"),
+    ("poltergeist", "vibeassets", "k6bdm27lba", "demon"),
+    # --- Stage 5 van field shop ------------------------------------------
+    ("terminal", "polyhaven", "classic_laptop", "shop"),
+    ("medkit", "polyhaven", "medical_box", "shop"),
+    ("tape_roll", "polyhaven", "medical_tape", "shop"),
+    ("shelf", "polyhaven", "worn_metal_rack", "shop"),
+    # No CC0 coil of rope turned up; a hose coiled on a wall hook reads the same on the rack.
+    ("rope_coil", "polyhaven", "garden_hose_wall_mounted_01", "shop"),
+    ("salt_jar", "kaykit", "KayKit-Restaurant-Bits-1.0@153c8a7535b48237854cb54ff6890679f8c574d1:"
+                           "addons/kaykit_restaurant_bits/Assets/gltf/jar_A_medium.gltf", "shop"),
+    ("battery", "opengameart", "battery-for-rc-cars-etc:battery.zip:battery/battery.obj:battery/battery.png", "shop"),
 ]
 
-# Rigged models and the bones scripts/DemonSkeletonDriver.gd looks up by name.
-RIGGED_MODELS = {
-    "demon": [
-        "Hips", "Spine02", "Spine01", "Spine", "neck", "Head", "head_end",
-        "LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand",
-        "RightShoulder", "RightArm", "RightForeArm", "RightHand",
-        "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase",
-        "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase",
-    ],
-}
+# The bones scripts/DemonSkeletonDriver.gd looks up by name.
+DEMON_BONES = [
+    "Hips", "Spine02", "Spine01", "Spine", "neck", "Head", "head_end",
+    "LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand",
+    "RightShoulder", "RightArm", "RightForeArm", "RightHand",
+    "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase",
+    "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase",
+]
+RIGGED_MODELS = {"demon": DEMON_BONES, "scuttler": DEMON_BONES, "poltergeist": DEMON_BONES}
+# The game falls back to the demon rig for these, so a missing bone is recorded
+# as "rig_compatible": false in the manifest instead of failing the download.
+OPTIONAL_RIGS = {"scuttler", "poltergeist"}
 
 # (local name, source, source id)
 TEXTURE_CATALOG = [
@@ -197,6 +237,98 @@ POLYHAVEN_MAPS = [("Diffuse", "albedo"), ("nor_gl", "normal"), ("Rough", "roughn
 # ambientCG file-name token -> our file suffix.
 AMBIENTCG_MAPS = [("_Color", "albedo"), ("_NormalGL", "normal"), ("_Roughness", "roughness"), ("_AmbientOcclusion", "ao")]
 
+# (file name, source, source id, edit) -> assets/audio/<file name>.ogg (or .wav when stored untouched).
+# autoload/SoundManager.gd looks slots up by name; "<slot>_2" .. "<slot>_4" are extra takes of one slot.
+# Source ids: bigsoundbank = page slug, freesound = user/sound number,
+# opengameart = content slug:attached file, kenney = pack slug:zip member.
+# Edit keys, all in seconds / dB and applied with ffmpeg: "trim": (start, end), "fade_in", "fade_out",
+# "loop": cross-fade length that folds the audio after the trim window back over its start so the
+# file repeats without a seam, "gain", "stereo": keep both channels (everything else is mixed to mono
+# for AudioStreamPlayer3D).
+AUDIO_CATALOG = [
+    # --- Horror atmosphere -----------------------------------------------
+    ("amb_drone", "freesound", "Nox_Sound/674735", {"trim": (1.0, 29.0), "loop": 3.0, "gain": 9, "stereo": True}),
+    ("amb_drone_2", "freesound", "gerainsan/457046", {"gain": 6, "stereo": True}),
+    ("amb_thunder", "bigsoundbank", "thunder-2-s3113", {"trim": (0.25, 4.9), "fade_in": 0.05, "fade_out": 0.6}),
+    ("amb_thunder_2", "bigsoundbank", "thunder-3-s3114", {"trim": (0.0, 10.6), "fade_in": 0.3, "fade_out": 1.5}),
+    ("amb_thunder_3", "bigsoundbank", "thunder-6-s3179", {"trim": (0.2, 8.6), "fade_in": 0.1, "fade_out": 1.2}),
+    ("amb_creak", "bigsoundbank", "squeaking-parquet-1-s3051", {"trim": (0.18, 0.98), "fade_out": 0.08}),
+    ("amb_creak_2", "bigsoundbank", "squeaking-parquet-10-s3060", {}),
+    ("amb_creak_3", "bigsoundbank", "creaking-door-s0302", {}),
+    ("amb_creak_4", "bigsoundbank", "squeaking-parquet-3-s3053", {"trim": (0.2, 0.8), "fade_out": 0.08, "gain": 3}),
+    ("amb_hum", "bigsoundbank", "neon-or-transformer-1-s2118", {"trim": (1.0, 7.0), "loop": 1.0, "gain": -8}),
+    # --- Furniture impacts -----------------------------------------------
+    ("impact_wood", "kenney", "impact-sounds:Audio/impactWood_heavy_000.ogg", {}),
+    ("impact_wood_2", "kenney", "impact-sounds:Audio/impactPlank_medium_000.ogg", {}),
+    ("impact_wood_3", "bigsoundbank", "wooden-chair-falling-on-carpet-s0516", {"trim": (4.08, 4.9), "fade_out": 0.1}),
+    ("impact_wood_4", "bigsoundbank", "wooden-chair-falling-on-carpet-s0516", {"trim": (12.25, 13.05), "fade_out": 0.1}),
+    ("impact_metal", "kenney", "impact-sounds:Audio/impactMetal_heavy_000.ogg", {}),
+    ("impact_metal_2", "kenney", "impact-sounds:Audio/impactTin_medium_000.ogg", {}),
+    ("impact_metal_3", "bigsoundbank", "falling-sheet-steel-bar-4-s1774", {"trim": (0.0, 1.3), "fade_out": 0.3, "gain": -2}),
+    ("impact_metal_4", "bigsoundbank", "falling-sheet-steel-bar-1-s1771", {"trim": (0.0, 0.6), "fade_out": 0.15}),
+    ("impact_thud", "kenney", "impact-sounds:Audio/impactSoft_heavy_000.ogg", {}),
+    ("impact_thud_2", "kenney", "impact-sounds:Audio/impactSoft_heavy_002.ogg", {}),
+    ("impact_thud_3", "kenney", "impact-sounds:Audio/impactPunch_heavy_000.ogg", {}),
+    ("impact_glass", "kenney", "impact-sounds:Audio/impactGlass_medium_000.ogg", {}),
+    ("impact_glass_2", "kenney", "impact-sounds:Audio/impactGlass_heavy_001.ogg", {}),
+    ("impact_glass_3", "kenney", "impact-sounds:Audio/impactGlass_light_002.ogg", {}),
+    # --- Holy Lasso ------------------------------------------------------
+    ("lasso_whip", "bigsoundbank", "complete-whip-1-s2961", {"trim": (0.2, 0.95), "fade_out": 0.15}),
+    ("lasso_creak", "bigsoundbank", "big-rope-s3426", {"trim": (4.0, 9.0), "loop": 0.75}),
+    ("lasso_clink", "freesound", "Rudmer_Rotteveel/457461", {"trim": (0.3, 0.77)}),
+    ("lasso_snap", "bigsoundbank", "whip-crack-1-s2949", {"trim": (0.15, 0.8), "fade_out": 0.3, "gain": -1}),
+    # --- Holy Taser ------------------------------------------------------
+    ("taser_arc", "freesound", "Sclolex/210878", {"trim": (0.6, 4.1), "loop": 0.5}),
+    ("taser_zap", "freesound", "AnthonyChan0/264779", {"gain": -1}),
+    ("taser_hiss", "bigsoundbank", "hiss-of-steam-train-1-s0227", {"trim": (0.0, 2.5), "fade_out": 0.9}),
+    ("taser_beep", "bigsoundbank", "beep-of-a-cash-register-s1417", {"gain": -6}),
+    # --- Duct tape -------------------------------------------------------
+    ("tape_rip", "freesound", "cj_ascoli/444366", {"gain": -1}),
+    ("tape_rip_2", "freesound", "AlaskaRobotics/245200", {"gain": -1}),
+    ("tape_rip_3", "bigsoundbank", "adhesive-tape-1-s0297", {"trim": (4.3, 7.45), "fade_in": 0.03, "fade_out": 0.1}),
+    ("tape_snap", "freesound", "_natiKatz/223375", {"gain": -1}),
+    ("tape_snap_2", "freesound", "baidonovan/187338", {"trim": (0.12, 0.46), "gain": 6}),
+    # --- Salt grenade ----------------------------------------------------
+    ("salt_shatter", "bigsoundbank", "broken-glass-of-champagne-s1591", {"trim": (0.0, 1.2), "fade_out": 0.3, "gain": -1}),
+    ("salt_shatter_2", "bigsoundbank", "glass-burst-s0148", {}),
+    ("salt_burst", "freesound", "Qvantor/880771", {"gain": 8}),
+    # --- Demon and contract ----------------------------------------------
+    ("demon_roar", "opengameart", "big-scary-troll-sounds:troll-roars.ogg", {"trim": (7.0, 8.85), "fade_out": 0.1, "gain": -1}),
+    ("demon_roar_2", "opengameart", "cc0-deep-monster-roar:monster_roar.wav", {"trim": (0.08, 4.4), "fade_out": 0.8}),
+    ("demon_roar_3", "opengameart", "big-scary-troll-sounds:troll-roars.ogg", {"trim": (3.55, 4.9), "fade_out": 0.1, "gain": -1}),
+    ("demon_roar_4", "freesound", "uagadugu/222523", {"trim": (0.2, 3.6), "fade_out": 0.3}),
+    ("demon_screech", "bigsoundbank", "barn-owl-s1400", {"trim": (0.1, 2.0), "fade_out": 0.15, "gain": -1}),
+    ("demon_screech_2", "bigsoundbank", "sika-deer-rut-call-2-s3618", {"trim": (1.0, 4.6), "fade_in": 0.15, "fade_out": 0.6, "gain": -1}),
+    ("tk_whoosh", "freesound", "TheEndOfACycle/674292", {"trim": (0.4, 2.69)}),
+    ("ragdoll_thud", "bigsoundbank", "body-fall-2-s2453", {"trim": (0.0, 1.0), "fade_out": 0.15, "gain": -1}),
+    ("ragdoll_thud_2", "bigsoundbank", "body-fall-1-s2452", {"trim": (0.0, 1.15), "fade_out": 0.1, "gain": -1}),
+    ("van_door_slam", "bigsoundbank", "car-door-3-s1524", {"trim": (1.85, 2.85), "fade_out": 0.2, "gain": -1}),
+    ("van_door_slam_2", "bigsoundbank", "car-sliding-door-2-s1494", {"trim": (0.12, 1.89), "gain": -1}),
+    ("van_bang", "freesound", "kyles/637480", {"trim": (0.08, 1.45), "fade_out": 0.12}),
+    ("van_bang_2", "freesound", "dster777/344565", {"trim": (0.15, 1.25), "fade_out": 0.2}),
+    ("heartbeat", "bigsoundbank", "heartbeat-2-s0244", {"trim": (0.0, 0.75), "fade_out": 0.2}),
+    ("heartbeat_2", "bigsoundbank", "heartbeat-1-s0243", {"trim": (0.0, 0.8), "fade_out": 0.15}),
+    ("cash_register", "freesound", "clubmydia+/584168", {"trim": (1.42, 4.5), "fade_out": 0.3}),
+    ("cash_register_2", "freesound", "CapsLok/184438", {"trim": (0.0, 1.45), "fade_out": 0.2}),
+    # --- Interface -------------------------------------------------------
+    ("ui_click", "kenney", "interface-sounds:Audio/click_001.ogg", {}),
+    ("ui_buy", "kenney", "interface-sounds:Audio/confirmation_001.ogg", {}),
+    ("ui_deny", "kenney", "interface-sounds:Audio/error_004.ogg", {}),
+]
+
+# (file name, licence file name, source, source id, licence id) -> assets/fonts/<file name>.ttf
+# github = owner/repo@commit:path, github-release = owner/repo@tag:asset.zip:member;
+# the licence id is a path in the same commit or a member of the same zip.
+FONT_CATALOG = [
+    ("Oswald-Bold", "OFL-Oswald", "github",
+     "googlefonts/OswaldFont@89795261ac9eeb9aa8cd99f43982c4e4b0e53261:fonts/ttf/Oswald-Bold.ttf", "OFL.txt"),
+    ("Inter-Medium", "OFL-Inter", "github-release", "rsms/inter@v4.1:Inter-4.1.zip:extras/ttf/Inter-Medium.ttf", "LICENSE.txt"),
+    ("JetBrainsMono-Medium", "OFL-JetBrainsMono", "github",
+     "JetBrains/JetBrainsMono@19371302b95d218af43299bce79ddbddd0bc364d:fonts/ttf/JetBrainsMono-Medium.ttf", "OFL.txt"),
+]
+# Every HUD and menu string is English or Russian: Basic Latin plus А-я, Ё and ё.
+FONT_REQUIRED = list(range(0x20, 0x7F)) + list(range(0x410, 0x450)) + [0x401, 0x451]
+
 
 class FetchError(Exception):
     pass
@@ -206,12 +338,16 @@ class FetchError(Exception):
 # HTTP
 # ---------------------------------------------------------------------------
 
-def http_get(url: str, agent: str = USER_AGENT, attempts: int = 4) -> bytes:
+def http_get(url: str, agent: str = USER_AGENT, attempts: int = 4, referer: str = "") -> bytes:
     """GET that insists on HTTP 200 and retries transient failures."""
     last = ""
+    headers = {"User-Agent": agent, "Accept": "*/*"}
+    if referer:
+        headers["Referer"] = referer
     for attempt in range(attempts):
+        wait = 1.5 * (attempt + 1)
         try:
-            request = urllib.request.Request(url, headers={"User-Agent": agent, "Accept": "*/*"})
+            request = urllib.request.Request(url, headers=headers)
             with urllib.request.urlopen(request, timeout=120) as response:
                 if response.status != 200:
                     raise FetchError("HTTP %s for %s" % (response.status, url))
@@ -220,14 +356,50 @@ def http_get(url: str, agent: str = USER_AGENT, attempts: int = 4) -> bytes:
             last = "HTTP %s" % error.code
             if error.code in (400, 401, 403, 404, 410):
                 break
+            if error.code == 429:
+                # Sound libraries throttle bursts from one address; give them room.
+                wait *= 4
         except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as error:
             last = str(error)
-        time.sleep(1.5 * (attempt + 1))
+        time.sleep(wait)
     raise FetchError("%s (%s)" % (url, last))
 
 
 def http_json(url: str, agent: str = USER_AGENT):
     return json.loads(http_get(url, agent).decode("utf-8"))
+
+
+_once_guard = threading.Lock()
+_once_results: dict = {}
+
+
+def once(key: str, loader):
+    """Runs loader a single time per run, however many worker threads ask for the same key."""
+    with _once_guard:
+        slot = _once_results.setdefault(key, {"lock": threading.Lock()})
+    with slot["lock"]:
+        if "value" not in slot and "error" not in slot:
+            try:
+                slot["value"] = loader()
+            except FetchError as error:
+                slot["error"] = error
+        if "error" in slot:
+            raise slot["error"]
+        return slot["value"]
+
+
+def http_once(url: str, agent: str = USER_AGENT, referer: str = "") -> bytes:
+    """http_get for pages, archives and recordings that several catalog entries share."""
+    return once("GET " + url, lambda: http_get(url, agent, referer=referer))
+
+
+def page_text(url: str) -> str:
+    return http_once(url).decode("utf-8", "replace")
+
+
+def plain(markup: str) -> str:
+    """Text of an HTML fragment."""
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", markup))).strip()
 
 
 # ---------------------------------------------------------------------------
@@ -240,6 +412,159 @@ def image_format(data: bytes) -> str:
     if data[:8] == b"\x89PNG\r\n\x1a\n":
         return "png"
     return ""
+
+
+def audio_kind(data: bytes) -> str:
+    """Container of a downloaded sound, judged by its magic bytes."""
+    if data[:4] == b"OggS":
+        return "ogg"
+    if data[:4] == b"RIFF" and data[8:12] == b"WAVE":
+        return "wav"
+    if data[:4] == b"fLaC":
+        return "flac"
+    if data[:3] == b"ID3" or (len(data) > 1 and data[0] == 0xFF and data[1] & 0xE0 == 0xE0):
+        return "mp3"
+    return ""
+
+
+def audio_info(data: bytes) -> dict:
+    """Validates a sound Godot can import (Ogg Vorbis or RIFF/WAVE) and returns its layout and length."""
+    kind = audio_kind(data)
+    if kind == "ogg":
+        # Walk every page: the first one must carry the Vorbis identification
+        # header and the last one's granule position is the sample count.
+        position = 0
+        granule = 0
+        pages = 0
+        packet = b""
+        while position + 27 <= len(data):
+            if data[position:position + 4] != b"OggS" or data[position + 4] != 0:
+                raise FetchError("corrupt Ogg page at byte %d" % position)
+            segments = data[position + 26]
+            table = data[position + 27:position + 27 + segments]
+            body = position + 27 + segments
+            size = sum(table)
+            if len(table) != segments or body + size > len(data):
+                raise FetchError("truncated Ogg stream")
+            if pages == 0:
+                packet = data[body:body + size]
+            stamp = struct.unpack("<q", data[position + 6:position + 14])[0]
+            if stamp > 0:
+                granule = stamp
+            position = body + size
+            pages += 1
+        if packet[:8] == b"OpusHead":
+            raise FetchError("Ogg Opus stream; Godot only imports Ogg Vorbis")
+        if packet[:7] != b"\x01vorbis" or len(packet) < 16:
+            raise FetchError("Ogg stream has no Vorbis identification header")
+        channels = packet[11]
+        rate = struct.unpack("<I", packet[12:16])[0]
+        if not channels or not rate or granule <= 0:
+            raise FetchError("Ogg Vorbis stream holds no audio")
+        return {"format": "ogg", "codec": "vorbis", "channels": channels, "sample_rate": rate,
+                "seconds": round(granule / float(rate), 3)}
+    if kind == "wav":
+        position = 12
+        layout = None
+        frames = 0
+        while position + 8 <= len(data):
+            tag = data[position:position + 4]
+            size = struct.unpack("<I", data[position + 4:position + 8])[0]
+            if tag == b"fmt " and size >= 16:
+                layout = struct.unpack("<HHIIHH", data[position + 8:position + 24])
+            elif tag == b"data" and layout:
+                frames = min(size, len(data) - position - 8) // max(1, layout[4])
+            position += 8 + size + (size & 1)
+        if layout is None or frames <= 0:
+            raise FetchError("WAVE file holds no audio")
+        if layout[0] not in (1, 3, 0xFFFE):
+            raise FetchError("WAVE codec %d is not PCM" % layout[0])
+        return {"format": "wav", "codec": "pcm_%d" % layout[5], "channels": layout[1], "sample_rate": layout[2],
+                "seconds": round(frames / float(layout[2]), 3)}
+    raise FetchError("not Ogg Vorbis or RIFF/WAVE audio" + (" (%s)" % kind if kind else ""))
+
+
+def _font_tables(data: bytes) -> dict:
+    if data[:4] not in (b"\x00\x01\x00\x00", b"OTTO", b"true"):
+        raise FetchError("missing TrueType/OpenType header")
+    tables = {}
+    for index in range(struct.unpack(">H", data[4:6])[0]):
+        tag, _, offset, length = struct.unpack(">4sIII", data[12 + index * 16:28 + index * 16])
+        if offset + length > len(data):
+            raise FetchError("font table %s runs past the end of the file" % tag.decode("latin-1"))
+        tables[tag.decode("latin-1")] = offset
+    for needed in ("cmap", "head", "hhea", "hmtx", "maxp", "name"):
+        if needed not in tables:
+            raise FetchError("font has no %s table" % needed)
+    return tables
+
+
+def _font_codepoints(data: bytes, base: int) -> set:
+    """Every code point a font's Unicode cmap subtables map to a real glyph."""
+    found = set()
+    for index in range(struct.unpack(">H", data[base + 2:base + 4])[0]):
+        platform, encoding, offset = struct.unpack(">HHI", data[base + 4 + index * 8:base + 12 + index * 8])
+        if platform != 0 and (platform, encoding) not in ((3, 1), (3, 10)):
+            continue
+        at = base + offset
+        kind = struct.unpack(">H", data[at:at + 2])[0]
+        if kind == 4:
+            doubled = struct.unpack(">H", data[at + 6:at + 8])[0]
+            count = doubled // 2
+            ends = struct.unpack(">%dH" % count, data[at + 14:at + 14 + doubled])
+            starts = struct.unpack(">%dH" % count, data[at + 16 + doubled:at + 16 + 2 * doubled])
+            deltas = struct.unpack(">%dH" % count, data[at + 16 + 2 * doubled:at + 16 + 3 * doubled])
+            ranges_at = at + 16 + 3 * doubled
+            ranges = struct.unpack(">%dH" % count, data[ranges_at:ranges_at + doubled])
+            for segment in range(count):
+                for code in range(starts[segment], min(ends[segment], 0xFFFE) + 1):
+                    if ranges[segment]:
+                        slot = ranges_at + 2 * segment + ranges[segment] + 2 * (code - starts[segment])
+                        glyph = struct.unpack(">H", data[slot:slot + 2])[0]
+                        if glyph:
+                            glyph = (glyph + deltas[segment]) & 0xFFFF
+                    else:
+                        glyph = (code + deltas[segment]) & 0xFFFF
+                    if glyph:
+                        found.add(code)
+        elif kind == 12:
+            for group in range(struct.unpack(">I", data[at + 12:at + 16])[0]):
+                first, last, glyph = struct.unpack(">III", data[at + 16 + group * 12:at + 28 + group * 12])
+                for code in range(first, min(last, 0x10FFFF) + 1):
+                    if glyph + code - first:
+                        found.add(code)
+    return found
+
+
+def font_info(data: bytes) -> dict:
+    """Validates an sfnt font and its Latin + Russian Cyrillic coverage; returns its naming and size."""
+    tables = _font_tables(data)
+    codepoints = _font_codepoints(data, tables["cmap"])
+    absent = [code for code in FONT_REQUIRED if code not in codepoints]
+    if absent:
+        raise FetchError("font lacks %d of the %d Latin/Cyrillic characters the game needs (first U+%04X)" % (
+            len(absent), len(FONT_REQUIRED), absent[0]))
+    names = {}
+    base = tables["name"]
+    _, count, strings = struct.unpack(">HHH", data[base:base + 6])
+    for index in range(count):
+        platform, _, language, key, length, offset = struct.unpack(">6H", data[base + 6 + index * 12:base + 18 + index * 12])
+        raw = data[base + strings + offset:base + strings + offset + length]
+        if platform == 3 and language == 0x409:
+            names[key] = raw.decode("utf-16-be", "replace")
+        elif platform == 1:
+            names.setdefault(key, raw.decode("mac-roman", "replace"))
+    return {
+        "format": "otf" if data[:4] == b"OTTO" else "ttf",
+        "family": names.get(16, names.get(1, "")),
+        "style": names.get(17, names.get(2, "")),
+        "version": names.get(5, ""),
+        "glyphs": struct.unpack(">H", data[tables["maxp"] + 4:tables["maxp"] + 6])[0],
+        "codepoints": len(codepoints),
+        "cyrillic": True,
+        # A variable font carries an fvar table; the game expects one fixed weight per file.
+        "variable": "fvar" in tables,
+    }
 
 
 def glb_summary(data: bytes) -> dict:
@@ -338,11 +663,13 @@ def glb_rig(data: bytes, required_bones: list) -> dict:
         raise FetchError("skeleton is missing bones: %s" % ", ".join(absent))
 
     vertices = 0
+    skinned = 0
     low = [float("inf")] * 3
     high = [float("-inf")] * 3
     for node in nodes:
         if "mesh" not in node or "skin" not in node:
             continue
+        skinned += 1
         for primitive in document["meshes"][node["mesh"]]["primitives"]:
             attributes = primitive["attributes"]
             if "JOINTS_0" not in attributes or "WEIGHTS_0" not in attributes:
@@ -354,15 +681,37 @@ def glb_rig(data: bytes, required_bones: list) -> dict:
                 high[axis] = max(high[axis], accessor["max"][axis])
     if vertices <= 0:
         raise FetchError("skinned mesh has no vertices")
+    # Unit vector from each shoulder joint to its wrist: (+-1, 0, 0) is a T-pose,
+    # a falling y an A-pose, a rising z arms held out in front.
+    rest = {bone["name"]: bone["rest"] for bone in bones}
+    arms = {}
+    for side in ("Left", "Right"):
+        if side + "Arm" in rest and side + "Hand" in rest:
+            reach = [rest[side + "Hand"][axis] - rest[side + "Arm"][axis] for axis in range(3)]
+            length = sum(value * value for value in reach) ** 0.5 or 1.0
+            arms[side.lower()] = [round(value / length, 3) for value in reach]
     return {
         "skeleton": skin.get("name", ""),
         "joints": len(joints),
         "vertices": vertices,
+        "skinned_meshes": skinned,
+        "animations": [clip.get("name", "") for clip in document.get("animations", [])],
         "bounds_min": [round(value, 4) for value in low],
         "bounds_max": [round(value, 4) for value in high],
         "height": round(high[1] - low[1], 4),
+        "arm_direction": arms,
         "bones": bones,
     }
+
+
+def rig_report(name: str, data: bytes) -> dict:
+    """Manifest fields for a rigged model: its skeleton and whether the demon ragdoll can drive it."""
+    required = RIGGED_MODELS[name]
+    rig = glb_rig(data, [] if name in OPTIONAL_RIGS else required)
+    present = {bone["name"] for bone in rig["bones"]}
+    absent = [bone for bone in required if bone not in present]
+    return {"rig": rig, "rig_compatible": not absent, "rig_missing_bones": absent,
+            "rig_extra_bones": sorted(present - set(required))}
 
 
 def print_rig(record: dict) -> None:
@@ -375,6 +724,12 @@ def print_rig(record: dict) -> None:
         record["triangles"], rig["skeleton"], rig["joints"]))
     print("  bounding box  min (%.3f, %.3f, %.3f)  max (%.3f, %.3f, %.3f)  height %.3f m" % (
         *rig["bounds_min"], *rig["bounds_max"], rig["height"]))
+    absent = record.get("rig_missing_bones", [])
+    print("  ragdoll bones %s  extra bones: %s  arm direction L %s R %s  animations: %s" % (
+        "all %d present" % len(RIGGED_MODELS.get(record["name"], [])) if not absent else "MISSING " + ", ".join(absent),
+        ", ".join(record.get("rig_extra_bones", [])) or "none",
+        rig.get("arm_direction", {}).get("left", "?"), rig.get("arm_direction", {}).get("right", "?"),
+        ", ".join(rig.get("animations", [])) or "none"))
     children: dict = {}
     for bone in rig["bones"]:
         children.setdefault(bone["parent"], []).append(bone)
@@ -771,6 +1126,155 @@ def fetch_vibeassets_model(asset_id: str) -> tuple:
     return data, meta
 
 
+def fetch_kaykit_model(ref: str) -> tuple:
+    """A .gltf from one of Kay Lousberg's GitHub packs ("Repo@commit:path"), packed with its .bin and atlas."""
+    repo, rest = ref.split("@", 1)
+    commit, path = rest.split(":", 1)
+    base = "https://raw.githubusercontent.com/KayKit-Game-Assets/%s/%s/" % (repo, commit)
+    licence = http_once(base + "LICENSE.txt").decode("utf-8", "replace")
+    if "Creative Commons Zero" not in licence:
+        raise FetchError("%sLICENSE.txt does not state CC0" % base)
+    url = base + urllib.parse.quote(path)
+    document = json.loads(http_get(url).decode("utf-8"))
+    folder = path.rsplit("/", 1)[0]
+    resources = {}
+    urls = [url]
+    for entry in document.get("buffers", []) + document.get("images", []):
+        uri = entry.get("uri", "")
+        if not uri or uri.startswith("data:"):
+            continue
+        urls.append(base + urllib.parse.quote(folder + "/" + urllib.parse.unquote(uri)))
+        resources[urllib.parse.unquote(uri)] = http_once(urls[-1])
+    meta = {
+        "source": "KayKit",
+        "source_id": ref,
+        "source_page": "https://github.com/KayKit-Game-Assets/" + repo,
+        "title": "%s (%s)" % (os.path.splitext(os.path.basename(path))[0], plain(licence).split(" Created")[0]),
+        "author": "Kay Lousberg",
+        "license": "CC0 1.0",
+        "download_urls": urls,
+        "note": "glTF, .bin and texture atlas packed into a single .glb by tools/fetch_assets.py",
+    }
+    return pack_glb(document, resources), meta
+
+
+def opengameart_file(ref: str) -> tuple:
+    """A file attached to an OpenGameArt entry whose licence list includes CC0 ("content-slug:file name")."""
+    slug, name = ref.split(":", 1)
+    page = "https://opengameart.org/content/" + slug
+    markup = page_text(page)
+    licences = [plain(found) for found in re.findall(r"<div class='license-name'>(.*?)</div>", markup, re.S)]
+    if "CC0" not in licences:
+        raise FetchError("%s is %s, not CC0" % (page, ", ".join(licences) or "unlicensed"))
+    link = re.search(r'<a href="(https://opengameart\.org/sites/default/files/[^"]+)" type="[^"]*length=(\d+)"[^>]*download="%s"'
+                     % re.escape(html.escape(name)), markup)
+    if not link:
+        raise FetchError("%s has no attached file called %s" % (page, name))
+    data = http_once(link.group(1))
+    if len(data) != int(link.group(2)):
+        raise FetchError("%s: got %d bytes, the page lists %s" % (link.group(1), len(data), link.group(2)))
+    title = re.search(r"<title>(.*?)</title>", markup, re.S)
+    author = re.search(r"<span class='username'>(.*?)</span>", markup, re.S)
+    meta = {
+        "source": "OpenGameArt",
+        "source_id": ref,
+        "source_page": page,
+        "title": plain(title.group(1)).split(" | ")[0] if title else slug,
+        "author": plain(author.group(1)) if author else "",
+        "license": "CC0 1.0",
+        "download_urls": [link.group(1)],
+    }
+    return data, meta
+
+
+def obj_to_glb(text: str, texture: bytes, name: str) -> bytes:
+    """Flat-shaded .glb of a one-material Wavefront OBJ and its colour map, re-centred to stand on the origin."""
+    points = []
+    coords = []
+    corners = []
+    for line in text.splitlines():
+        parts = line.split()
+        if not parts:
+            continue
+        if parts[0] == "v":
+            points.append([float(value) for value in parts[1:4]])
+        elif parts[0] == "vt":
+            # OBJ puts v = 0 at the bottom of the image, glTF at the top.
+            coords.append([float(parts[1]), 1.0 - float(parts[2])])
+        elif parts[0] == "f":
+            face = []
+            for token in parts[1:]:
+                refs = token.split("/")
+                point = int(refs[0])
+                coord = int(refs[1]) if len(refs) > 1 and refs[1] else 0
+                face.append((points[point - 1 if point > 0 else point],
+                             coords[coord - 1 if coord > 0 else coord] if coord else [0.0, 0.0]))
+            # Newell's method gives one normal for the whole polygon.
+            normal = [0.0, 0.0, 0.0]
+            for index, (here, _) in enumerate(face):
+                there = face[(index + 1) % len(face)][0]
+                normal[0] += (here[1] - there[1]) * (here[2] + there[2])
+                normal[1] += (here[2] - there[2]) * (here[0] + there[0])
+                normal[2] += (here[0] - there[0]) * (here[1] + there[1])
+            length = sum(value * value for value in normal) ** 0.5 or 1.0
+            normal = [value / length for value in normal]
+            for index in range(1, len(face) - 1):
+                for point, coord in (face[0], face[index], face[index + 1]):
+                    corners.append((point, normal, coord))
+    if not corners:
+        raise FetchError("OBJ has no faces")
+    low = [min(corner[0][axis] for corner in corners) for axis in range(3)]
+    high = [max(corner[0][axis] for corner in corners) for axis in range(3)]
+    shift = [(low[0] + high[0]) / 2.0, low[1], (low[2] + high[2]) / 2.0]
+    positions = [[corner[0][axis] - shift[axis] for axis in range(3)] for corner in corners]
+    count = len(corners)
+    blob = b"".join(struct.pack("<3f", *position) for position in positions)
+    blob += b"".join(struct.pack("<3f", *corner[1]) for corner in corners)
+    blob += b"".join(struct.pack("<2f", *corner[2]) for corner in corners)
+    kind = image_format(texture)
+    if not kind:
+        raise FetchError("OBJ colour map is not a JPEG or PNG")
+    document = {
+        "asset": {"version": "2.0", "generator": "tools/fetch_assets.py obj_to_glb"},
+        "scene": 0,
+        "scenes": [{"nodes": [0]}],
+        "nodes": [{"name": name, "mesh": 0}],
+        "meshes": [{"name": name, "primitives": [{"attributes": {"POSITION": 0, "NORMAL": 1, "TEXCOORD_0": 2}, "material": 0}]}],
+        "materials": [{"name": name, "pbrMetallicRoughness": {"baseColorTexture": {"index": 0},
+                                                                "metallicFactor": 0.0, "roughnessFactor": 0.7}}],
+        "textures": [{"source": 0, "sampler": 0}],
+        "samplers": [{"magFilter": 9729, "minFilter": 9987}],
+        "images": [{"uri": "colour." + kind}],
+        "buffers": [{"uri": "mesh.bin", "byteLength": len(blob)}],
+        "bufferViews": [
+            {"buffer": 0, "byteOffset": 0, "byteLength": count * 12, "target": 34962},
+            {"buffer": 0, "byteOffset": count * 12, "byteLength": count * 12, "target": 34962},
+            {"buffer": 0, "byteOffset": count * 24, "byteLength": count * 8, "target": 34962},
+        ],
+        "accessors": [
+            {"bufferView": 0, "componentType": 5126, "count": count, "type": "VEC3",
+             "min": [min(position[axis] for position in positions) for axis in range(3)],
+             "max": [max(position[axis] for position in positions) for axis in range(3)]},
+            {"bufferView": 1, "componentType": 5126, "count": count, "type": "VEC3"},
+            {"bufferView": 2, "componentType": 5126, "count": count, "type": "VEC2"},
+        ],
+    }
+    return pack_glb(document, {"mesh.bin": blob, "colour." + kind: texture})
+
+
+def fetch_opengameart_model(ref: str) -> tuple:
+    """An OBJ and its texture out of a CC0 OpenGameArt zip ("content-slug:archive:member.obj:member.png")."""
+    slug, archive, model, texture = ref.split(":")
+    data, meta = opengameart_file(slug + ":" + archive)
+    with zipfile.ZipFile(io.BytesIO(data)) as bundle:
+        glb = obj_to_glb(bundle.read(model).decode("utf-8", "replace"), bundle.read(texture),
+                         os.path.splitext(os.path.basename(model))[0])
+    meta["source_id"] = ref
+    meta["note"] = ("%s and %s from %s converted to a flat-shaded .glb, re-centred to stand on the origin, "
+                    "by tools/fetch_assets.py" % (model, texture, archive))
+    return glb, meta
+
+
 def fetch_polyhaven_texture(asset_id: str) -> tuple:
     info = polyhaven_info(asset_id, "textures")
     files = http_json("https://api.polyhaven.com/files/" + asset_id)
@@ -828,8 +1332,274 @@ def fetch_ambientcg_texture(asset_id: str) -> tuple:
     return maps, meta
 
 
-MODEL_SOURCES = {"polyhaven": fetch_polyhaven_model, "polypizza": fetch_polypizza_model, "vibeassets": fetch_vibeassets_model}
+def fetch_bigsoundbank_audio(slug: str) -> tuple:
+    """A recording from Joseph Sardin's library; the id is the page slug, e.g. "thunder-2-s3113"."""
+    page = "https://bigsoundbank.com/%s.html" % slug
+    markup = page_text(page)
+    if not re.search(r"<h2[^>]*>\s*License\s*</h2>\s*<p[^>]*>\s*<strong>CC0 \(public domain\)", markup):
+        raise FetchError("%s does not state a CC0 licence" % page)
+    link = re.search(r"https://bigsoundbank\.com/UPLOAD/ogg/%s\.ogg" % re.escape(slug.rsplit("-s", 1)[-1]), markup)
+    if not link:
+        raise FetchError("%s lists no Ogg download" % page)
+    title = re.search(r"<h1 itemprop='name'>(.*?)(?:<a |</h1>)", markup, re.S)
+    author = re.search(r"<strong>Author</strong>:\s*(.*?)<br", markup, re.S)
+    meta = {
+        "source": "BigSoundBank",
+        "source_id": slug,
+        "source_page": page,
+        "title": plain(title.group(1)) if title else slug,
+        "author": plain(author.group(1)) if author else "Joseph SARDIN",
+        "license": "CC0 1.0",
+        "download_urls": [link.group(0)],
+    }
+    return http_once(link.group(0)), meta
+
+
+def fetch_freesound_audio(ref: str) -> tuple:
+    """The Ogg preview of a CC0 Freesound upload ("user/sound number"); originals need an account."""
+    user, number = ref.split("/", 1)
+    page = "https://freesound.org/people/%s/sounds/%s/" % (urllib.parse.quote(user, safe="+@._-"), number)
+    markup = page_text(page)
+    licence = re.search(r'title="Go to the full license text"\s+href="([^"]+)"', markup)
+    if not licence or "creativecommons.org/publicdomain/zero/" not in licence.group(1):
+        raise FetchError("%s is %s, not CC0" % (page, licence.group(1) if licence else "unlicensed"))
+    player = re.search(r'data-sound-id="%s".*?data-ogg="(https://cdn\.freesound\.org/previews/[^"]+)-lq\.ogg".*?data-title="([^"]*)"'
+                       % re.escape(number), markup, re.S)
+    if not player:
+        raise FetchError("%s lists no Ogg preview" % page)
+    # The page embeds the low-bitrate preview; the high-quality one sits beside it.
+    data = b""
+    url = ""
+    for quality in ("-hq.ogg", "-lq.ogg"):
+        url = player.group(1) + quality
+        try:
+            data = http_once(url)
+            break
+        except FetchError:
+            if quality == "-lq.ogg":
+                raise
+    meta = {
+        "source": "Freesound",
+        "source_id": ref,
+        "source_page": page,
+        "title": html.unescape(player.group(2)),
+        "author": user,
+        "license": "CC0 1.0",
+        "download_urls": [url],
+    }
+    return data, meta
+
+
+def fetch_opengameart_audio(ref: str) -> tuple:
+    return opengameart_file(ref)
+
+
+_kenney_guard = threading.Lock()
+
+
+def kenney_pack(slug: str) -> tuple:
+    """(zip archive, title, link endpoint) of a Kenney pack, through the signed link its asset page requests."""
+    page = "https://kenney.nl/assets/" + slug
+
+    def load() -> tuple:
+        markup = http_get(page).decode("utf-8", "replace")
+        if "creativecommons.org/publicdomain/zero/1.0" not in markup:
+            raise FetchError("%s does not state a CC0 licence" % page)
+        token = re.search(r"data-download-id='([0-9a-f]+)'", markup)
+        if not token:
+            raise FetchError("%s has no download button" % page)
+        endpoint = "https://kenney.nl/download-link/" + token.group(1)
+        signed = json.loads(http_get(endpoint, referer=page).decode("utf-8")).get("url", "")
+        if not signed:
+            raise FetchError("%s returned no download link" % endpoint)
+        archive = http_get(signed, referer=page)
+        if archive[:2] != b"PK":
+            raise FetchError("Kenney download for %s is not a zip archive" % slug)
+        bundle = zipfile.ZipFile(io.BytesIO(archive))
+        if "Creative Commons Zero" not in bundle.read("License.txt").decode("utf-8", "replace"):
+            raise FetchError("License.txt in the %s pack does not state CC0" % slug)
+        title = re.search(r"<title>(.*?)</title>", markup, re.S)
+        return bundle, plain(title.group(1)).split(" · ")[0] if title else slug, endpoint
+
+    try:
+        return once("kenney " + slug, load)
+    except (KeyError, ValueError, zipfile.BadZipFile) as error:
+        raise FetchError("Kenney pack %s: %s" % (slug, error))
+
+
+def fetch_kenney_audio(ref: str) -> tuple:
+    """One member of a Kenney sound pack ("pack-slug:path inside the zip")."""
+    slug, member = ref.split(":", 1)
+    bundle, title, endpoint = kenney_pack(slug)
+    with _kenney_guard:
+        try:
+            data = bundle.read(member)
+        except KeyError:
+            raise FetchError("the %s pack has no %s" % (slug, member))
+    meta = {
+        "source": "Kenney",
+        "source_id": ref,
+        "source_page": "https://kenney.nl/assets/" + slug,
+        "title": "%s: %s" % (title, os.path.splitext(os.path.basename(member))[0]),
+        "author": "Kenney",
+        "license": "CC0 1.0",
+        # The archive itself is served from a signed link that expires within minutes.
+        "download_urls": [endpoint],
+        "note": "%s extracted from the pack's zip" % member,
+    }
+    return data, meta
+
+
+def _licence_record(text: bytes, where: str) -> str:
+    """First copyright line of an OFL licence text; anything else is refused."""
+    decoded = text.decode("utf-8", "replace")
+    if "SIL OPEN FONT LICENSE" not in decoded.upper():
+        raise FetchError("%s is not the SIL Open Font License" % where)
+    for line in decoded.splitlines():
+        if line.strip().lower().startswith("copyright"):
+            return line.strip()
+    return ""
+
+
+def fetch_github_font(ref: str, licence_path: str) -> tuple:
+    """A font file committed to its upstream repository ("owner/repo@commit:path")."""
+    repo, rest = ref.split("@", 1)
+    commit, path = rest.split(":", 1)
+    base = "https://raw.githubusercontent.com/%s/%s/" % (repo, commit)
+    licence = http_get(base + licence_path)
+    meta = {
+        "source": "GitHub",
+        "source_id": ref,
+        "source_page": "https://github.com/" + repo,
+        "author": _licence_record(licence, base + licence_path),
+        "license": "SIL Open Font License 1.1",
+        "download_urls": [base + path, base + licence_path],
+    }
+    return http_get(base + path), licence, meta
+
+
+def fetch_release_font(ref: str, licence_member: str) -> tuple:
+    """A font out of an upstream release archive ("owner/repo@tag:asset.zip:member")."""
+    repo, rest = ref.split("@", 1)
+    tag, asset, member = rest.split(":", 2)
+    url = "https://github.com/%s/releases/download/%s/%s" % (repo, tag, asset)
+    archive = http_once(url)
+    if archive[:2] != b"PK":
+        raise FetchError("%s is not a zip archive" % url)
+    with zipfile.ZipFile(io.BytesIO(archive)) as bundle:
+        font = bundle.read(member)
+        licence = bundle.read(licence_member)
+    meta = {
+        "source": "GitHub release",
+        "source_id": ref,
+        "source_page": "https://github.com/%s/releases/tag/%s" % (repo, tag),
+        "author": _licence_record(licence, "%s in %s" % (licence_member, asset)),
+        "license": "SIL Open Font License 1.1",
+        "download_urls": [url],
+        "note": "%s and %s extracted from %s" % (member, licence_member, asset),
+    }
+    return font, licence, meta
+
+
+def process_audio(data: bytes, edit: dict) -> tuple:
+    """Applies a catalog entry's edit with ffmpeg. Returns (bytes, note, pending).
+
+    Sounds that need no edit are stored exactly as downloaded. Without ffmpeg an
+    Ogg Vorbis or WAVE source is also stored as it came (pending is then True, so
+    a later run with ffmpeg finishes the job) and any other format is refused.
+    """
+    kind = audio_kind(data)
+    info = audio_info(data) if kind in ("ogg", "wav") else None
+    mixdown = info is None or (info["channels"] > 1 and not edit.get("stereo"))
+    if info and not mixdown and not any(key in edit for key in ("trim", "loop", "gain", "fade_in", "fade_out")):
+        return data, "", False
+    if FFMPEG is None:
+        if info:
+            return data, "ffmpeg not found: stored as downloaded, without the trim, fade, loop or mono mix", True
+        raise FetchError("ffmpeg is needed to turn this %s file into Ogg Vorbis" % (kind or "unrecognised"))
+
+    start, end = edit.get("trim", (0.0, info["seconds"] if info else 0.0))
+    channels = 2 if edit.get("stereo") else 1
+    cross = float(edit.get("loop", 0.0))
+    steps = []
+    notes = []
+    if "trim" in edit:
+        steps += ["atrim=start=%.3f:end=%.3f" % (start, end + cross), "asetpts=PTS-STARTPTS"]
+        notes.append("trimmed to %.2f-%.2f s" % (start, end))
+    if cross:
+        notes.append("%.2f s cross-fade for a seamless loop" % cross)
+    else:
+        # A cut through a waveform clicks unless it is eased in and out.
+        fade_in = edit.get("fade_in", 0.004 if start > 0 else 0.0)
+        fade_out = edit.get("fade_out", 0.02 if "trim" in edit else 0.0)
+        if fade_in:
+            steps.append("afade=t=in:st=0:d=%.3f" % fade_in)
+        if fade_out and end > start:
+            steps.append("afade=t=out:st=%.3f:d=%.3f" % (max(0.0, end - start - fade_out), fade_out))
+        if "fade_in" in edit or "fade_out" in edit:
+            notes.append("fades %.2f/%.2f s" % (fade_in, fade_out))
+    if edit.get("gain"):
+        steps.append("volume=%.1fdB" % edit["gain"])
+        notes.append("%+.0f dB" % edit["gain"])
+    notes.append("stereo" if channels == 2 else "mono")
+
+    def ffmpeg(arguments: list) -> None:
+        try:
+            done = subprocess.run([FFMPEG, "-hide_banner", "-loglevel", "error", "-nostdin", "-y"] + arguments,
+                                  capture_output=True, timeout=180)
+        except (OSError, subprocess.TimeoutExpired) as error:
+            raise FetchError("ffmpeg failed: %s" % error)
+        if done.returncode != 0:
+            raise FetchError("ffmpeg failed: %s" % done.stderr.decode("utf-8", "replace").strip()[-300:])
+
+    shape = ["-vn", "-ac", str(channels), "-ar", str(AUDIO_RATE)]
+    # bitexact drops the encoder tag and random stream serial, so a re-run gives the same bytes.
+    encode = ["-c:a", "libvorbis", "-q:a", "4", "-map_metadata", "-1", "-fflags", "+bitexact", "-flags:a", "+bitexact"]
+    with tempfile.TemporaryDirectory(prefix="bind_and_deliver_audio_") as folder:
+        source = os.path.join(folder, "source." + (kind or "bin"))
+        target = os.path.join(folder, "target.ogg")
+        with open(source, "wb") as handle:
+            handle.write(data)
+        chain = ["-af", ",".join(steps)] if steps else []
+        if cross:
+            # ffmpeg's acrossfade emits nothing when a seek leaves its first input a few
+            # samples short, so the window is decoded to PCM and folded over itself here.
+            raw = os.path.join(folder, "window.raw")
+            ffmpeg(["-i", source] + chain + shape + ["-f", "s16le", raw])
+            with open(raw, "rb") as handle:
+                samples = array.array("h", handle.read())
+            if sys.byteorder == "big":
+                samples.byteswap()
+            body = int(round((end - start) * AUDIO_RATE)) * channels
+            fade = min(int(round(cross * AUDIO_RATE)) * channels, len(samples) - body)
+            if body <= 0 or fade <= 0:
+                raise FetchError("recording is too short to loop %.2f-%.2f s" % (start, end))
+            # The stretch after the window fades out over the window's own first seconds,
+            # so the last sample of the result runs straight into its first.
+            looped = samples[:body]
+            for index in range(fade):
+                weight = (index // channels) / float(fade // channels)
+                looped[index] = int(round(samples[body + index] * (1.0 - weight) + samples[index] * weight))
+            if sys.byteorder == "big":
+                looped.byteswap()
+            with open(raw, "wb") as handle:
+                handle.write(looped.tobytes())
+            ffmpeg(["-f", "s16le", "-ar", str(AUDIO_RATE), "-ac", str(channels), "-i", raw] + encode + [target])
+        else:
+            ffmpeg(["-i", source] + chain + shape + encode + [target])
+        if not os.path.isfile(target):
+            raise FetchError("ffmpeg wrote no output")
+        with open(target, "rb") as handle:
+            result = handle.read()
+    return result, "ffmpeg: %s, 44.1 kHz Ogg Vorbis q4" % ", ".join(notes), False
+
+
+MODEL_SOURCES = {"polyhaven": fetch_polyhaven_model, "polypizza": fetch_polypizza_model, "vibeassets": fetch_vibeassets_model,
+                 "kaykit": fetch_kaykit_model, "opengameart": fetch_opengameart_model}
 TEXTURE_SOURCES = {"polyhaven": fetch_polyhaven_texture, "ambientcg": fetch_ambientcg_texture}
+AUDIO_SOURCES = {"bigsoundbank": fetch_bigsoundbank_audio, "freesound": fetch_freesound_audio,
+                 "opengameart": fetch_opengameart_audio, "kenney": fetch_kenney_audio}
+FONT_SOURCES = {"github": fetch_github_font, "github-release": fetch_release_font}
 
 
 # ---------------------------------------------------------------------------
@@ -845,15 +1615,51 @@ def texture_path(name: str, suffix: str) -> str:
     return os.path.join(TEXTURES, name, "%s_%s.jpg" % (os.path.basename(name), suffix))
 
 
+def audio_path(name: str, kind: str) -> str:
+    return os.path.join(AUDIO, "%s.%s" % (name, kind))
+
+
+def local_path(resource: str) -> str:
+    return os.path.join(ROOT, resource.replace("res://", ""))
+
+
+# Everything a download, an archive or a parser can throw at a job.
+JOB_ERRORS = (FetchError, KeyError, IndexError, ValueError, OSError, struct.error, zipfile.BadZipFile)
+
+
+def fall_back(record: dict, old: dict, error: Exception) -> dict:
+    """Result of a failed job: the last good run's files if they are still intact, else a failed slot."""
+    kept = []
+    for entry in (old or {}).get("files", []):
+        try:
+            with open(local_path(entry["path"]), "rb") as handle:
+                intact = hashlib.sha256(handle.read()).hexdigest() == entry["sha256"]
+        except OSError:
+            intact = False
+        if not intact:
+            kept = []
+            break
+        kept.append(entry)
+    if kept and old.get("status") == "ok":
+        result = {key: value for key, value in old.items() if key not in ("cached", "refresh_error")}
+        result["cached"] = True
+        result["refresh_error"] = str(error)
+        return result
+    record["status"] = "failed"
+    record["error"] = str(error)
+    record["files"] = []
+    return record
+
+
 def do_model(job: tuple, previous: dict, force: bool) -> dict:
     name, source, asset_id, folder = job
     path = model_path(name, folder)
     record = {"name": name, "type": "model", "category": folder, "status": "ok"}
+    old = previous.get(name)
     try:
-        old = previous.get(name)
         if not force and old and old.get("source_id") == asset_id and os.path.isfile(path):
             data = open(path, "rb").read()
-            record.update({k: v for k, v in old.items() if k not in ("files", "status")})
+            record.update({k: v for k, v in old.items() if k not in ("files", "status", "refresh_error")})
             record["cached"] = True
         else:
             data, meta = MODEL_SOURCES[source](asset_id)
@@ -865,24 +1671,122 @@ def do_model(job: tuple, previous: dict, force: bool) -> dict:
             # Validate before anything lands on disk.
             glb_summary(data)
             if name in RIGGED_MODELS:
-                glb_rig(data, RIGGED_MODELS[name])
+                rig_report(name, data)
             write_file(path, data)
         record.update(glb_summary(data))
         if name in RIGGED_MODELS:
-            record["rig"] = glb_rig(data, RIGGED_MODELS[name])
+            record.update(rig_report(name, data))
         record["files"] = [file_record(path, data, "glb")]
-    except (FetchError, KeyError, ValueError, OSError) as error:
-        record["status"] = "failed"
-        record["error"] = str(error)
-        record["files"] = []
+    except JOB_ERRORS as error:
+        return fall_back(record, old, error)
     return record
+
+
+def audio_edit(edit: dict) -> dict:
+    """A catalog edit as it is stored in the manifest (JSON has no tuples)."""
+    return {key: list(value) if isinstance(value, tuple) else value for key, value in sorted(edit.items())}
+
+
+def do_audio(job: tuple, previous: dict, force: bool) -> dict:
+    name, source, asset_id, edit = job
+    slot = re.sub(r"_[2-9]$", "", name)
+    record = {"name": name, "type": "audio", "slot": slot, "status": "ok"}
+    old = previous.get("audio/" + name)
+    try:
+        cached = b""
+        if (not force and old and old.get("status") == "ok" and old.get("source_id") == asset_id
+                and old.get("edit") == audio_edit(edit) and old.get("files")
+                and not (old.get("pending_ffmpeg") and FFMPEG)):
+            path = local_path(old["files"][0]["path"])
+            if os.path.isfile(path):
+                cached = open(path, "rb").read()
+        if cached:
+            data = cached
+            record.update({k: v for k, v in old.items() if k not in ("files", "status", "refresh_error")})
+            record["cached"] = True
+            info = audio_info(data)
+        else:
+            data, meta = AUDIO_SOURCES[source](asset_id)
+            record.update(meta)
+            record["edit"] = audio_edit(edit)
+            data, note, pending = process_audio(data, edit)
+            if note:
+                record["note"] = (record["note"] + "; " if record.get("note") else "") + note
+            if pending:
+                record["pending_ffmpeg"] = True
+            # Validate before anything lands on disk.
+            info = audio_info(data)
+            path = audio_path(name, info["format"])
+            write_file(path, data)
+            # One file per slot: drop a take left behind in the other container.
+            for other in ("ogg", "wav"):
+                stale = audio_path(name, other)
+                if other != info["format"] and os.path.isfile(stale):
+                    os.remove(stale)
+                    if os.path.isfile(stale + ".import"):
+                        os.remove(stale + ".import")
+        record.update({key: info[key] for key in ("codec", "channels", "sample_rate", "seconds")})
+        record["files"] = [file_record(path, data, info["format"])]
+    except JOB_ERRORS as error:
+        return fall_back(record, old, error)
+    return record
+
+
+def do_font(job: tuple, previous: dict, force: bool) -> dict:
+    name, licence_name, source, asset_id, licence_id = job
+    record = {"name": name, "type": "font", "status": "ok"}
+    old = previous.get("font/" + name)
+    try:
+        font = licence = b""
+        if not force and old and old.get("status") == "ok" and old.get("source_id") == asset_id and len(old.get("files", [])) == 2:
+            paths = [local_path(entry["path"]) for entry in old["files"]]
+            if all(os.path.isfile(path) for path in paths):
+                font, licence = (open(path, "rb").read() for path in paths)
+        if font:
+            record.update({k: v for k, v in old.items() if k not in ("files", "status", "refresh_error")})
+            record["cached"] = True
+            info = font_info(font)
+            _licence_record(licence, licence_name)
+        else:
+            font, licence, meta = FONT_SOURCES[source](asset_id, licence_id)
+            record.update(meta)
+            # Validate before anything lands on disk.
+            info = font_info(font)
+            if info["variable"]:
+                record["note"] = (record["note"] + "; " if record.get("note") else "") + \
+                    "variable font: no static instance was available under this name"
+            write_file(os.path.join(FONTS, "%s.%s" % (name, info["format"])), font)
+            write_file(os.path.join(FONTS, licence_name + ".txt"), licence)
+        record.update({key: value for key, value in info.items() if key != "format"})
+        record["title"] = ("%s %s" % (info["family"], info["style"])).strip()
+        record["files"] = [file_record(os.path.join(FONTS, "%s.%s" % (name, info["format"])), font, info["format"]),
+                           file_record(os.path.join(FONTS, licence_name + ".txt"), licence, "text")]
+    except JOB_ERRORS as error:
+        return fall_back(record, old, error)
+    return record
+
+
+def prune_audio(previous: dict) -> list:
+    """Deletes sounds an earlier run stored for slots the catalog no longer lists."""
+    wanted = {job[0] for job in AUDIO_CATALOG}
+    removed = []
+    for key, old in previous.items():
+        if not key.startswith("audio/") or old.get("name") in wanted:
+            continue
+        for entry in old.get("files", []):
+            path = local_path(entry["path"])
+            for stale in (path, path + ".import"):
+                if os.path.isfile(stale):
+                    os.remove(stale)
+            removed.append(entry["path"])
+    return removed
 
 
 def do_texture(job: tuple, previous: dict, force: bool) -> dict:
     name, source, asset_id = job
     record = {"name": name, "type": "texture_set", "status": "ok"}
+    old = previous.get(name)
     try:
-        old = previous.get(name)
         cached = {}
         if not force and old and old.get("source_id") == asset_id:
             for entry in old.get("files", []):
@@ -891,7 +1795,7 @@ def do_texture(job: tuple, previous: dict, force: bool) -> dict:
                     cached[entry["map"]] = open(local, "rb").read()
         if cached and len(cached) == len(old.get("files", [])):
             maps = cached
-            record.update({k: v for k, v in old.items() if k not in ("files", "status")})
+            record.update({k: v for k, v in old.items() if k not in ("files", "status", "refresh_error")})
             record["cached"] = True
         else:
             maps, meta = TEXTURE_SOURCES[source](asset_id)
@@ -915,14 +1819,13 @@ def do_texture(job: tuple, previous: dict, force: bool) -> dict:
                 raise FetchError("%s has no %s map" % (asset_id, required))
         record["maps"] = present
         record["files"] = files
-    except (FetchError, KeyError, ValueError, OSError, zipfile.BadZipFile) as error:
-        record["status"] = "failed"
-        record["error"] = str(error)
-        record["files"] = []
+    except JOB_ERRORS as error:
+        return fall_back(record, old, error)
     return record
 
 
 def load_previous() -> dict:
+    """Last manifest by name; sounds and fonts are keyed "audio/<name>" and "font/<name>"."""
     if not os.path.isfile(MANIFEST):
         return {}
     try:
@@ -930,7 +1833,10 @@ def load_previous() -> dict:
             manifest = json.load(handle)
     except (OSError, ValueError):
         return {}
-    return {entry["name"]: entry for entry in manifest.get("models", []) + manifest.get("textures", [])}
+    previous = {entry["name"]: entry for entry in manifest.get("models", []) + manifest.get("textures", [])}
+    previous.update({"audio/" + entry["name"]: entry for entry in manifest.get("audio", [])})
+    previous.update({"font/" + entry["name"]: entry for entry in manifest.get("fonts", [])})
+    return previous
 
 
 def human(size: int) -> str:
@@ -939,7 +1845,7 @@ def human(size: int) -> str:
     return "%.1f KB" % (size / 1024.0)
 
 
-def print_summary(models: list, textures: list) -> None:
+def print_summary(models: list, textures: list, audio: list, fonts: list) -> None:
     print("")
     print("%-22s %-11s %-30s %10s %9s  %s" % ("MODEL", "SOURCE", "TITLE", "SIZE", "TRIS", "FILE"))
     for record in models:
@@ -949,6 +1855,24 @@ def print_summary(models: list, textures: list) -> None:
         entry = record["files"][0]
         print("%-22s %-11s %-30s %10s %9d  %s" % (record["name"], record["source"], record["title"][:30],
                 human(entry["bytes"]), record["triangles"], entry["path"]))
+    print("")
+    print("%-22s %-12s %-34s %10s %8s %3s  %s" % ("SOUND", "SOURCE", "TITLE", "SIZE", "SECONDS", "CH", "FILE"))
+    for record in audio:
+        if record["status"] != "ok":
+            print("%-22s FAILED (the game synthesises this slot): %s" % (record["name"], record.get("error", "")))
+            continue
+        entry = record["files"][0]
+        print("%-22s %-12s %-34s %10s %8.2f %3d  %s" % (record["name"], record["source"], record["title"][:34],
+                human(entry["bytes"]), record["seconds"], record["channels"], entry["path"]))
+    print("")
+    print("%-22s %-28s %10s %7s %-9s %s" % ("FONT", "FAMILY / STYLE", "SIZE", "GLYPHS", "CYRILLIC", "FILES"))
+    for record in fonts:
+        if record["status"] != "ok":
+            print("%-22s FAILED (the game keeps Godot's default font): %s" % (record["name"], record.get("error", "")))
+            continue
+        print("%-22s %-28s %10s %7d %-9s %s" % (record["name"], record["title"][:28], human(record["files"][0]["bytes"]),
+                record["glyphs"], "full" if record["cyrillic"] else "MISSING",
+                ", ".join(entry["path"] for entry in record["files"])))
     print("")
     print("%-22s %-11s %-30s %10s  %s" % ("TEXTURE SET", "SOURCE", "TITLE", "SIZE", "MAPS"))
     for record in textures:
@@ -971,9 +1895,13 @@ def verify_offline() -> int:
         manifest = json.load(handle)
     problems = 0
     checked = 0
-    for record in manifest.get("models", []) + manifest.get("textures", []):
+    counts: dict = {}
+    sections = [manifest.get(key, []) for key in ("models", "textures", "audio", "fonts")]
+    for record in [record for section in sections for record in section]:
+        if record.get("status") != "ok":
+            print("MISSING  %s %s was not downloaded: %s" % (record.get("type", "asset"), record["name"], record.get("error", "")))
         for entry in record.get("files", []):
-            local = os.path.join(ROOT, entry["path"].replace("res://", ""))
+            local = local_path(entry["path"])
             checked += 1
             try:
                 data = open(local, "rb").read()
@@ -982,65 +1910,105 @@ def verify_offline() -> int:
                 if entry["format"] == "glb":
                     glb_summary(data)
                     if record["name"] in RIGGED_MODELS:
-                        record["rig"] = glb_rig(data, RIGGED_MODELS[record["name"]])
+                        record.update(rig_report(record["name"], data))
                         print_rig(record)
+                elif entry["format"] in ("ogg", "wav"):
+                    if audio_info(data)["format"] != entry["format"]:
+                        raise FetchError("not a valid %s" % entry["format"])
+                elif entry["format"] in ("ttf", "otf"):
+                    font_info(data)
+                elif entry["format"] == "text":
+                    _licence_record(data, entry["path"])
                 elif image_format(data) != entry["format"]:
                     raise FetchError("not a valid %s" % entry["format"])
-            except (OSError, FetchError) as error:
+                counts[entry["format"]] = counts.get(entry["format"], 0) + 1
+            except (OSError, FetchError, struct.error, ValueError, IndexError) as error:
                 problems += 1
                 print("BAD  %s: %s" % (entry["path"], error))
-    print("Checked %d files, %d problem(s)." % (checked, problems))
+    print("Checked %d files (%s), %d problem(s)." % (
+        checked, ", ".join("%d %s" % (counts[kind], kind) for kind in sorted(counts)), problems))
     return 1 if problems else 0
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--force", action="store_true", help="re-download files that already exist")
-    parser.add_argument("--verify", action="store_true", help="only re-check local files against the manifest")
+    parser.add_argument("--verify", "--verify-offline", dest="verify", action="store_true",
+                        help="only re-check local files against the manifest; nothing is downloaded")
     args = parser.parse_args()
     if args.verify:
         return verify_offline()
 
     previous = load_previous()
     started = time.time()
+    if FFMPEG is None:
+        print("ffmpeg is not on PATH: sounds are stored as downloaded; ones that need transcoding are skipped.")
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as pool:
         model_jobs = [pool.submit(do_model, job, previous, args.force) for job in MODEL_CATALOG]
         texture_jobs = [pool.submit(do_texture, job, previous, args.force) for job in TEXTURE_CATALOG]
+        audio_jobs = [pool.submit(do_audio, job, previous, args.force) for job in AUDIO_CATALOG]
+        font_jobs = [pool.submit(do_font, job, previous, args.force) for job in FONT_CATALOG]
         models = [job.result() for job in model_jobs]
         textures = [job.result() for job in texture_jobs]
+        audio = [job.result() for job in audio_jobs]
+        fonts = [job.result() for job in font_jobs]
+    pruned = prune_audio(previous)
 
-    failed = [r for r in models + textures if r["status"] != "ok"]
+    everything = models + textures + audio + fonts
+    failed = [r for r in everything if r["status"] != "ok"]
+    stale = [r for r in everything if r.get("refresh_error")]
     model_bytes = sum(f["bytes"] for r in models for f in r["files"])
     texture_bytes = sum(f["bytes"] for r in textures for f in r["files"])
+    audio_bytes = sum(f["bytes"] for r in audio for f in r["files"])
+    font_bytes = sum(f["bytes"] for r in fonts for f in r["files"])
     manifest = {
         "generator": "tools/fetch_assets.py",
         "generated_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "license_summary": "Every asset is CC0 1.0 (public domain dedication). Attribution is not required; authors are listed as a courtesy.",
+        "license_summary": "Every model, texture and sound is CC0 1.0 (public domain dedication). Attribution is not required; "
+                           "authors are listed as a courtesy. Fonts are SIL Open Font License 1.1 and ship with their licence text.",
         "totals": {
             "models": len([r for r in models if r["status"] == "ok"]),
             "texture_sets": len([r for r in textures if r["status"] == "ok"]),
-            "files": sum(len(r["files"]) for r in models + textures),
+            "sounds": len([r for r in audio if r["status"] == "ok"]),
+            "sound_slots": len({r["slot"] for r in audio if r["status"] == "ok"}),
+            "fonts": len([r for r in fonts if r["status"] == "ok"]),
+            "files": sum(len(r["files"]) for r in everything),
             "model_bytes": model_bytes,
             "texture_bytes": texture_bytes,
+            "audio_bytes": audio_bytes,
+            "audio_seconds": round(sum(r.get("seconds", 0.0) for r in audio if r["status"] == "ok"), 2),
+            "font_bytes": font_bytes,
             "triangles": sum(r.get("triangles", 0) for r in models),
             "failed": len(failed),
         },
         "models": models,
         "textures": textures,
+        "audio": audio,
+        "fonts": fonts,
     }
     os.makedirs(ASSETS, exist_ok=True)
     with open(MANIFEST, "w", encoding="utf-8") as handle:
         json.dump(manifest, handle, indent=1, sort_keys=False)
         handle.write("\n")
 
-    print_summary(models, textures)
+    print_summary(models, textures, audio, fonts)
     print("")
-    print("%d models (%s, %d triangles) and %d texture sets (%s) in %.0f s. Manifest: %s" % (
-        manifest["totals"]["models"], human(model_bytes), manifest["totals"]["triangles"],
-        manifest["totals"]["texture_sets"], human(texture_bytes), time.time() - started,
-        os.path.relpath(MANIFEST, ROOT)))
+    print("%d models (%s, %d triangles), %d texture sets (%s), %d sounds for %d slots (%s, %.0f s) and %d fonts (%s) "
+          "in %.0f s. Manifest: %s" % (
+              manifest["totals"]["models"], human(model_bytes), manifest["totals"]["triangles"],
+              manifest["totals"]["texture_sets"], human(texture_bytes),
+              manifest["totals"]["sounds"], manifest["totals"]["sound_slots"], human(audio_bytes),
+              manifest["totals"]["audio_seconds"], manifest["totals"]["fonts"], human(font_bytes),
+              time.time() - started, os.path.relpath(MANIFEST, ROOT)))
+    for path in pruned:
+        print("Removed %s: its slot is no longer in the catalog." % path)
+    for record in stale:
+        print("KEPT %s %s from an earlier run; refreshing it failed: %s" % (record["type"], record["name"], record["refresh_error"]))
     if failed:
-        print("%d asset(s) FAILED; the game falls back to placeholder meshes for those." % len(failed))
+        print("%d asset(s) FAILED; the game falls back to placeholder meshes, synthesised sounds or its default font for those."
+              % len(failed))
+        for record in failed:
+            print("  %s %s: %s" % (record["type"], record["name"], record.get("error", "")))
         return 1
     return 0
 
