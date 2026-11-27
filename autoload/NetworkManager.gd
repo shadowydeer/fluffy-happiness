@@ -93,6 +93,16 @@ func is_peer_ready(id: int) -> bool:
 	return _ready_peers.has(id)
 
 
+## Host: the clients that have built their site and can take in-game RPCs.
+func get_ready_clients() -> Array[int]:
+	var ready: Array[int] = []
+	if mode == Mode.HOST:
+		for id: int in players:
+			if id != 1 and _ready_peers.has(id):
+				ready.append(id)
+	return ready
+
+
 ## This machine's LAN addresses, for the host to read out to friends.
 func get_local_addresses() -> PackedStringArray:
 	var found := PackedStringArray()
