@@ -17,10 +17,15 @@ const ContractManager := preload("res://scripts/ContractManager.gd")
 const PossessionSystem := preload("res://scripts/PossessionSystem.gd")
 const NetSync := preload("res://scripts/NetSync.gd")
 const PauseMenu := preload("res://scripts/PauseMenu.gd")
+const ShopManager := preload("res://scripts/ShopManager.gd")
+const JuiceManager := preload("res://scripts/JuiceManager.gd")
+const DemonArchetypes := preload("res://scripts/DemonArchetypes.gd")
 
 const FOG_COLOR := Color(0.16, 0.20, 0.27)
 const KILL_PLANE_Y := -25.0
-const DEBUG_KEYS := "Test keys:  K stun / wake demon   J cycle AI (lurking > enraged > poltergeist throw)   L cycle bind level 0-3   P summon demon   F1 show on HUD"
+const DEBUG_KEYS := "Test keys:  K stun / wake demon   J cycle AI (lurking > enraged > poltergeist throw)   L cycle bind level 0-3   P summon demon   M next demon archetype   G +$1000 test cash   F1 show on HUD"
+## What the G test key pays into the bank.
+const TEST_CASH := 1000
 
 ## Solo suit colour: 0 orange, 1 teal, 2 olive, 3 purple. Co-op players pick theirs in the lobby.
 @export var suit_variant := 0
@@ -38,6 +43,8 @@ var contracts: ContractManager
 var possession: PossessionSystem
 var net: NetSync
 var pause_menu: PauseMenu
+var shop: ShopManager
+var juice: JuiceManager
 
 
 func _ready() -> void:
@@ -50,6 +57,7 @@ func _ready() -> void:
 	if backdrop:
 		_build_interior_air()
 		_tune_lights(self)
+		SoundManager.start_ambience(self)
 		return
 
 	# A prop's place in this list is its id on the wire: identical on every machine.
@@ -62,10 +70,17 @@ func _ready() -> void:
 	add_child(hud)
 	hud.call(&"bind_player", player)
 
+	# The host says what kind of demon this job is about; a client hears with the first sync.
+	GameState.set_archetype(GameState.pick_archetype())
 	_spawn_demon(0)
 	print(DEBUG_KEYS)
 	_build_interior_air()
 	_tune_lights(self)
+
+	juice = JuiceManager.new()
+	juice.name = "Juice"
+	add_child(juice)
+	juice.setup(self)
 
 	contracts = ContractManager.new()
 	contracts.name = "Contracts"
@@ -82,11 +97,19 @@ func _ready() -> void:
 	add_child(net)
 	net.setup(self)
 
+	shop = ShopManager.new()
+	shop.name = "Shop"
+	add_child(shop)
+	shop.setup(self)
+
 	pause_menu = PauseMenu.new()
 	pause_menu.name = "PauseMenu"
 	add_child(pause_menu)
 	pause_menu.setup(self)
 
+	SoundManager.watch_props(GameState.net_props)
+	SoundManager.start_ambience(self)
+	GameState.archetype_changed.connect(_on_archetype_changed)
 	NetworkManager.player_left.connect(_on_player_left)
 	NetworkManager.announce_ready()
 
@@ -94,6 +117,9 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	if NetworkManager.player_left.is_connected(_on_player_left):
 		NetworkManager.player_left.disconnect(_on_player_left)
+	if GameState.archetype_changed.is_connected(_on_archetype_changed):
+		GameState.archetype_changed.disconnect(_on_archetype_changed)
+	SoundManager.stop_ambience()
 	GameState.net_props = []
 
 
@@ -160,6 +186,8 @@ func respawn_demon(tier: int) -> Node3D:
 	_tune_lights(demon)
 	if is_instance_valid(possession):
 		possession.bind_demon(demon)
+	if is_instance_valid(juice):
+		juice.bind_demon(demon)
 	return demon
 
 
@@ -167,6 +195,8 @@ func _spawn_demon(tier: int) -> void:
 	demon = DemonScene.instantiate() as Node3D
 	demon.name = "Demon"
 	demon.transform = level.demon_spawn
+	# Read by the ragdoll, its skin and its brain as they build themselves.
+	demon.set(&"archetype", GameState.demon_archetype)
 	add_child(demon)
 	var brain := demon.get_node("AI")
 	brain.call(&"setup", level, player)
@@ -202,6 +232,31 @@ func _unhandled_input(event: InputEvent) -> void:
 			brain.call(&"debug_cycle_bind")
 		KEY_P:
 			brain.call(&"debug_summon")
+		KEY_M:
+			cycle_archetype()
+		KEY_G:
+			GameState.add_cash(TEST_CASH)
+			GameState.post_notice("TEST CASH  +$%d" % TEST_CASH)
+
+
+## M test key: swaps the demon on site for the next archetype, awake on the dais. Host only.
+func cycle_archetype() -> void:
+	if not NetworkManager.is_authority() or contracts.phase != ContractManager.Phase.RUNNING:
+		return
+	GameState.set_archetype(DemonArchetypes.next(GameState.demon_archetype))
+	# The old one may have been found, stunned or loaded already: the new one has not.
+	GameState.reset()
+	contracts.bind_demon(respawn_demon(GameState.contracts_completed))
+	GameState.post_notice("DEMON // %s" % DemonArchetypes.title(GameState.demon_archetype))
+
+
+## A client's demon is a mirror: when the host changes what it is mirroring, rebuild it.
+func _on_archetype_changed(kind: int) -> void:
+	if NetworkManager.is_authority() or not is_instance_valid(demon) or not is_instance_valid(contracts):
+		return
+	var built: Variant = demon.get(&"archetype")
+	if built == null or int(built) != kind:
+		contracts.bind_demon(respawn_demon(GameState.contracts_completed))
 
 
 func _physics_process(_delta: float) -> void:
