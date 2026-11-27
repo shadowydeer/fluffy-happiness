@@ -25,6 +25,8 @@ signal grabbed(by: Node, part: int)
 signal released(by: Node)
 signal struggled(strength: float)
 signal impacted(speed: float)
+## Something a player did (a lasso, a shock) that a conscious demon will not let pass.
+signal provoked(by: Node)
 
 enum Part { PELVIS, TORSO, HEAD, UPPER_ARM_L, LOWER_ARM_L, UPPER_ARM_R, LOWER_ARM_R, UPPER_LEG_L, LOWER_LEG_L, UPPER_LEG_R, LOWER_LEG_R }
 enum Pose { LURK, STALK, CHASE, CAST, FREEZE }
@@ -65,9 +67,14 @@ const FALL_FLING := 22.0
 const STUN_DECAY: Array[float] = [2.5, 2.0, 1.5, 1.0]
 ## Struggle strength at bind level 0..3.
 const STRUGGLE: Array[float] = [1.0, 0.6, 0.3, 0.1]
-const DRAG_FORCE_BASE := 540.0
-const DRAG_FORCE_PER_BIND := 120.0
+## Pull available on a stunned segment, and the weight it adds to whoever drags it, at bind level 0..3.
+const DRAG_FORCE: Array[float] = [540.0, 680.0, 840.0, 1000.0]
+const DRAG_CARRY: Array[float] = [44.0, 34.0, 22.0, 9.0]
 const AWAKE_DRAG_FORCE := 70.0
+## How firmly tape holds wrapped limbs in place at bind level 0..3 (see `_bind_drive`).
+const BIND_HOLD: Array[float] = [0.0, 0.45, 0.8, 1.2]
+## Stun points a conscious demon shakes off per second once nothing is shocking it.
+const STUN_BLEED := 14.0
 
 # --- Intent, written by the AI ------------------------------------------------
 var pose: Pose = Pose.LURK
@@ -85,6 +92,10 @@ var is_stunned := false
 var bind_level := 0
 ## Set while the demon is caged: the stun meter stops draining.
 var stun_locked := false
+## Set once the van is sealed on it: no more struggling, it is cargo now.
+var contained := false
+## Multiplies stun dealt to a conscious demon; later contracts bring tougher ones.
+var stun_scale := 1.0
 ## Times the safety net had to rebuild the ragdoll (NaN, runaway speed, stretched joint). Should stay 0.
 var fault_count := 0
 var peak_speed := 0.0
@@ -115,6 +126,8 @@ var _duck := 0.0
 var _duck_left := 0.0
 var _fall_left := 0.0
 var _fall_direction := Vector3.FORWARD
+var _shock_left := 0.0
+var _convulse_left := 0.0
 var _gait := 0.0
 var _support := 1.0
 var _ground_y := 0.0
@@ -240,9 +253,35 @@ func place(xf: Transform3D) -> void:
 
 ## Adds stun; the demon collapses when the meter fills.
 func add_stun(amount: float) -> void:
+	if not is_stunned and amount > 0.0:
+		amount *= stun_scale
 	stun_meter = clampf(stun_meter + amount, 0.0, 100.0)
 	if stun_meter >= 100.0 and not is_stunned:
 		_collapse()
+
+
+## A player did something to it. Awake, the brain answers; out cold, nobody is home.
+func provoke(by: Node) -> void:
+	if by and not is_stunned:
+		provoked.emit(by)
+
+
+## Current through `body`: every limb convulses for as long as this keeps being called.
+func shock(body: RigidBody3D, by: Node = null) -> void:
+	if _shock_left <= 0.0:
+		_convulse_left = 0.0
+	_shock_left = 0.25
+	if _convulse_left <= 0.0:
+		_convulse_left = 0.05
+		for part in range(Part.UPPER_ARM_L, Part.size()):
+			var axis := Vector3(randf_range(-1.0, 1.0), randf_range(-0.4, 0.4), randf_range(-1.0, 1.0)).normalized()
+			_bodies[part].apply_torque_impulse(_bodies[part].global_transform.basis * axis * _inertia[part] * randf_range(3.5, 8.0))
+		if is_instance_valid(body):
+			body.apply_central_impulse(Vector3(randf_range(-1.0, 1.0), randf_range(0.0, 0.6), randf_range(-1.0, 1.0)) * body.mass * 0.35)
+	var visuals := get_node_or_null("Visuals")
+	if visuals and visuals.has_method(&"set_shock"):
+		visuals.call(&"set_shock", 1.0)
+	provoke(by)
 
 
 ## Instant full stun.
@@ -256,6 +295,7 @@ func knock_out() -> void:
 func wake() -> void:
 	stun_meter = 0.0
 	stun_locked = false
+	contained = false
 	if not is_stunned:
 		return
 	is_stunned = false
@@ -319,8 +359,8 @@ func get_grab_tuning(body: RigidBody3D) -> Dictionary:
 	if is_stunned:
 		return {
 			"mass": body.mass * 3.0,
-			"force": DRAG_FORCE_BASE + DRAG_FORCE_PER_BIND * bind_level,
-			"carry": 44.0 - 9.0 * bind_level,
+			"force": DRAG_FORCE[bind_level],
+			"carry": DRAG_CARRY[bind_level],
 		}
 	# Awake, it simply will not be hauled around.
 	return {"mass": body.mass * 0.6, "force": AWAKE_DRAG_FORCE, "carry": 6.0}
@@ -523,10 +563,14 @@ func _physics_process(delta: float) -> void:
 		return
 	_time += delta
 	_thud_left = maxf(0.0, _thud_left - delta)
+	_shock_left = maxf(0.0, _shock_left - delta)
+	_convulse_left -= delta
 	if is_stunned and not stun_locked:
 		stun_meter = maxf(0.0, stun_meter - STUN_DECAY[bind_level] * delta)
 		if stun_meter <= 0.0:
 			wake()
+	elif not is_stunned and _shock_left <= 0.0 and stun_meter > 0.0:
+		stun_meter = maxf(0.0, stun_meter - STUN_BLEED * delta)
 	if is_stunned:
 		_tick_limp(delta)
 	else:
@@ -764,8 +808,10 @@ func _tick_limp(delta: float) -> void:
 			_fall_left = 0.0
 		else:
 			_topple(clampf(_fall_left / FALL_TIME, 0.0, 1.0))
+	if bind_level > 0:
+		_bind_drive()
 	_struggle_left -= delta
-	if _struggle_left <= 0.0:
+	if _struggle_left <= 0.0 and not contained:
 		var strength := STRUGGLE[bind_level] * (1.0 if dragged else 0.25)
 		_struggle_left = randf_range(0.7, 1.5) * (1.0 + bind_level * 0.35) * (1.0 if dragged else 2.4)
 		_thrash(strength)
@@ -781,6 +827,27 @@ func _tick_limp(delta: float) -> void:
 				_bodies[part].apply_central_impulse(hop * PART_MASS[part])
 	else:
 		_snag_time = maxf(0.0, _snag_time - delta * 2.0)
+
+
+## Tape does what tape does: wrapped arms stay by the ribs and (from the second wrap)
+## wrapped legs stay together, firmer with every level, so a bound demon drags like a
+## parcel instead of a spilled bag and the bands on its skin stay where they were put.
+func _bind_drive() -> void:
+	var hold := BIND_HOLD[bind_level]
+	var chest := _bodies[Part.TORSO].global_transform.basis
+	var hips := _bodies[Part.PELVIS].global_transform.basis
+	for i in 2:
+		var upper_arm: int = Part.UPPER_ARM_L if i == 0 else Part.UPPER_ARM_R
+		_steer(_bodies[upper_arm], chest, upper_arm, 6.0, 1.0, hold, 70.0)
+		if bind_level < 2:
+			continue
+		var lower_arm: int = Part.LOWER_ARM_L if i == 0 else Part.LOWER_ARM_R
+		var upper_leg: int = Part.UPPER_LEG_L if i == 0 else Part.UPPER_LEG_R
+		var lower_leg: int = Part.LOWER_LEG_L if i == 0 else Part.LOWER_LEG_R
+		# Forearms folded up across the belly.
+		_steer(_bodies[lower_arm], _bodies[upper_arm].global_transform.basis * Basis(Vector3.RIGHT, 0.6), lower_arm, 6.0, 1.0, hold, 50.0)
+		_steer(_bodies[upper_leg], hips, upper_leg, 6.0, 1.0, hold, 110.0)
+		_steer(_bodies[lower_leg], _bodies[upper_leg].global_transform.basis, lower_leg, 6.0, 1.0, hold, 80.0)
 
 
 ## One burst of flailing: kicked legs, thrown arms and a sideways tug on the core.
