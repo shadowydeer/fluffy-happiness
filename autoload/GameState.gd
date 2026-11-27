@@ -3,7 +3,9 @@ extends Node
 ##
 ## Owns the shared physics-layer bits, node groups, the contract objective chain
 ## and the crew's career: contract number, bank balance and the last payout. It
-## outlives the level, so the Stage 5 shop can read and spend `bank_cash`.
+## outlives the level, so the field shop can read and spend `bank_cash`, and it keeps
+## what the shop sold: gadget upgrade levels, the crew's salt grenades and which demon
+## archetype the current contract is about. It also owns `user://settings.cfg`.
 ## The HUD listens to the signals here; world objects report progress through
 ## `complete_step()` and take it back with `revoke_step()` (a demon that wakes up
 ## is no longer subdued).
@@ -16,6 +18,12 @@ signal notice_posted(text: String)
 signal contract_completed
 signal contract_started(number: int)
 signal bank_changed(total: int)
+## An upgrade level, the salt grenade count or the revive boost changed.
+signal loadout_changed
+## The contract is now about a different kind of demon (see DemonArchetypes).
+signal archetype_changed(kind: int)
+
+const DemonArchetypes := preload("res://scripts/DemonArchetypes.gd")
 
 # Physics layer bits (names mirrored in project.godot -> layer_names).
 const LAYER_WORLD := 1
@@ -53,6 +61,17 @@ const STEPS: Array[Dictionary] = [
 ## Things worth noting on the way that the contract does not depend on.
 const MILESTONES: Array[StringName] = [STEP_OPEN_VAN, STEP_ENTER_HOUSE]
 
+const SETTINGS_PATH := "user://settings.cfg"
+
+## Field shop upgrades, by id. Each goes from level 0 (stock) to UPGRADE_MAX.
+const UPGRADE_TASER := &"taser"
+const UPGRADE_LASSO := &"lasso"
+const UPGRADE_TAPE := &"tape"
+const UPGRADE_MAX := 2
+## Salt grenades the crew can carry, and how many every contract starts with at least.
+const SALT_MAX := 4
+const SALT_STARTER := 1
+
 ## Network references to bodies: 0 nothing, 1.. loose props, then demon limbs, then players by seat.
 const REF_DEMON := 1000
 const REF_PLAYER := 2000
@@ -64,6 +83,20 @@ var bank_cash := 0
 ## Line items of the most recent payout (see ContractManager.compute_payout).
 var last_payout: Dictionary = {}
 
+## Gadget upgrade levels bought at the field shop, shared by the whole crew.
+var upgrades: Dictionary = {UPGRADE_TASER: 0, UPGRADE_LASSO: 0, UPGRADE_TAPE: 0}
+## Salt grenades left in the crew's pool (slot 4).
+var salt_charges := SALT_STARTER
+## Co-op: an auto-injector was bought for this contract, so revives are quicker.
+var revive_boost := false
+## Which demon this contract is about: a DemonArchetypes.Type.
+var demon_archetype: int = DemonArchetypes.Type.BRUTE
+## Pins the archetype of every contract (the M test key and the regression tools); -1 lets it cycle.
+var archetype_lock := -1
+
+## The site's JuiceManager (camera shake, dust, sparks) and ShopManager; null in the menu.
+var juice: Node
+var shop: Node
 ## The site's NetSync while a co-op contract is running; null in solo and in the menu.
 var net: Node
 ## The site's PossessionSystem.
@@ -85,6 +118,13 @@ func reset() -> void:
 	_milestones.clear()
 	_task_override = ""
 	_alert = ""
+	if is_authority():
+		# Every contract starts with at least the free starter grenade, and no borrowed adrenaline.
+		var changed := revive_boost or salt_charges < SALT_STARTER
+		salt_charges = maxi(salt_charges, SALT_STARTER)
+		revive_boost = false
+		if changed:
+			loadout_changed.emit()
 	refresh()
 
 
@@ -113,6 +153,101 @@ func add_cash(amount: int) -> int:
 	bank_cash += amount
 	bank_changed.emit(bank_cash)
 	return bank_cash
+
+
+## Takes `amount` out of the bank if it is there. Host only, like every other mutator.
+func spend_cash(amount: int) -> bool:
+	if not is_authority() or amount < 0 or amount > bank_cash:
+		return false
+	bank_cash -= amount
+	bank_changed.emit(bank_cash)
+	return true
+
+
+# --- Field shop loadout ----------------------------------------------------------------
+
+func get_upgrade(id: StringName) -> int:
+	return int(upgrades.get(id, 0))
+
+
+func set_upgrade(id: StringName, level: int) -> void:
+	if not is_authority() or not upgrades.has(id):
+		return
+	level = clampi(level, 0, UPGRADE_MAX)
+	if level != int(upgrades[id]):
+		upgrades[id] = level
+		loadout_changed.emit()
+
+
+## Adds grenades to the crew's pool (capped at SALT_MAX). Returns the new count.
+func add_salt(count: int) -> int:
+	if is_authority():
+		var total := clampi(salt_charges + count, 0, SALT_MAX)
+		if total != salt_charges:
+			salt_charges = total
+			loadout_changed.emit()
+	return salt_charges
+
+
+## Takes one grenade out of the pool; false when it is empty.
+func use_salt() -> bool:
+	if not is_authority() or salt_charges <= 0:
+		return false
+	salt_charges -= 1
+	loadout_changed.emit()
+	return true
+
+
+func set_revive_boost(active: bool) -> void:
+	if is_authority() and active != revive_boost:
+		revive_boost = active
+		loadout_changed.emit()
+
+
+## Host: the kind of demon the contract is about. Every peer hears `archetype_changed`.
+func set_archetype(kind: int) -> void:
+	if not is_authority() or kind == demon_archetype:
+		return
+	demon_archetype = kind
+	archetype_changed.emit(kind)
+
+
+## The archetype a contract should open with: the pinned one, else the cycle by career length.
+func pick_archetype() -> int:
+	return archetype_lock if archetype_lock >= 0 else DemonArchetypes.for_contract(contracts_completed)
+
+
+# --- Juice ---------------------------------------------------------------------------
+
+## A world effect with its camera shake (see JuiceManager), here and on every client.
+## Only the host's call does anything in co-op: clients get theirs over the wire.
+func fx(kind: StringName, at: Vector3, strength: float = 1.0) -> void:
+	if is_instance_valid(juice):
+		juice.call(&"emit_fx", kind, at, strength)
+
+
+## Shakes this machine's camera by up to `amount` (0..1), fading to nothing `radius` metres from `at`.
+func shake_at(at: Vector3, amount: float, radius: float = 14.0) -> void:
+	if is_instance_valid(juice):
+		juice.call(&"shake_at", at, amount, radius)
+
+
+# --- Settings --------------------------------------------------------------------------
+
+## One value from user://settings.cfg (audio volumes, language).
+func get_setting(section: String, key: String, default: Variant = null) -> Variant:
+	var file := ConfigFile.new()
+	if file.load(SETTINGS_PATH) != OK:
+		return default
+	return file.get_value(section, key, default)
+
+
+## Writes one value, keeping every other section of the file as it was.
+func set_setting(section: String, key: String, value: Variant) -> void:
+	var file := ConfigFile.new()
+	file.load(SETTINGS_PATH)
+	file.set_value(section, key, value)
+	file.save(SETTINGS_PATH)
 
 
 ## Re-emits the current objective so late listeners (the HUD) can sync.
@@ -282,7 +417,9 @@ func get_sync() -> Array:
 	var marks: Array[String] = []
 	for id: StringName in _milestones:
 		marks.append(String(id))
-	return [contract_number, contracts_completed, bank_cash, done, marks, _task_override, _alert]
+	return [contract_number, contracts_completed, bank_cash, done, marks, _task_override, _alert,
+			demon_archetype, get_upgrade(UPGRADE_TASER), get_upgrade(UPGRADE_LASSO), get_upgrade(UPGRADE_TAPE),
+			salt_charges, revive_boost]
 
 
 func apply_sync(data: Array) -> void:
@@ -304,9 +441,26 @@ func apply_sync(data: Array) -> void:
 	if cash != bank_cash:
 		bank_cash = cash
 		bank_changed.emit(bank_cash)
+	if data.size() >= 13:
+		_apply_loadout(data)
 	if started:
 		contract_started.emit(contract_number)
 	refresh()
+
+
+func _apply_loadout(data: Array) -> void:
+	var kind := int(data[7])
+	if kind != demon_archetype:
+		demon_archetype = kind
+		archetype_changed.emit(kind)
+	var gear := {UPGRADE_TASER: int(data[8]), UPGRADE_LASSO: int(data[9]), UPGRADE_TAPE: int(data[10])}
+	var salt := int(data[11])
+	var boost := bool(data[12])
+	if gear != upgrades or salt != salt_charges or boost != revive_boost:
+		upgrades = gear
+		salt_charges = salt
+		revive_boost = boost
+		loadout_changed.emit()
 
 
 func _task_for(id: StringName) -> String:
