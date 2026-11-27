@@ -63,8 +63,21 @@ var player_spawn := Transform3D(Basis.IDENTITY, Vector3(1.2, 0.1, 7.5))
 var van: ExtractionVan
 var front_doors: Array[HingedDoor] = []
 var interior_doors: Array[HingedDoor] = []
-## Where Main parks the idle crew: stood around the back of the van.
-var squad_spots: Array[Transform3D] = []
+## Where each of up to four exorcists starts a contract, by seat: side by side at the kerb,
+## behind the van. Solo uses the first.
+var crew_spawns: Array[Transform3D] = [
+	Transform3D(Basis.IDENTITY, Vector3(1.2, 0.1, 7.5)),
+	Transform3D(Basis.IDENTITY, Vector3(-0.3, 0.1, 7.5)),
+	Transform3D(Basis.IDENTITY, Vector3(1.2, 0.1, 9.1)),
+	Transform3D(Basis.IDENTITY, Vector3(-0.3, 0.1, 9.1)),
+]
+## Where the demon wakes: on the summoning circle, facing the hallway doors.
+var demon_spawn := Transform3D(Basis(Vector3.UP, PI), DAIS_CENTER + Vector3.UP * DAIS_HEIGHT)
+## Waypoint graph the demon steers by: room centres plus both sides of every doorway.
+var nav_points := PackedVector3Array()
+var nav_links: Array[Vector2i] = []
+## Indices into `nav_points` where it likes to lurk.
+var lurk_nodes := PackedInt32Array()
 var prop_count := 0
 
 var _rng := RandomNumberGenerator.new()
@@ -105,6 +118,7 @@ func build() -> void:
 	_build_van()
 	_build_van_area()
 	_build_triggers()
+	_build_navigation()
 	_spawn_props()
 
 
@@ -1375,7 +1389,7 @@ func _build_van() -> void:
 	add_child(van)
 
 
-## Work site round the back of the van: tripod floodlight, and where the crew stands.
+## Work site round the back of the van: the tripod floodlight and its cable.
 func _build_van_area() -> void:
 	var tripod_at := Vector3(8.3, 0.0, -0.9)
 	var aim := Vector3(4.6, 0.9, 1.6)
@@ -1413,19 +1427,15 @@ func _build_van_area() -> void:
 	for i in cable_points.size() - 1:
 		_rod(_decor, cable_points[i], cable_points[i + 1], 0.014, cable)
 
-	squad_spots = [
-		Transform3D(Basis(Vector3.UP, deg_to_rad(250.0)), Vector3(7.0, 0.0, -0.4)),
-		Transform3D(Basis(Vector3.UP, deg_to_rad(100.0)), Vector3(1.5, 0.0, 4.6)),
-		Transform3D(Basis(Vector3.UP, deg_to_rad(165.0)), Vector3(6.3, 0.0, 8.9)),
-	]
-
 
 func _build_triggers() -> void:
 	_trigger(GameState.STEP_ENTER_HOUSE, HOUSE_WEST + 0.4, HALL_WEST - 0.4, FLOOR_Y, FLOOR_Y + 2.6, RITUAL_SPLIT + 0.4, HOUSE_SOUTH - 0.7)
-	_trigger(GameState.STEP_FIND_RITUAL, HOUSE_WEST + 0.4, HOUSE_EAST - 0.4, FLOOR_Y, FLOOR_Y + 2.6, HOUSE_NORTH + 0.4, RITUAL_SPLIT - 0.7)
+	_trigger(&"ritual_room", HOUSE_WEST + 0.4, HOUSE_EAST - 0.4, FLOOR_Y, FLOOR_Y + 2.6, HOUSE_NORTH + 0.4, RITUAL_SPLIT - 0.7,
+			"The ritual room. Something in here is breathing.")
 
 
-func _trigger(step: StringName, x0: float, x1: float, y0: float, y1: float, z0: float, z1: float) -> void:
+## Completes objective `step` when a player walks in; with `notice` set it posts that line once instead.
+func _trigger(step: StringName, x0: float, x1: float, y0: float, y1: float, z0: float, z1: float, notice: String = "") -> void:
 	var area := Area3D.new()
 	area.name = "Trigger_%s" % step
 	area.collision_layer = 0
@@ -1439,8 +1449,59 @@ func _trigger(step: StringName, x0: float, x1: float, y0: float, y1: float, z0: 
 	area.position = Vector3(x0 + x1, y0 + y1, z0 + z1) * 0.5
 	add_child(area)
 	area.body_entered.connect(func(body: Node3D) -> void:
-		if body.is_in_group(GameState.GROUP_PLAYER):
-			GameState.complete_step(step))
+		if not body.is_in_group(GameState.GROUP_PLAYER):
+			return
+		if notice.is_empty():
+			GameState.complete_step(step)
+		elif body.get(&"is_local") and not area.has_meta(&"fired"):
+			# Flavour text is for whoever walked in, on their own screen.
+			area.set_meta(&"fired", true)
+			GameState.post_notice_for(body, notice))
+
+
+## Lays out the demon's waypoint graph. Doorways get a node on each side so a
+## path never cuts a corner through a frame.
+func _build_navigation() -> void:
+	var fy := FLOOR_Y
+	var study_y := FLOOR_Y + STUDY_RAISE
+	var dais := _nav(DAIS_CENTER + Vector3.UP * DAIS_HEIGHT)
+	var ritual_west := _nav(Vector3(-6.2, fy, -18.6))
+	var ritual_east := _nav(Vector3(6.6, fy, -18.6))
+	var living_arch_north := _nav(Vector3(-6.2, fy, RITUAL_SPLIT - 1.0))
+	var living_arch_south := _nav(Vector3(-6.2, fy, RITUAL_SPLIT + 1.0))
+	var ritual_door_north := _nav(Vector3(2.0, fy, RITUAL_SPLIT - 1.0))
+	var ritual_door_south := _nav(Vector3(2.0, fy, RITUAL_SPLIT + 1.0))
+	var living := _nav(Vector3(-5.0, fy, -9.5))
+	var living_south := _nav(Vector3(FRONT_DOOR_X, fy, -6.4))
+	var hall_door_west := _nav(Vector3(HALL_WEST - 1.0, fy, -9.5))
+	var hall_door_east := _nav(Vector3(HALL_WEST + 1.0, fy, -9.5))
+	var hall := _nav(Vector3(2.0, fy, -9.5))
+	var hall_north := _nav(Vector3(2.0, fy, -12.6))
+	var hall_south := _nav(Vector3(2.0, fy, -6.0))
+	var stairs_foot := _nav(Vector3(2.5, fy, -11.5))
+	var study_door := _nav(Vector3(HALL_EAST + 1.0, study_y, -11.5))
+	var study := _nav(Vector3(7.0, study_y, -9.5))
+	var porch := _nav(Vector3(FRONT_DOOR_X, fy, -2.6))
+	var front_path := _nav(Vector3(FRONT_DOOR_X, 0.0, 0.6))
+	var yard := _nav(Vector3(1.0, 0.0, 1.5))
+	var ramp_foot := _nav(Vector3(VAN_POSITION.x, 0.0, -1.0))
+	for pair: Array in [
+		[dais, ritual_west], [dais, ritual_east], [dais, ritual_door_north], [dais, living_arch_north],
+		[ritual_west, living_arch_north], [ritual_west, ritual_door_north], [ritual_east, ritual_door_north],
+		[living_arch_north, living_arch_south], [living_arch_south, living],
+		[ritual_door_north, ritual_door_south], [ritual_door_south, hall_north],
+		[hall_north, hall], [hall_north, stairs_foot], [hall, stairs_foot], [hall, hall_south],
+		[hall, hall_door_east], [hall_door_east, hall_door_west], [hall_door_west, living],
+		[stairs_foot, study_door], [study_door, study],
+		[living, living_south], [living_south, porch], [porch, front_path], [front_path, yard], [yard, ramp_foot],
+	]:
+		nav_links.append(Vector2i(int(pair[0]), int(pair[1])))
+	lurk_nodes = PackedInt32Array([dais, ritual_west, ritual_east, living_arch_north, ritual_door_north])
+
+
+func _nav(at: Vector3) -> int:
+	nav_points.append(at)
+	return nav_points.size() - 1
 
 
 func _spawn_props() -> void:
@@ -1589,8 +1650,58 @@ func _prop(kind: StringName, at: Vector3, yaw_degrees: float = 0.0, tilt_degrees
 	prop.position = at + Vector3.UP * lift
 	prop.rotation = Vector3(deg_to_rad(tilt_degrees.x), deg_to_rad(yaw_degrees), deg_to_rad(tilt_degrees.z))
 	_props.add_child(prop, true)
+	prop.set_meta(&"spawn_transform", prop.transform)
 	prop_count += 1
 	return prop
+
+
+## Puts every loose prop back where the level first dropped it, at rest.
+func reset_props() -> void:
+	for child in _props.get_children():
+		var prop := child as RigidBody3D
+		if prop == null or not prop.has_meta(&"spawn_transform"):
+			continue
+		var home: Transform3D = _props.global_transform * (prop.get_meta(&"spawn_transform") as Transform3D)
+		prop.linear_velocity = Vector3.ZERO
+		prop.angular_velocity = Vector3.ZERO
+		prop.global_transform = home
+		PhysicsServer3D.body_set_state(prop.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, home)
+		PhysicsServer3D.body_set_state(prop.get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, Vector3.ZERO)
+		PhysicsServer3D.body_set_state(prop.get_rid(), PhysicsServer3D.BODY_STATE_ANGULAR_VELOCITY, Vector3.ZERO)
+		prop.sleeping = false
+
+
+## Shuts the house up again and breaks the seal on the van.
+func reset_doors() -> void:
+	for door in front_doors:
+		door.set_open(false)
+	for door in interior_doors:
+		door.set_open(false)
+	van.release()
+
+
+## Where the exorcist in `seat` (0-3) starts.
+func get_spawn(seat: int) -> Transform3D:
+	return crew_spawns[posmod(seat, crew_spawns.size())]
+
+
+## Every door that opens, in a fixed order: the house's, then the van's two.
+func get_doors() -> Array[HingedDoor]:
+	var doors: Array[HingedDoor] = []
+	doors.append_array(front_doors)
+	doors.append_array(interior_doors)
+	doors.append(van.left_door)
+	doors.append(van.right_door)
+	return doors
+
+
+## Every loose prop the level spawned.
+func get_props() -> Array[RigidBody3D]:
+	var props: Array[RigidBody3D] = []
+	for child in _props.get_children():
+		if child is RigidBody3D:
+			props.append(child as RigidBody3D)
+	return props
 
 
 # =============================================================================

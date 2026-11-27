@@ -213,7 +213,7 @@ static func _body(display_name: String, body_mass: float, friction: float, bounc
 	surface.bounce = bounce
 	body.physics_material_override = surface
 	body.collision_layer = GameState.LAYER_PROP
-	body.collision_mask = GameState.LAYER_WORLD | GameState.LAYER_PLAYER | GameState.LAYER_PROP | GameState.LAYER_INTERACT
+	body.collision_mask = GameState.LAYER_WORLD | GameState.LAYER_PLAYER | GameState.LAYER_PROP | GameState.LAYER_INTERACT | GameState.LAYER_DEMON
 	body.linear_damp = 0.05
 	body.angular_damp = angular_damping
 	# Small, fast things are the ones that would tunnel through a wall when thrown.

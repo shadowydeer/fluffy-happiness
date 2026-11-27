@@ -25,6 +25,8 @@ const LIMIT_RETURN_RATE := 9.0   # 1/s: how hard an over-swung leaf is steered b
 @export var noun := "door"
 
 var is_open := false
+## A locked leaf ignores F and stays shut (the sealed extraction van).
+var locked := false
 ## Optional second leaf that opens and closes together with this one.
 var partner: RigidBody3D
 
@@ -58,7 +60,7 @@ func configure(width: float, height: float, thickness: float, door_mass: float, 
 func _ready() -> void:
 	collision_layer = GameState.LAYER_INTERACT
 	# Deliberately blind to the world layer: the hinge keeps the leaf in its frame.
-	collision_mask = GameState.LAYER_PLAYER | GameState.LAYER_PROP
+	collision_mask = GameState.LAYER_PLAYER | GameState.LAYER_PROP | GameState.LAYER_DEMON
 	can_sleep = false
 	angular_damp = 0.4
 	_closed_local = transform.basis.orthonormalized()
@@ -79,15 +81,38 @@ func hinge_to(anchor: PhysicsBody3D) -> void:
 
 
 func interact(_by: Node = null) -> void:
+	if locked:
+		GameState.post_notice("Sealed for transport")
+		return
 	set_open(not is_open)
 
 
 func get_prompt() -> String:
+	if locked:
+		return "Sealed %s" % noun
 	return ("Close %s" if is_open else "Open %s") % noun
 
 
+## Bolts the leaf shut: it stops being a swinging body and rides its parent rigidly.
+func lock() -> void:
+	locked = true
+	is_open = false
+	_latched = true
+	freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
+	freeze = true
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+	transform = Transform3D(_closed_local, position)
+
+
+func unlock() -> void:
+	locked = false
+	freeze = false
+	sleeping = false
+
+
 func set_open(open: bool, sync_partner: bool = true) -> void:
-	if is_open == open:
+	if is_open == open or locked:
 		return
 	is_open = open
 	if open:

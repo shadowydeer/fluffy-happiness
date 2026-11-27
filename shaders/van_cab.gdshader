@@ -23,10 +23,13 @@ void vertex() {
 	world_normal = normalize(mat3(MODEL_MATRIX) * NORMAL);
 }
 
-vec3 triplanar(sampler2D map, vec3 p, vec3 n) {
+// A macro rather than a function: one function may not sample textures whose
+// filter or hint settings differ.
+#define TRIPLANAR(map, p, w) (texture(map, (p).zy).rgb * (w).x + texture(map, (p).xz).rgb * (w).y + texture(map, (p).xy).rgb * (w).z)
+
+vec3 triplanar_weights(vec3 n) {
 	vec3 w = pow(abs(n), vec3(4.0));
-	w /= (w.x + w.y + w.z);
-	return texture(map, p.zy).rgb * w.x + texture(map, p.xz).rgb * w.y + texture(map, p.xy).rgb * w.z;
+	return w / (w.x + w.y + w.z);
 }
 
 void fragment() {
@@ -37,9 +40,12 @@ void fragment() {
 	float painted = smoothstep(0.22, 0.4, saturation) * smoothstep(0.1, 0.25, high);
 
 	vec3 n = normalize(world_normal);
-	vec3 paint = triplanar(paint_albedo, world_position * paint_scale, n) * paint_tint;
-	float paint_rough = triplanar(paint_roughness, world_position * paint_scale, n).r * paint_roughness_scale;
-	float dirt = triplanar(grime, world_position * 0.3, n).r;
+	vec3 w = triplanar_weights(n);
+	vec3 paint_p = world_position * paint_scale;
+	vec3 grime_p = world_position * 0.3;
+	vec3 paint = TRIPLANAR(paint_albedo, paint_p, w) * paint_tint;
+	float paint_rough = TRIPLANAR(paint_roughness, paint_p, w).r * paint_roughness_scale;
+	float dirt = TRIPLANAR(grime, grime_p, w).r;
 	// Grime gathers low on the body.
 	float splash = smoothstep(1.3, 0.2, world_position.y);
 	vec3 trim = base * mix(0.5, 1.0, dirt) * mix(1.0, 0.7, splash);
