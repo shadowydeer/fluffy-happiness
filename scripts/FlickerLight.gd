@@ -2,6 +2,11 @@ extends Node
 ## Add as a child of any Light3D to make it sputter like a failing bulb, a
 ## candle or a pulsing sigil. Optionally drives an emissive material in sync so
 ## the bulb mesh dims with the light.
+##
+## Every flicker also joins `GROUP`, so the demon can haunt it: `haunt_target`
+## (0..1) mixes in a hard electrical stutter that eases back out when released.
+
+const GROUP := &"haunt_lights"
 
 @export var base_energy := 2.0
 ## Share of the energy that wobbles with the noise (0 = steady, 1 = wild).
@@ -13,19 +18,29 @@ extends Node
 
 var glow_material: StandardMaterial3D
 var glow_energy := 3.0
+## Set by the demon while it is close; 0 leaves the light alone.
+var haunt_target := 0.0
 
 var _light: Light3D
 var _noise := FastNoiseLite.new()
 var _time := 0.0
 var _dropout_left := 0.0
+var _haunt := 0.0
+var _haunt_clock := 0.0
 
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	_light = get_parent() as Light3D
 	_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
 	_noise.frequency = 0.35
 	_noise.seed = randi()
 	_time = randf() * 100.0
+
+
+## Current haunt strength (0..1) after smoothing.
+func get_haunt() -> float:
+	return _haunt
 
 
 func _process(delta: float) -> void:
@@ -40,6 +55,15 @@ func _process(delta: float) -> void:
 		level *= dropout_floor if fmod(_time * 5.0, 1.0) < 0.7 else 0.6
 	elif dropout_rate > 0.0 and randf() < dropout_rate * delta:
 		_dropout_left = randf_range(0.06, 0.35)
+
+	# Haunting bites quickly and lets go slowly.
+	_haunt = move_toward(_haunt, haunt_target, delta * (3.5 if haunt_target > _haunt else 0.9))
+	if _haunt > 0.001:
+		_haunt_clock += delta
+		var gate := _noise.get_noise_1d(_haunt_clock * 26.0 + 300.0)
+		var surge := 1.25 + 0.25 * _noise.get_noise_1d(_haunt_clock * 60.0)
+		var haunted := 0.04 if gate < -0.08 else surge
+		level *= lerpf(1.0, haunted, _haunt)
 
 	if _light:
 		_light.light_energy = base_energy * level

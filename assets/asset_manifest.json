@@ -1,13 +1,13 @@
 {
  "generator": "tools/fetch_assets.py",
- "generated_utc": "2026-11-26T12:29:05Z",
+ "generated_utc": "2026-11-26T15:15:00Z",
  "license_summary": "Every asset is CC0 1.0 (public domain dedication). Attribution is not required; authors are listed as a courtesy.",
  "totals": {
   "models": 81,
-  "texture_sets": 24,
-  "files": 175,
+  "texture_sets": 26,
+  "files": 182,
   "model_bytes": 163116456,
-  "texture_bytes": 60717235,
+  "texture_bytes": 65805173,
   "triangles": 1184754,
   "failed": 0
  },
@@ -4274,6 +4274,109 @@
      "format": "jpeg",
      "verified": true,
      "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "demon/charred_skin",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "bark_willow_02",
+   "source_page": "https://polyhaven.com/a/bark_willow_02",
+   "title": "Bark Willow 02",
+   "author": "Charlotte Baglioni",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_willow_02/bark_willow_02_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_willow_02/bark_willow_02_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_willow_02/bark_willow_02_rough_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_willow_02/bark_willow_02_ao_1k.jpg"
+   ],
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness",
+    "ao"
+   ],
+   "files": [
+    {
+     "path": "res://assets/textures/demon/charred_skin/charred_skin_albedo.jpg",
+     "bytes": 998966,
+     "sha256": "95e1380566834aab220bd8ea9a5287f3bfff46910c18017fcb46ebbbe832024f",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/demon/charred_skin/charred_skin_normal.jpg",
+     "bytes": 1358916,
+     "sha256": "7d6f905fe7225d96741d191f6ee61c0681603570d28f14e7678df6a3019bc48d",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/demon/charred_skin/charred_skin_roughness.jpg",
+     "bytes": 498100,
+     "sha256": "b9d690f5a5fc411b89c6301273ac03ab0a5910c8a16a96839df223aff4bf794d",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
+    },
+    {
+     "path": "res://assets/textures/demon/charred_skin/charred_skin_ao.jpg",
+     "bytes": 979197,
+     "sha256": "7fdfd01ee8c13f7c33c640254a6932258b13bc422b658f13625f11f4851df971",
+     "format": "jpeg",
+     "verified": true,
+     "map": "ao"
+    }
+   ]
+  },
+  {
+   "name": "demon/cracked_bone",
+   "type": "texture_set",
+   "status": "ok",
+   "source": "ambientCG",
+   "source_id": "Ivory001B",
+   "source_page": "https://ambientcg.com/view?id=Ivory001B",
+   "title": "Ivory 001 B",
+   "author": "ambientCG (Lennart Demes)",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://ambientcg.com/get?file=Ivory001B_1K-JPG.zip"
+   ],
+   "note": "maps extracted from the 1K-JPG zip",
+   "maps": [
+    "albedo",
+    "normal",
+    "roughness"
+   ],
+   "files": [
+    {
+     "path": "res://assets/textures/demon/cracked_bone/cracked_bone_albedo.jpg",
+     "bytes": 334739,
+     "sha256": "d0302a48f285a884945f48c3a5c69d79315b8a44f19ac2b50d7057694dd0873a",
+     "format": "jpeg",
+     "verified": true,
+     "map": "albedo"
+    },
+    {
+     "path": "res://assets/textures/demon/cracked_bone/cracked_bone_normal.jpg",
+     "bytes": 474781,
+     "sha256": "8c138e7e996aaacc25efb08f361cd65e02bbeb4b433f5dab619f2bba237f6143",
+     "format": "jpeg",
+     "verified": true,
+     "map": "normal"
+    },
+    {
+     "path": "res://assets/textures/demon/cracked_bone/cracked_bone_roughness.jpg",
+     "bytes": 443239,
+     "sha256": "fe4a76c5e4ae7aa8183e62134f9078ee0b2bdc7f32b70cb7f9d3f49fef61cd1f",
+     "format": "jpeg",
+     "verified": true,
+     "map": "roughness"
     }
    ]
   }

@@ -65,6 +65,13 @@ var front_doors: Array[HingedDoor] = []
 var interior_doors: Array[HingedDoor] = []
 ## Where Main parks the idle crew: stood around the back of the van.
 var squad_spots: Array[Transform3D] = []
+## Where the demon wakes: on the summoning circle, facing the hallway doors.
+var demon_spawn := Transform3D(Basis(Vector3.UP, PI), DAIS_CENTER + Vector3.UP * DAIS_HEIGHT)
+## Waypoint graph the demon steers by: room centres plus both sides of every doorway.
+var nav_points := PackedVector3Array()
+var nav_links: Array[Vector2i] = []
+## Indices into `nav_points` where it likes to lurk.
+var lurk_nodes := PackedInt32Array()
 var prop_count := 0
 
 var _rng := RandomNumberGenerator.new()
@@ -105,6 +112,7 @@ func build() -> void:
 	_build_van()
 	_build_van_area()
 	_build_triggers()
+	_build_navigation()
 	_spawn_props()
 
 
@@ -1422,10 +1430,12 @@ func _build_van_area() -> void:
 
 func _build_triggers() -> void:
 	_trigger(GameState.STEP_ENTER_HOUSE, HOUSE_WEST + 0.4, HALL_WEST - 0.4, FLOOR_Y, FLOOR_Y + 2.6, RITUAL_SPLIT + 0.4, HOUSE_SOUTH - 0.7)
-	_trigger(GameState.STEP_FIND_RITUAL, HOUSE_WEST + 0.4, HOUSE_EAST - 0.4, FLOOR_Y, FLOOR_Y + 2.6, HOUSE_NORTH + 0.4, RITUAL_SPLIT - 0.7)
+	_trigger(&"ritual_room", HOUSE_WEST + 0.4, HOUSE_EAST - 0.4, FLOOR_Y, FLOOR_Y + 2.6, HOUSE_NORTH + 0.4, RITUAL_SPLIT - 0.7,
+			"The ritual room. Something in here is breathing.")
 
 
-func _trigger(step: StringName, x0: float, x1: float, y0: float, y1: float, z0: float, z1: float) -> void:
+## Completes objective `step` when a player walks in; with `notice` set it posts that line once instead.
+func _trigger(step: StringName, x0: float, x1: float, y0: float, y1: float, z0: float, z1: float, notice: String = "") -> void:
 	var area := Area3D.new()
 	area.name = "Trigger_%s" % step
 	area.collision_layer = 0
@@ -1439,8 +1449,58 @@ func _trigger(step: StringName, x0: float, x1: float, y0: float, y1: float, z0: 
 	area.position = Vector3(x0 + x1, y0 + y1, z0 + z1) * 0.5
 	add_child(area)
 	area.body_entered.connect(func(body: Node3D) -> void:
-		if body.is_in_group(GameState.GROUP_PLAYER):
-			GameState.complete_step(step))
+		if not body.is_in_group(GameState.GROUP_PLAYER):
+			return
+		if notice.is_empty():
+			GameState.complete_step(step)
+		elif not area.has_meta(&"fired"):
+			area.set_meta(&"fired", true)
+			GameState.post_notice(notice))
+
+
+## Lays out the demon's waypoint graph. Doorways get a node on each side so a
+## path never cuts a corner through a frame.
+func _build_navigation() -> void:
+	var fy := FLOOR_Y
+	var study_y := FLOOR_Y + STUDY_RAISE
+	var dais := _nav(DAIS_CENTER + Vector3.UP * DAIS_HEIGHT)
+	var ritual_west := _nav(Vector3(-6.2, fy, -18.6))
+	var ritual_east := _nav(Vector3(6.6, fy, -18.6))
+	var living_arch_north := _nav(Vector3(-6.2, fy, RITUAL_SPLIT - 1.0))
+	var living_arch_south := _nav(Vector3(-6.2, fy, RITUAL_SPLIT + 1.0))
+	var ritual_door_north := _nav(Vector3(2.0, fy, RITUAL_SPLIT - 1.0))
+	var ritual_door_south := _nav(Vector3(2.0, fy, RITUAL_SPLIT + 1.0))
+	var living := _nav(Vector3(-5.0, fy, -9.5))
+	var living_south := _nav(Vector3(FRONT_DOOR_X, fy, -6.4))
+	var hall_door_west := _nav(Vector3(HALL_WEST - 1.0, fy, -9.5))
+	var hall_door_east := _nav(Vector3(HALL_WEST + 1.0, fy, -9.5))
+	var hall := _nav(Vector3(2.0, fy, -9.5))
+	var hall_north := _nav(Vector3(2.0, fy, -12.6))
+	var hall_south := _nav(Vector3(2.0, fy, -6.0))
+	var stairs_foot := _nav(Vector3(2.5, fy, -11.5))
+	var study_door := _nav(Vector3(HALL_EAST + 1.0, study_y, -11.5))
+	var study := _nav(Vector3(7.0, study_y, -9.5))
+	var porch := _nav(Vector3(FRONT_DOOR_X, fy, -2.6))
+	var front_path := _nav(Vector3(FRONT_DOOR_X, 0.0, 0.6))
+	var yard := _nav(Vector3(1.0, 0.0, 1.5))
+	var ramp_foot := _nav(Vector3(VAN_POSITION.x, 0.0, -1.0))
+	for pair: Array in [
+		[dais, ritual_west], [dais, ritual_east], [dais, ritual_door_north], [dais, living_arch_north],
+		[ritual_west, living_arch_north], [ritual_west, ritual_door_north], [ritual_east, ritual_door_north],
+		[living_arch_north, living_arch_south], [living_arch_south, living],
+		[ritual_door_north, ritual_door_south], [ritual_door_south, hall_north],
+		[hall_north, hall], [hall_north, stairs_foot], [hall, stairs_foot], [hall, hall_south],
+		[hall, hall_door_east], [hall_door_east, hall_door_west], [hall_door_west, living],
+		[stairs_foot, study_door], [study_door, study],
+		[living, living_south], [living_south, porch], [porch, front_path], [front_path, yard], [yard, ramp_foot],
+	]:
+		nav_links.append(Vector2i(int(pair[0]), int(pair[1])))
+	lurk_nodes = PackedInt32Array([dais, ritual_west, ritual_east, living_arch_north, ritual_door_north])
+
+
+func _nav(at: Vector3) -> int:
+	nav_points.append(at)
+	return nav_points.size() - 1
 
 
 func _spawn_props() -> void:

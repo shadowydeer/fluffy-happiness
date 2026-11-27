@@ -603,7 +603,7 @@ func _on_cargo_entered(body: Node3D) -> void:
 	var prop := body as RigidBody3D
 	if prop and prop.is_in_group(GameState.GROUP_GRABBABLE):
 		cargo_loaded.emit(prop)
-		GameState.complete_step(GameState.STEP_LOAD_CARGO)
+		GameState.post_notice("Cage test: %s secured" % str(prop.get_meta(&"display_name", prop.name)))
 
 
 # --- Assembly helpers -------------------------------------------------------

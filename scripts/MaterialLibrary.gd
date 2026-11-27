@@ -55,7 +55,7 @@ static func has_set(set_name: String) -> bool:
 
 ## One map of a texture set, or null if it is not available.
 static func _map(set_name: String, map_name: String) -> Texture2D:
-	var path := "%s%s/%s_%s.jpg" % [TEXTURE_ROOT, set_name, set_name, map_name]
+	var path := "%s%s/%s_%s.jpg" % [TEXTURE_ROOT, set_name, set_name.get_file(), map_name]
 	if _textures.has(path):
 		return _textures[path]
 	var texture: Texture2D = null

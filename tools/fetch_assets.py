@@ -43,7 +43,7 @@ MODELS = os.path.join(ASSETS, "models")
 TEXTURES = os.path.join(ASSETS, "textures")
 MANIFEST = os.path.join(ASSETS, "asset_manifest.json")
 
-USER_AGENT = "BindAndDeliver-AssetFetcher/1.5 (Godot indie project; contact via repository)"
+USER_AGENT = "BindAndDeliver-AssetFetcher/2.0 (Godot indie project; contact via repository)"
 BROWSER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) " + USER_AGENT
 POLYHAVEN_RESOLUTION = "1k"
 AMBIENTCG_ATTRIBUTE = "1K-JPG"
@@ -169,6 +169,9 @@ TEXTURE_CATALOG = [
     ("metal_tread_plate", "polyhaven", "metal_plate"),
     ("metal_painted_rusty", "polyhaven", "rusty_metal_02"),
     ("fabric_suit", "polyhaven", "terlenka"),
+    # Stage 2 demon: fibrous bark stands in for charred sinew, ivory for claws, teeth and bone.
+    ("demon/charred_skin", "polyhaven", "bark_willow_02"),
+    ("demon/cracked_bone", "ambientcg", "Ivory001B"),
 ]
 
 # Poly Haven map key -> our file suffix.
@@ -456,7 +459,8 @@ def model_path(name: str, folder: str) -> str:
 
 
 def texture_path(name: str, suffix: str) -> str:
-    return os.path.join(TEXTURES, name, "%s_%s.jpg" % (name, suffix))
+    # Sets may live in a sub-folder ("demon/charred_skin"); files are named after the leaf.
+    return os.path.join(TEXTURES, name, "%s_%s.jpg" % (os.path.basename(name), suffix))
 
 
 def do_model(job: tuple, previous: dict, force: bool) -> dict:
