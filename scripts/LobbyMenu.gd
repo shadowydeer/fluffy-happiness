@@ -13,6 +13,9 @@ extends Node3D
 ##                port, name and suit colour, then CONNECT and wait for the host.
 ##
 ## Every seat in the roster is a person. There are no bots to fill empty ones.
+##
+## The EN | RU switch sits in the top-right corner. All text here is written in English
+## and shown through `Loc`, so the whole screen changes language the moment it is pressed.
 
 const MainScene := preload("res://scenes/Main.tscn")
 
@@ -27,6 +30,9 @@ const GOLD := Color(1.0, 0.78, 0.3)
 const PANEL := Color(0.025, 0.032, 0.04, 0.9)
 const STEEL := Color(0.2, 0.24, 0.27)
 const SUIT_SWATCHES: Array[Color] = [Color(0.86, 0.34, 0.06), Color(0.05, 0.50, 0.50), Color(0.38, 0.42, 0.17), Color(0.40, 0.20, 0.58)]
+const TITLE_SIZE := 76
+## Distance between the title's two baselines, in ems.
+const TITLE_LINE_PITCH := 1.02
 ## The camera looks at this point while it tracks from one end of its rail to the other.
 const LOOK_AT := Vector3(1.5, 1.7, -2.5)
 const RAIL_FROM := Vector3(9.6, 3.1, 12.7)
@@ -51,6 +57,7 @@ var _roster_rows: Array[Label] = []
 var _lobby_status: Label
 var _primary: Button
 var _back: Button
+var _language: Button
 var _menu_buttons: Dictionary = {}
 
 
@@ -100,6 +107,11 @@ func get_menu_button(id: String) -> Button:
 
 func get_primary_button() -> Button:
 	return _primary
+
+
+## The EN | RU switch in the top-right corner.
+func get_language_toggle() -> Button:
+	return _language
 
 
 func get_roster_text() -> String:
@@ -309,23 +321,32 @@ func _build_ui() -> void:
 	column.offset_right = 460.0
 	column.offset_top = -250.0
 	column.offset_bottom = 250.0
+	column.grow_vertical = Control.GROW_DIRECTION_BOTH
 	column.add_theme_constant_override(&"separation", 10)
 	root.add_child(column)
 	column.add_child(_label("ECTO-LOGISTICS  //  FIELD TERMINAL", 12, DIM))
-	var title := _label("BIND &\nDELIVER", 68, INK)
-	title.add_theme_constant_override(&"line_spacing", -14)
+	# The name of the game is the same in every language.
+	var title := _label("BIND &\nDELIVER", TITLE_SIZE, INK)
+	title.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	# Two tight lines whichever face is installed: display faces are set with a lot of air.
+	title.add_theme_constant_override(&"line_spacing", int(TITLE_SIZE * TITLE_LINE_PITCH - Loc.header_font().get_height(TITLE_SIZE)))
+	Loc.style_header(title)
 	column.add_child(title)
 	var rule := ColorRect.new()
 	rule.color = ACCENT
 	rule.custom_minimum_size = Vector2(0.0, 4.0)
 	column.add_child(rule)
-	column.add_child(_label("Break in. Bind the demon. Shove it in the van.", 15, DIM))
+	var tagline := _label("Break in. Bind the demon. Shove it in the van.", 15, DIM)
+	tagline.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(tagline)
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0.0, 14.0)
 	column.add_child(gap)
 	for entry: Array in [["solo", "PLAY SOLO", ACCENT, _on_solo], ["host", "HOST CO-OP", STEEL, _on_host],
 			["join", "JOIN CO-OP", STEEL, _on_join], ["quit", "QUIT", Color(0.12, 0.13, 0.14), _on_quit]]:
 		var button := _button(str(entry[1]), entry[2] as Color)
+		button.add_theme_font_size_override(&"font_size", 20)
+		Loc.style_header(button)
 		button.pressed.connect(entry[3] as Callable)
 		column.add_child(button)
 		_menu_buttons[str(entry[0])] = button
@@ -333,10 +354,30 @@ func _build_ui() -> void:
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_status)
 	var foot := _label("SOLO: one exorcist, no backup.\nCO-OP: 2-4 players, LAN or direct IP. No bots, ever.", 11, Color(DIM, 0.75))
+	foot.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(foot)
 	(_menu_buttons["solo"] as Button).grab_focus()
 
 	_build_panel(root)
+	_build_language(root)
+
+
+## EN | RU, top right, clear of the lobby card.
+func _build_language(root: Control) -> void:
+	var row := HBoxContainer.new()
+	row.name = "Language"
+	row.anchor_left = 1.0
+	row.anchor_right = 1.0
+	row.offset_left = -364.0
+	row.offset_right = -64.0
+	row.offset_top = 26.0
+	row.offset_bottom = 58.0
+	row.alignment = BoxContainer.ALIGNMENT_END
+	row.add_theme_constant_override(&"separation", 12)
+	root.add_child(row)
+	row.add_child(_label("LANGUAGE", 11, Color(DIM, 0.85)))
+	_language = Loc.make_toggle()
+	row.add_child(_language)
 
 
 ## The lobby card on the right: identity, connection details, roster and the big button.
@@ -369,7 +410,8 @@ func _build_panel(root: Control) -> void:
 	column.add_theme_constant_override(&"separation", 9)
 	_panel.add_child(column)
 
-	_panel_title = _label("HOST CO-OP", 26, INK)
+	_panel_title = _label("HOST CO-OP", 28, INK)
+	Loc.style_header(_panel_title)
 	column.add_child(_panel_title)
 	_local_ip = _label("LOCAL IP   %s" % "   ".join(NetworkManager.get_local_addresses()), 13, TEAL)
 	_local_ip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -394,6 +436,8 @@ func _build_panel(root: Control) -> void:
 		pick.toggle_mode = true
 		pick.button_group = group
 		pick.custom_minimum_size = Vector2(0.0, 34.0)
+		pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		pick.clip_text = true
 		pick.add_theme_font_size_override(&"font_size", 12)
 		var chosen := StyleBoxFlat.new()
 		chosen.bg_color = SUIT_SWATCHES[i]
@@ -427,10 +471,14 @@ func _build_panel(root: Control) -> void:
 	_primary = _button("START CONTRACT", ACCENT)
 	_primary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_primary.size_flags_stretch_ratio = 2.0
+	_primary.add_theme_font_size_override(&"font_size", 19)
+	Loc.style_header(_primary)
 	_primary.pressed.connect(_on_primary)
 	buttons.add_child(_primary)
 	_back = _button("BACK", STEEL)
 	_back.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_back.add_theme_font_size_override(&"font_size", 19)
+	Loc.style_header(_back)
 	_back.pressed.connect(_on_back)
 	buttons.add_child(_back)
 

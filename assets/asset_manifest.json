@@ -1,15 +1,21 @@
 {
  "generator": "tools/fetch_assets.py",
- "generated_utc": "2026-11-26T16:37:11Z",
- "license_summary": "Every asset is CC0 1.0 (public domain dedication). Attribution is not required; authors are listed as a courtesy.",
+ "generated_utc": "2026-11-27T20:01:18Z",
+ "license_summary": "Every model, texture and sound is CC0 1.0 (public domain dedication). Attribution is not required; authors are listed as a courtesy. Fonts are SIL Open Font License 1.1 and ship with their licence text.",
  "totals": {
-  "models": 82,
+  "models": 91,
   "texture_sets": 26,
-  "files": 183,
-  "model_bytes": 164673120,
+  "sounds": 58,
+  "sound_slots": 30,
+  "fonts": 3,
+  "files": 256,
+  "model_bytes": 179654928,
   "texture_bytes": 65805173,
-  "triangles": 1199328,
-  "failed": 0
+  "audio_bytes": 1303411,
+  "audio_seconds": 111.96,
+  "font_bytes": 809374,
+  "triangles": 1280917,
+  "failed": 2
  },
  "models": [
   {
@@ -2929,6 +2935,10 @@
     "skeleton": "Armature",
     "joints": 24,
     "vertices": 21225,
+    "skinned_meshes": 1,
+    "animations": [
+     "Armature|clip0|baselayer"
+    ],
     "bounds_min": [
      -0.8091,
      0.0,
@@ -2940,6 +2950,18 @@
      0.4457
     ],
     "height": 2.0,
+    "arm_direction": {
+     "left": [
+      0.544,
+      -0.207,
+      0.813
+     ],
+     "right": [
+      -0.534,
+      -0.216,
+      0.817
+     ]
+    },
     "bones": [
      {
       "name": "Hips",
@@ -3303,11 +3325,1125 @@
      }
     ]
    },
+   "cached": true,
+   "rig_compatible": true,
+   "rig_missing_bones": [],
+   "rig_extra_bones": [
+    "headfront"
+   ],
    "files": [
     {
      "path": "res://assets/models/demon/demon.glb",
      "bytes": 1556664,
      "sha256": "e0d02ffbc2129adc1c4620b03c68e3e4bf29088d017e0ff800e9d00110ad5717",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "scuttler",
+   "type": "model",
+   "category": "demon",
+   "status": "ok",
+   "source": "vibeassets",
+   "source_id": "ooq775xp55",
+   "source_page": "https://vibeassets.io/a/ooq775xp55",
+   "title": "Imp demon, rigged (Meshy)",
+   "author": "vibeassets.io contributor (text-to-3D, auto-rigged)",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://vibeassets.io/download/ooq775xp55"
+   ],
+   "note": "1 embedded JPEG(s) re-ordered losslessly to 1x1 sampling so Godot can decode them; mesh, skin and pixels are unchanged",
+   "triangles": 12525,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 1,
+   "skins": 1,
+   "rig": {
+    "skeleton": "Armature",
+    "joints": 24,
+    "vertices": 15502,
+    "skinned_meshes": 1,
+    "animations": [
+     "Armature|clip0|baselayer"
+    ],
+    "bounds_min": [
+     -0.5716,
+     -0.0,
+     -0.3897
+    ],
+    "bounds_max": [
+     0.5716,
+     1.35,
+     0.3897
+    ],
+    "height": 1.35,
+    "arm_direction": {
+     "left": [
+      0.778,
+      0.207,
+      0.593
+     ],
+     "right": [
+      -0.774,
+      0.192,
+      0.604
+     ]
+    },
+    "bones": [
+     {
+      "name": "Hips",
+      "parent": "",
+      "rest": [
+       -0.0092,
+       0.5335,
+       -0.0101
+      ],
+      "rotation": [
+       0.3439,
+       -0.039,
+       -0.0,
+       0.9382
+      ]
+     },
+     {
+      "name": "LeftUpLeg",
+      "parent": "Hips",
+      "rest": [
+       0.0872,
+       0.4856,
+       0.0025
+      ],
+      "rotation": [
+       0.86,
+       0.08,
+       -0.1987,
+       0.4631
+      ]
+     },
+     {
+      "name": "LeftLeg",
+      "parent": "LeftUpLeg",
+      "rest": [
+       0.1449,
+       0.2942,
+       0.053
+      ],
+      "rotation": [
+       0.3858,
+       0.1372,
+       0.0677,
+       0.9098
+      ]
+     },
+     {
+      "name": "LeftFoot",
+      "parent": "LeftLeg",
+      "rest": [
+       0.1518,
+       0.0748,
+       -0.0718
+      ],
+      "rotation": [
+       -0.7175,
+       -0.2282,
+       -0.1102,
+       0.6489
+      ]
+     },
+     {
+      "name": "LeftToeBase",
+      "parent": "LeftFoot",
+      "rest": [
+       0.2144,
+       0.0299,
+       0.0238
+      ],
+      "rotation": [
+       -0.1856,
+       -0.0553,
+       -0.0105,
+       0.981
+      ]
+     },
+     {
+      "name": "RightUpLeg",
+      "parent": "Hips",
+      "rest": [
+       -0.1092,
+       0.484,
+       0.001
+      ],
+      "rotation": [
+       0.8785,
+       -0.0691,
+       0.1214,
+       0.4569
+      ]
+     },
+     {
+      "name": "RightLeg",
+      "parent": "RightUpLeg",
+      "rest": [
+       -0.1669,
+       0.2861,
+       0.0455
+      ],
+      "rotation": [
+       0.3545,
+       -0.1119,
+       -0.0409,
+       0.9275
+      ]
+     },
+     {
+      "name": "RightFoot",
+      "parent": "RightLeg",
+      "rest": [
+       -0.1829,
+       0.0723,
+       -0.0685
+      ],
+      "rotation": [
+       -0.7268,
+       0.1442,
+       0.0326,
+       0.6708
+      ]
+     },
+     {
+      "name": "RightToeBase",
+      "parent": "RightFoot",
+      "rest": [
+       -0.225,
+       0.0286,
+       0.0343
+      ],
+      "rotation": [
+       -0.1862,
+       0.0367,
+       0.007,
+       0.9818
+      ]
+     },
+     {
+      "name": "Spine02",
+      "parent": "Hips",
+      "rest": [
+       -0.0076,
+       0.6123,
+       -0.012
+      ],
+      "rotation": [
+       -0.3555,
+       0.0448,
+       -0.0121,
+       0.9335
+      ]
+     },
+     {
+      "name": "Spine01",
+      "parent": "Spine02",
+      "rest": [
+       -0.0061,
+       0.6911,
+       -0.0139
+      ],
+      "rotation": [
+       0.0,
+       0.0,
+       0.0,
+       1
+      ]
+     },
+     {
+      "name": "Spine",
+      "parent": "Spine01",
+      "rest": [
+       -0.0046,
+       0.77,
+       -0.0158
+      ],
+      "rotation": [
+       0.1554,
+       -0.0143,
+       0.0169,
+       0.9876
+      ]
+     },
+     {
+      "name": "LeftShoulder",
+      "parent": "Spine",
+      "rest": [
+       0.0208,
+       0.8162,
+       0.0057
+      ],
+      "rotation": [
+       0.4649,
+       0.3765,
+       -0.5108,
+       0.6174
+      ]
+     },
+     {
+      "name": "LeftArm",
+      "parent": "LeftShoulder",
+      "rest": [
+       0.1222,
+       0.8162,
+       0.0272
+      ],
+      "rotation": [
+       0.0632,
+       0.0512,
+       0.1955,
+       0.9773
+      ]
+     },
+     {
+      "name": "LeftForeArm",
+      "parent": "LeftArm",
+      "rest": [
+       0.2779,
+       0.7889,
+       0.1334
+      ],
+      "rotation": [
+       -0.3432,
+       -0.1718,
+       0.0906,
+       0.919
+      ]
+     },
+     {
+      "name": "LeftHand",
+      "parent": "LeftForeArm",
+      "rest": [
+       0.3943,
+       0.8885,
+       0.2348
+      ],
+      "rotation": [
+       0.2113,
+       0.0856,
+       0.0021,
+       0.9737
+      ]
+     },
+     {
+      "name": "RightShoulder",
+      "parent": "Spine",
+      "rest": [
+       -0.034,
+       0.8146,
+       0.0048
+      ],
+      "rotation": [
+       0.458,
+       -0.3849,
+       0.5091,
+       0.6188
+      ]
+     },
+     {
+      "name": "RightArm",
+      "parent": "RightShoulder",
+      "rest": [
+       -0.1517,
+       0.8146,
+       0.0253
+      ],
+      "rotation": [
+       0.0967,
+       -0.0813,
+       -0.2068,
+       0.9702
+      ]
+     },
+     {
+      "name": "RightForeArm",
+      "parent": "RightArm",
+      "rest": [
+       -0.3071,
+       0.7725,
+       0.127
+      ],
+      "rotation": [
+       -0.3966,
+       0.1938,
+       -0.1193,
+       0.8893
+      ]
+     },
+     {
+      "name": "RightHand",
+      "parent": "RightForeArm",
+      "rest": [
+       -0.4182,
+       0.8806,
+       0.2331
+      ],
+      "rotation": [
+       0.2321,
+       -0.08,
+       -0.0211,
+       0.9692
+      ]
+     },
+     {
+      "name": "neck",
+      "parent": "Spine",
+      "rest": [
+       -0.0024,
+       0.8173,
+       -0.017
+      ],
+      "rotation": [
+       -0.1549,
+       0.0253,
+       -0.0318,
+       0.9871
+      ]
+     },
+     {
+      "name": "Head",
+      "parent": "neck",
+      "rest": [
+       -0.0,
+       0.8713,
+       -0.0183
+      ],
+      "rotation": [
+       0.2665,
+       0.0003,
+       0.0118,
+       0.9638
+      ]
+     },
+     {
+      "name": "head_end",
+      "parent": "Head",
+      "rest": [
+       0.0159,
+       1.2173,
+       0.0315
+      ],
+      "rotation": [
+       -0.1852,
+       0.0,
+       -0.0085,
+       0.9827
+      ]
+     },
+     {
+      "name": "headfront",
+      "parent": "Head",
+      "rest": [
+       -0.0,
+       0.8713,
+       0.1283
+      ],
+      "rotation": [
+       0.5028,
+       0.0,
+       0.0232,
+       0.8641
+      ]
+     }
+    ]
+   },
+   "rig_compatible": true,
+   "rig_missing_bones": [],
+   "rig_extra_bones": [
+    "headfront"
+   ],
+   "files": [
+    {
+     "path": "res://assets/models/demon/scuttler.glb",
+     "bytes": 1161664,
+     "sha256": "6ba7ea0da44bde0ce0c22888b510b89ce3b768494a54c1f3aeeb2ebc90fa2130",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "poltergeist",
+   "type": "model",
+   "category": "demon",
+   "status": "ok",
+   "source": "vibeassets",
+   "source_id": "k6bdm27lba",
+   "source_page": "https://vibeassets.io/a/k6bdm27lba",
+   "title": "Hooded medieval inquisitor, rigged + 10 animations",
+   "author": "vibeassets.io contributor (text-to-3D, auto-rigged)",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://vibeassets.io/download/k6bdm27lba"
+   ],
+   "note": "2 embedded JPEG(s) re-ordered losslessly to 1x1 sampling so Godot can decode them; mesh, skin and pixels are unchanged",
+   "triangles": 30778,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 10,
+   "skins": 1,
+   "rig": {
+    "skeleton": "Armature",
+    "joints": 24,
+    "vertices": 35871,
+    "skinned_meshes": 1,
+    "animations": [
+     "Idle_12",
+     "Idle_9",
+     "Scheming_Hand_Rub",
+     "Talk_with_Left_Hand_Raised",
+     "Neck_Slashing_Gesture",
+     "Finger_Wag_No",
+     "Shrug",
+     "Listening_Gesture",
+     "Gentlemans_Bow",
+     "Formal_Bow"
+    ],
+    "bounds_min": [
+     -0.7362,
+     0.0,
+     -0.2328
+    ],
+    "bounds_max": [
+     0.7362,
+     1.95,
+     0.2328
+    ],
+    "height": 1.95,
+    "arm_direction": {
+     "left": [
+      0.987,
+      -0.157,
+      -0.014
+     ],
+     "right": [
+      -0.985,
+      -0.173,
+      0.017
+     ]
+    },
+    "bones": [
+     {
+      "name": "Hips",
+      "parent": "",
+      "rest": [
+       -0.0084,
+       1.171,
+       0.0059
+      ],
+      "rotation": [
+       -0.0275,
+       -0.0029,
+       -0.0029,
+       0.9996
+      ]
+     },
+     {
+      "name": "Spine02",
+      "parent": "Hips",
+      "rest": [
+       -0.0077,
+       1.2857,
+       -0.0004
+      ],
+      "rotation": [
+       0.0,
+       0.0,
+       -0.0,
+       1
+      ]
+     },
+     {
+      "name": "Spine01",
+      "parent": "Spine02",
+      "rest": [
+       -0.007,
+       1.4004,
+       -0.0067
+      ],
+      "rotation": [
+       -0.0,
+       -0.0,
+       -0.0,
+       1
+      ]
+     },
+     {
+      "name": "Spine",
+      "parent": "Spine01",
+      "rest": [
+       -0.0063,
+       1.5185,
+       -0.0132
+      ],
+      "rotation": [
+       -0.0001,
+       -0.0038,
+       -0.004,
+       1.0
+      ]
+     },
+     {
+      "name": "neck",
+      "parent": "Spine",
+      "rest": [
+       -0.0053,
+       1.5894,
+       -0.0171
+      ],
+      "rotation": [
+       -0.0,
+       -0.0,
+       -0.0,
+       1
+      ]
+     },
+     {
+      "name": "Head",
+      "parent": "neck",
+      "rest": [
+       -0.0042,
+       1.6674,
+       -0.0214
+      ],
+      "rotation": [
+       0.0941,
+       -0.0332,
+       -0.0364,
+       0.9943
+      ]
+     },
+     {
+      "name": "head_end",
+      "parent": "Head",
+      "rest": [
+       0.0167,
+       1.9344,
+       0.0155
+      ],
+      "rotation": [
+       -0.0,
+       0.0,
+       0.0,
+       1
+      ]
+     },
+     {
+      "name": "headfront",
+      "parent": "Head",
+      "rest": [
+       -0.0042,
+       1.6674,
+       0.1049
+      ],
+      "rotation": [
+       0.0,
+       -0.7515,
+       -0.6571,
+       0.0589
+      ]
+     },
+     {
+      "name": "LeftShoulder",
+      "parent": "Spine",
+      "rest": [
+       0.0319,
+       1.585,
+       -0.017
+      ],
+      "rotation": [
+       -0.5095,
+       -0.4612,
+       -0.4803,
+       0.545
+      ]
+     },
+     {
+      "name": "LeftArm",
+      "parent": "LeftShoulder",
+      "rest": [
+       0.1809,
+       1.585,
+       -0.0319
+      ],
+      "rotation": [
+       -0.0827,
+       0.7737,
+       -0.1248,
+       0.6156
+      ]
+     },
+     {
+      "name": "LeftForeArm",
+      "parent": "LeftArm",
+      "rest": [
+       0.3576,
+       1.5303,
+       -0.0448
+      ],
+      "rotation": [
+       -0.0017,
+       0.1747,
+       0.1488,
+       0.9733
+      ]
+     },
+     {
+      "name": "LeftHand",
+      "parent": "LeftForeArm",
+      "rest": [
+       0.5511,
+       1.5261,
+       -0.0372
+      ],
+      "rotation": [
+       0.0212,
+       0.028,
+       0.0138,
+       0.9993
+      ]
+     },
+     {
+      "name": "RightShoulder",
+      "parent": "Spine",
+      "rest": [
+       -0.0413,
+       1.5892,
+       -0.0168
+      ],
+      "rotation": [
+       -0.5127,
+       0.4576,
+       0.4909,
+       0.5355
+      ]
+     },
+     {
+      "name": "RightArm",
+      "parent": "RightShoulder",
+      "rest": [
+       -0.1851,
+       1.5892,
+       -0.0332
+      ],
+      "rotation": [
+       -0.0714,
+       -0.7807,
+       0.1216,
+       0.6088
+      ]
+     },
+     {
+      "name": "RightForeArm",
+      "parent": "RightArm",
+      "rest": [
+       -0.3744,
+       1.5345,
+       -0.0476
+      ],
+      "rotation": [
+       0.0442,
+       -0.1484,
+       -0.1327,
+       0.979
+      ]
+     },
+     {
+      "name": "RightHand",
+      "parent": "RightForeArm",
+      "rest": [
+       -0.5679,
+       1.5219,
+       -0.0267
+      ],
+      "rotation": [
+       -0.1213,
+       -0.0822,
+       0.0168,
+       0.9891
+      ]
+     },
+     {
+      "name": "LeftUpLeg",
+      "parent": "Hips",
+      "rest": [
+       0.0965,
+       1.0637,
+       0.0059
+      ],
+      "rotation": [
+       0.9776,
+       0.0984,
+       0.0981,
+       0.1579
+      ]
+     },
+     {
+      "name": "LeftLeg",
+      "parent": "LeftUpLeg",
+      "rest": [
+       0.1694,
+       0.6319,
+       0.1857
+      ],
+      "rotation": [
+       0.3939,
+       -0.0672,
+       0.1122,
+       0.9098
+      ]
+     },
+     {
+      "name": "LeftFoot",
+      "parent": "LeftLeg",
+      "rest": [
+       0.1767,
+       0.1589,
+       -0.0379
+      ],
+      "rotation": [
+       -0.5311,
+       0.0947,
+       -0.1577,
+       0.8271
+      ]
+     },
+     {
+      "name": "LeftToeBase",
+      "parent": "LeftFoot",
+      "rest": [
+       0.2017,
+       0.042,
+       0.0666
+      ],
+      "rotation": [
+       0.1021,
+       0.8846,
+       -0.3887,
+       0.2368
+      ]
+     },
+     {
+      "name": "RightUpLeg",
+      "parent": "Hips",
+      "rest": [
+       -0.1108,
+       1.062,
+       0.0059
+      ],
+      "rotation": [
+       0.9812,
+       -0.0709,
+       -0.0809,
+       0.1603
+      ]
+     },
+     {
+      "name": "RightLeg",
+      "parent": "RightUpLeg",
+      "rest": [
+       -0.1683,
+       0.6242,
+       0.1853
+      ],
+      "rotation": [
+       0.3946,
+       0.0461,
+       -0.0832,
+       0.9139
+      ]
+     },
+     {
+      "name": "RightFoot",
+      "parent": "RightLeg",
+      "rest": [
+       -0.1809,
+       0.1589,
+       -0.0328
+      ],
+      "rotation": [
+       -0.5266,
+       -0.0798,
+       0.1399,
+       0.8347
+      ]
+     },
+     {
+      "name": "RightToeBase",
+      "parent": "RightFoot",
+      "rest": [
+       -0.2037,
+       0.0412,
+       0.0689
+      ],
+      "rotation": [
+       0.0973,
+       -0.8856,
+       0.3986,
+       0.2178
+      ]
+     }
+    ]
+   },
+   "rig_compatible": true,
+   "rig_missing_bones": [],
+   "rig_extra_bones": [
+    "headfront"
+   ],
+   "files": [
+    {
+     "path": "res://assets/models/demon/poltergeist.glb",
+     "bytes": 3216916,
+     "sha256": "bd9bf74358029f01ec96c3b50cfdd65cd0d84b7963e8aa405feca11a7f14ec3b",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "terminal",
+   "type": "model",
+   "category": "shop",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "classic_laptop",
+   "source_page": "https://polyhaven.com/a/classic_laptop",
+   "title": "Classic Laptop",
+   "author": "Arrangemonk",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/classic_laptop/classic_laptop_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/classic_laptop/classic_laptop_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/classic_laptop/classic_laptop_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/classic_laptop/classic_laptop_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/classic_laptop/classic_laptop.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 14450,
+   "meshes": 3,
+   "materials": 2,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "files": [
+    {
+     "path": "res://assets/models/shop/terminal.glb",
+     "bytes": 2181136,
+     "sha256": "d6b854aff5c1b24cad8917e035a23ac60fdf986ec61c61c080825d79f103abfb",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "medkit",
+   "type": "model",
+   "category": "shop",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "medical_box",
+   "source_page": "https://polyhaven.com/a/medical_box",
+   "title": "Medical Box",
+   "author": "Ulan Cabanilla",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/medical_box/medical_box_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/medical_box/medical_box_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/medical_box/medical_box_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/medical_box/medical_box_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/medical_box/medical_box.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 3718,
+   "meshes": 5,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "files": [
+    {
+     "path": "res://assets/models/shop/medkit.glb",
+     "bytes": 1971848,
+     "sha256": "ecb72b4ad5873c1f84b87b80b72498a2fb85c97573465293f8d4b4e488dc4fcc",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tape_roll",
+   "type": "model",
+   "category": "shop",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "medical_tape",
+   "source_page": "https://polyhaven.com/a/medical_tape",
+   "title": "Medical Tape",
+   "author": "Miroslav Turura",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/medical_tape/medical_tape_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/medical_tape/medical_tape_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/medical_tape/medical_tape_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/medical_tape/medical_tape_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/medical_tape/medical_tape.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 1408,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "files": [
+    {
+     "path": "res://assets/models/shop/tape_roll.glb",
+     "bytes": 1597624,
+     "sha256": "1f5edc2b21bda963390e6ef8e73aa651ef3385df7ba0aa14f1857d7e83bc2aed",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "shelf",
+   "type": "model",
+   "category": "shop",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "worn_metal_rack",
+   "source_page": "https://polyhaven.com/a/worn_metal_rack",
+   "title": "Worn Metal Rack",
+   "author": "Luca B",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/worn_metal_rack/worn_metal_rack_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/worn_metal_rack/worn_metal_rack_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/worn_metal_rack/worn_metal_rack_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/worn_metal_rack/worn_metal_rack_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/worn_metal_rack/worn_metal_rack.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 6372,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "files": [
+    {
+     "path": "res://assets/models/shop/shelf.glb",
+     "bytes": 2008100,
+     "sha256": "7359f5e4c66921458243c1574c72a1fe0c98955a9ad9b91d3000df88662ffb91",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "rope_coil",
+   "type": "model",
+   "category": "shop",
+   "status": "ok",
+   "source": "Poly Haven",
+   "source_id": "garden_hose_wall_mounted_01",
+   "source_page": "https://polyhaven.com/a/garden_hose_wall_mounted_01",
+   "title": "Garden Hose Wall Mounted 01",
+   "author": "Kuutti Siitonen",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/garden_hose_wall_mounted_01/garden_hose_wall_mounted_01_1k.gltf",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/garden_hose_wall_mounted_01/garden_hose_wall_mounted_01_arm_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/garden_hose_wall_mounted_01/garden_hose_wall_mounted_01_nor_gl_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/garden_hose_wall_mounted_01/garden_hose_wall_mounted_01_diff_1k.jpg",
+    "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/garden_hose_wall_mounted_01/garden_hose_wall_mounted_01.bin"
+   ],
+   "note": "glTF, .bin and 1k textures packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 11684,
+   "meshes": 2,
+   "materials": 1,
+   "embedded_images": 3,
+   "animations": 0,
+   "skins": 0,
+   "files": [
+    {
+     "path": "res://assets/models/shop/rope_coil.glb",
+     "bytes": 2583268,
+     "sha256": "90c5bf27c4cea1ad388c785804f253ff0d2b9ffcbc9483776002ea00f8fa9478",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "salt_jar",
+   "type": "model",
+   "category": "shop",
+   "status": "ok",
+   "source": "KayKit",
+   "source_id": "KayKit-Restaurant-Bits-1.0@153c8a7535b48237854cb54ff6890679f8c574d1:addons/kaykit_restaurant_bits/Assets/gltf/jar_A_medium.gltf",
+   "source_page": "https://github.com/KayKit-Game-Assets/KayKit-Restaurant-Bits-1.0",
+   "title": "jar_A_medium (KayKit : Restaurant Bits (1.0))",
+   "author": "Kay Lousberg",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Restaurant-Bits-1.0/153c8a7535b48237854cb54ff6890679f8c574d1/addons/kaykit_restaurant_bits/Assets/gltf/jar_A_medium.gltf",
+    "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Restaurant-Bits-1.0/153c8a7535b48237854cb54ff6890679f8c574d1/addons/kaykit_restaurant_bits/Assets/gltf/jar_A_medium.bin",
+    "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Restaurant-Bits-1.0/153c8a7535b48237854cb54ff6890679f8c574d1/addons/kaykit_restaurant_bits/Assets/gltf/restaurantbits_texture.png"
+   ],
+   "note": "glTF, .bin and texture atlas packed into a single .glb by tools/fetch_assets.py",
+   "triangles": 188,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 0,
+   "skins": 0,
+   "files": [
+    {
+     "path": "res://assets/models/shop/salt_jar.glb",
+     "bytes": 29644,
+     "sha256": "e0cd9c638eb7195e87377f47226c0878429e3891fa93f08bfa8889e63a8ee70e",
+     "format": "glb",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "battery",
+   "type": "model",
+   "category": "shop",
+   "status": "ok",
+   "source": "OpenGameArt",
+   "source_id": "battery-for-rc-cars-etc:battery.zip:battery/battery.obj:battery/battery.png",
+   "source_page": "https://opengameart.org/content/battery-for-rc-cars-etc",
+   "title": "Battery (for RC cars, etc.)",
+   "author": "yethiel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://opengameart.org/sites/default/files/battery.zip"
+   ],
+   "note": "battery/battery.obj and battery/battery.png from battery.zip converted to a flat-shaded .glb, re-centred to stand on the origin, by tools/fetch_assets.py",
+   "triangles": 466,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 0,
+   "skins": 0,
+   "files": [
+    {
+     "path": "res://assets/models/shop/battery.glb",
+     "bytes": 231608,
+     "sha256": "37a210f9a3c3b3ce61e32bab3e313ac8977844b01e4b6062d9fc696a6b3418db",
      "format": "glb",
      "verified": true
     }
@@ -4788,6 +5924,2153 @@
      "format": "jpeg",
      "verified": true,
      "map": "roughness"
+    }
+   ]
+  }
+ ],
+ "audio": [
+  {
+   "name": "amb_drone",
+   "type": "audio",
+   "slot": "amb_drone",
+   "status": "failed",
+   "source": "Freesound",
+   "source_id": "Nox_Sound/674735",
+   "source_page": "https://freesound.org/people/Nox_Sound/sounds/674735/",
+   "title": "Atmosphere_Drone_Dark_Loop_Stereo.wav",
+   "author": "Nox_Sound",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/674/674735_9250976-hq.ogg"
+   ],
+   "edit": {
+    "gain": 9,
+    "loop": 3.0,
+    "stereo": true,
+    "trim": [
+     1.0,
+     29.0
+    ]
+   },
+   "note": "ffmpeg: trimmed to 1.00-29.00 s, 3.00 s cross-fade for a seamless loop, +9 dB, stereo, 44.1 kHz Ogg Vorbis q4",
+   "error": "Ogg Vorbis stream holds no audio",
+   "files": []
+  },
+  {
+   "name": "amb_drone_2",
+   "type": "audio",
+   "slot": "amb_drone",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "gerainsan/457046",
+   "source_page": "https://freesound.org/people/gerainsan/sounds/457046/",
+   "title": "Horror Pulsating Drone Loop",
+   "author": "gerainsan",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/457/457046_3577171-hq.ogg"
+   ],
+   "edit": {
+    "gain": 6,
+    "stereo": true
+   },
+   "note": "ffmpeg: +6 dB, stereo, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 2,
+   "sample_rate": 44100,
+   "seconds": 13.131,
+   "files": [
+    {
+     "path": "res://assets/audio/amb_drone_2.ogg",
+     "bytes": 166004,
+     "sha256": "bd48a1d97d88276aced46c6015fe09ff92319b02aff554d8c74584b7cb896ba7",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "amb_thunder",
+   "type": "audio",
+   "slot": "amb_thunder",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "thunder-2-s3113",
+   "source_page": "https://bigsoundbank.com/thunder-2-s3113.html",
+   "title": "Thunder #2",
+   "author": "Joseph SARDIN & Axeline T.",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/3113.ogg"
+   ],
+   "edit": {
+    "fade_in": 0.05,
+    "fade_out": 0.6,
+    "trim": [
+     0.25,
+     4.9
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.25-4.90 s, fades 0.05/0.60 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 4.65,
+   "files": [
+    {
+     "path": "res://assets/audio/amb_thunder.ogg",
+     "bytes": 34654,
+     "sha256": "b481c8a202432a26f88cc372996a071092e701c80e2d9555765385882e05ecac",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "amb_thunder_2",
+   "type": "audio",
+   "slot": "amb_thunder",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "thunder-3-s3114",
+   "source_page": "https://bigsoundbank.com/thunder-3-s3114.html",
+   "title": "Thunder #3",
+   "author": "Joseph SARDIN & Axeline T.",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/3114.ogg"
+   ],
+   "edit": {
+    "fade_in": 0.3,
+    "fade_out": 1.5,
+    "trim": [
+     0.0,
+     10.6
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-10.60 s, fades 0.30/1.50 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 10.6,
+   "files": [
+    {
+     "path": "res://assets/audio/amb_thunder_2.ogg",
+     "bytes": 81569,
+     "sha256": "29951e286012cd5e14ac886c312f7d390218c42e50f096c4790add88a7837ab2",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "amb_thunder_3",
+   "type": "audio",
+   "slot": "amb_thunder",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "thunder-6-s3179",
+   "source_page": "https://bigsoundbank.com/thunder-6-s3179.html",
+   "title": "Thunder #6",
+   "author": "Joseph SARDIN & Axeline T.",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/3179.ogg"
+   ],
+   "edit": {
+    "fade_in": 0.1,
+    "fade_out": 1.2,
+    "trim": [
+     0.2,
+     8.6
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.20-8.60 s, fades 0.10/1.20 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 8.4,
+   "files": [
+    {
+     "path": "res://assets/audio/amb_thunder_3.ogg",
+     "bytes": 53224,
+     "sha256": "fa7d97393adda32aab8d4f6b97fd3c91f2380c07eaaefcdce7933b66bbb795bc",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "amb_creak",
+   "type": "audio",
+   "slot": "amb_creak",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "squeaking-parquet-1-s3051",
+   "source_page": "https://bigsoundbank.com/squeaking-parquet-1-s3051.html",
+   "title": "Squeaking parquet #1",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/3051.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.08,
+    "trim": [
+     0.18,
+     0.98
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.18-0.98 s, fades 0.00/0.08 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.8,
+   "files": [
+    {
+     "path": "res://assets/audio/amb_creak.ogg",
+     "bytes": 11186,
+     "sha256": "7d83c18873d62c1089ce7c0a80d6a466613b03618d071dbc70803b0715d098e6",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "amb_creak_2",
+   "type": "audio",
+   "slot": "amb_creak",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "squeaking-parquet-10-s3060",
+   "source_page": "https://bigsoundbank.com/squeaking-parquet-10-s3060.html",
+   "title": "Squeaking Parquet #10",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/3060.ogg"
+   ],
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 48000,
+   "seconds": 1.885,
+   "files": [
+    {
+     "path": "res://assets/audio/amb_creak_2.ogg",
+     "bytes": 24036,
+     "sha256": "da79446241a4d3a2150920a09b9265e10dc740102c3367814229b4987d623ccf",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "amb_creak_3",
+   "type": "audio",
+   "slot": "amb_creak",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "creaking-door-s0302",
+   "source_page": "https://bigsoundbank.com/creaking-door-s0302.html",
+   "title": "Creaking Door #1",
+   "author": "DenisChardonnet",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/0302.ogg"
+   ],
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.358,
+   "files": [
+    {
+     "path": "res://assets/audio/amb_creak_3.ogg",
+     "bytes": 40344,
+     "sha256": "7e2f0ef187d8358220294482885906ef86a973a1e0927d3d590a9c49566854a1",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "amb_creak_4",
+   "type": "audio",
+   "slot": "amb_creak",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "squeaking-parquet-3-s3053",
+   "source_page": "https://bigsoundbank.com/squeaking-parquet-3-s3053.html",
+   "title": "Squeaking parquet #3",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/3053.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.08,
+    "gain": 3,
+    "trim": [
+     0.2,
+     0.8
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.20-0.80 s, fades 0.00/0.08 s, +3 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.6,
+   "files": [
+    {
+     "path": "res://assets/audio/amb_creak_4.ogg",
+     "bytes": 9268,
+     "sha256": "b88cc1f3678379ac9904ccc9111355b7eeb719bc99da675364d287d5eecfdac2",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "amb_hum",
+   "type": "audio",
+   "slot": "amb_hum",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "neon-or-transformer-1-s2118",
+   "source_page": "https://bigsoundbank.com/neon-or-transformer-1-s2118.html",
+   "title": "Neon or transformer #1",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/2118.ogg"
+   ],
+   "edit": {
+    "gain": -8,
+    "loop": 1.0,
+    "trim": [
+     1.0,
+     7.0
+    ]
+   },
+   "note": "ffmpeg: trimmed to 1.00-7.00 s, 1.00 s cross-fade for a seamless loop, -8 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 6.0,
+   "files": [
+    {
+     "path": "res://assets/audio/amb_hum.ogg",
+     "bytes": 96634,
+     "sha256": "70147589e8b0b1bd37bdd678e49ff7dbea9a1ebc8681c3fa2609458e81aaaf3e",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_wood",
+   "type": "audio",
+   "slot": "impact_wood",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactWood_heavy_000.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactWood_heavy_000",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactWood_heavy_000.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.313,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_wood.ogg",
+     "bytes": 4440,
+     "sha256": "b0c755e5d1b5870594f1be97f079060a0d6fc585a7bc01b66564c4cb45088359",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_wood_2",
+   "type": "audio",
+   "slot": "impact_wood",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactPlank_medium_000.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactPlank_medium_000",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactPlank_medium_000.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.779,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_wood_2.ogg",
+     "bytes": 9090,
+     "sha256": "5948ca6294d264f5b1487ee192ea302ed253490363f68a1c3ff5a15f03832421",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_wood_3",
+   "type": "audio",
+   "slot": "impact_wood",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "wooden-chair-falling-on-carpet-s0516",
+   "source_page": "https://bigsoundbank.com/wooden-chair-falling-on-carpet-s0516.html",
+   "title": "Wooden chair falling on carpet",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/0516.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.1,
+    "trim": [
+     4.08,
+     4.9
+    ]
+   },
+   "note": "ffmpeg: trimmed to 4.08-4.90 s, fades 0.00/0.10 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.82,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_wood_3.ogg",
+     "bytes": 10703,
+     "sha256": "3f35c9d9979705a8f4e9a10e81f19ba8140b04ce47a6fa821a05bb3f1e00fe1d",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_wood_4",
+   "type": "audio",
+   "slot": "impact_wood",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "wooden-chair-falling-on-carpet-s0516",
+   "source_page": "https://bigsoundbank.com/wooden-chair-falling-on-carpet-s0516.html",
+   "title": "Wooden chair falling on carpet",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/0516.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.1,
+    "trim": [
+     12.25,
+     13.05
+    ]
+   },
+   "note": "ffmpeg: trimmed to 12.25-13.05 s, fades 0.00/0.10 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.8,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_wood_4.ogg",
+     "bytes": 10152,
+     "sha256": "642ea9056bdc686350470a080a9946f0af36b9e2d0bc79d05ee6030d25d59669",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_metal",
+   "type": "audio",
+   "slot": "impact_metal",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactMetal_heavy_000.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactMetal_heavy_000",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactMetal_heavy_000.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.168,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_metal.ogg",
+     "bytes": 4564,
+     "sha256": "c6161d146d5628298b4a25551c43014eb023bc4ed84bd7ff6efd5008ffd9f5e0",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_metal_2",
+   "type": "audio",
+   "slot": "impact_metal",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactTin_medium_000.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactTin_medium_000",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactTin_medium_000.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.159,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_metal_2.ogg",
+     "bytes": 4732,
+     "sha256": "8f81998ba34b4471b61e0c8b69273692da45099b74771d206003111d08371776",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_metal_3",
+   "type": "audio",
+   "slot": "impact_metal",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "falling-sheet-steel-bar-4-s1774",
+   "source_page": "https://bigsoundbank.com/falling-sheet-steel-bar-4-s1774.html",
+   "title": "Falling sheet steel bar #4",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/1774.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.3,
+    "gain": -2,
+    "trim": [
+     0.0,
+     1.3
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-1.30 s, fades 0.00/0.30 s, -2 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.3,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_metal_3.ogg",
+     "bytes": 15360,
+     "sha256": "be5bc42cd1e59ceb8d3df0494d4dfa0058a46325c7056c060dc343fd568a0527",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_metal_4",
+   "type": "audio",
+   "slot": "impact_metal",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "falling-sheet-steel-bar-1-s1771",
+   "source_page": "https://bigsoundbank.com/falling-sheet-steel-bar-1-s1771.html",
+   "title": "Falling sheet steel bar #1",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/1771.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.15,
+    "trim": [
+     0.0,
+     0.6
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-0.60 s, fades 0.00/0.15 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.6,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_metal_4.ogg",
+     "bytes": 9134,
+     "sha256": "b4b214f9580e2dd82da9693eaad097c5701f3c82decfbbf75a7baee4d4336cff",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_thud",
+   "type": "audio",
+   "slot": "impact_thud",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactSoft_heavy_000.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactSoft_heavy_000",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactSoft_heavy_000.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.53,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_thud.ogg",
+     "bytes": 4683,
+     "sha256": "32d4dbec6c06afd700eb92ab7c6f87aa7043f44b1d3123ca921ef90f411fccf4",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_thud_2",
+   "type": "audio",
+   "slot": "impact_thud",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactSoft_heavy_002.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactSoft_heavy_002",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactSoft_heavy_002.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.572,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_thud_2.ogg",
+     "bytes": 4874,
+     "sha256": "72af4f0d7b7482faa3c49d623b5377cc61953b50e26b6e651f32e410b61277f2",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_thud_3",
+   "type": "audio",
+   "slot": "impact_thud",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactPunch_heavy_000.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactPunch_heavy_000",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactPunch_heavy_000.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.649,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_thud_3.ogg",
+     "bytes": 8582,
+     "sha256": "d112981eafb4fdf85415afc31100fca88b12b21ff2acdc673f920b73f8a42865",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_glass",
+   "type": "audio",
+   "slot": "impact_glass",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactGlass_medium_000.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactGlass_medium_000",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactGlass_medium_000.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.543,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_glass.ogg",
+     "bytes": 6106,
+     "sha256": "da0f0aef26ed40868c95125f48a1de2e79760b9c62a8df07d4886a2deb0bb0a4",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_glass_2",
+   "type": "audio",
+   "slot": "impact_glass",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactGlass_heavy_001.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactGlass_heavy_001",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactGlass_heavy_001.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.429,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_glass_2.ogg",
+     "bytes": 6086,
+     "sha256": "06695894c94ce84ab31cff357650b9ae62ec9d11e9cc77d8da534defbe6644fb",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "impact_glass_3",
+   "type": "audio",
+   "slot": "impact_glass",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "impact-sounds:Audio/impactGlass_light_002.ogg",
+   "source_page": "https://kenney.nl/assets/impact-sounds",
+   "title": "Impact Sounds: impactGlass_light_002",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473"
+   ],
+   "note": "Audio/impactGlass_light_002.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.21,
+   "files": [
+    {
+     "path": "res://assets/audio/impact_glass_3.ogg",
+     "bytes": 4992,
+     "sha256": "fb2d53070a55ef7e4cef64012e046367a9e0e6ad23f59a1f2be318eea6596cc3",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "lasso_whip",
+   "type": "audio",
+   "slot": "lasso_whip",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "complete-whip-1-s2961",
+   "source_page": "https://bigsoundbank.com/complete-whip-1-s2961.html",
+   "title": "Complete whip #1",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/2961.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.15,
+    "trim": [
+     0.2,
+     0.95
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.20-0.95 s, fades 0.00/0.15 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.75,
+   "files": [
+    {
+     "path": "res://assets/audio/lasso_whip.ogg",
+     "bytes": 10322,
+     "sha256": "fdbb173122a5a331e61fd3f8d734059fedbc44710c14dae1ad02ef14928076e5",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "lasso_creak",
+   "type": "audio",
+   "slot": "lasso_creak",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "big-rope-s3426",
+   "source_page": "https://bigsoundbank.com/big-rope-s3426.html",
+   "title": "Big rope",
+   "author": "Joseph SARDIN & Axeline T.",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/3426.ogg"
+   ],
+   "edit": {
+    "loop": 0.75,
+    "trim": [
+     4.0,
+     9.0
+    ]
+   },
+   "note": "ffmpeg: trimmed to 4.00-9.00 s, 0.75 s cross-fade for a seamless loop, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 5.0,
+   "files": [
+    {
+     "path": "res://assets/audio/lasso_creak.ogg",
+     "bytes": 45105,
+     "sha256": "fe649ce8422141cc5b73e2ef0eabb75f4e1c1bca8b7870c9b99c078115a0e769",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "lasso_clink",
+   "type": "audio",
+   "slot": "lasso_clink",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "Rudmer_Rotteveel/457461",
+   "source_page": "https://freesound.org/people/Rudmer_Rotteveel/sounds/457461/",
+   "title": "Karabiner_Click_05.wav",
+   "author": "Rudmer_Rotteveel",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/457/457461_4921277-hq.ogg"
+   ],
+   "edit": {
+    "trim": [
+     0.3,
+     0.77
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.30-0.77 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.468,
+   "files": [
+    {
+     "path": "res://assets/audio/lasso_clink.ogg",
+     "bytes": 8036,
+     "sha256": "84ab0f3b03d5a2d69d266645ea18b7d65a4ab6440c3f19e7249f160b4452c99d",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "lasso_snap",
+   "type": "audio",
+   "slot": "lasso_snap",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "whip-crack-1-s2949",
+   "source_page": "https://bigsoundbank.com/whip-crack-1-s2949.html",
+   "title": "Whip crack #1",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/2949.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.3,
+    "gain": -1,
+    "trim": [
+     0.15,
+     0.8
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.15-0.80 s, fades 0.00/0.30 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.65,
+   "files": [
+    {
+     "path": "res://assets/audio/lasso_snap.ogg",
+     "bytes": 8299,
+     "sha256": "44a8479dab9238fe408ad0dcabc1b69b0e8e43f5ae15732af1c7f1d0d37372bd",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "taser_arc",
+   "type": "audio",
+   "slot": "taser_arc",
+   "status": "failed",
+   "source": "Freesound",
+   "source_id": "Sclolex/210878",
+   "source_page": "https://freesound.org/people/Sclolex/sounds/210878/",
+   "title": "highvoltagearc.wav",
+   "author": "Sclolex",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/210/210878_985466-hq.ogg"
+   ],
+   "edit": {
+    "loop": 0.5,
+    "trim": [
+     0.6,
+     4.1
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.60-4.10 s, 0.50 s cross-fade for a seamless loop, mono, 44.1 kHz Ogg Vorbis q4",
+   "error": "Ogg Vorbis stream holds no audio",
+   "files": []
+  },
+  {
+   "name": "taser_zap",
+   "type": "audio",
+   "slot": "taser_zap",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "AnthonyChan0/264779",
+   "source_page": "https://freesound.org/people/AnthonyChan0/sounds/264779/",
+   "title": "Civilian Stun Gun 1/10s zap",
+   "author": "AnthonyChan0",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/264/264779_2886479-hq.ogg"
+   ],
+   "edit": {
+    "gain": -1
+   },
+   "note": "ffmpeg: -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.397,
+   "files": [
+    {
+     "path": "res://assets/audio/taser_zap.ogg",
+     "bytes": 7176,
+     "sha256": "f61683f5c2740374b98cfae94e1e2a55deea764da763eea0479ee00f88e3e58f",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "taser_hiss",
+   "type": "audio",
+   "slot": "taser_hiss",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "hiss-of-steam-train-1-s0227",
+   "source_page": "https://bigsoundbank.com/hiss-of-steam-train-1-s0227.html",
+   "title": "Hiss of steam train #1",
+   "author": "GlaneurDeSons",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/0227.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.9,
+    "trim": [
+     0.0,
+     2.5
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-2.50 s, fades 0.00/0.90 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 2.5,
+   "files": [
+    {
+     "path": "res://assets/audio/taser_hiss.ogg",
+     "bytes": 23595,
+     "sha256": "323ac548e991450d38af0302ee369a6477ace53e15af2c9519e6d3298d6566f3",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "taser_beep",
+   "type": "audio",
+   "slot": "taser_beep",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "beep-of-a-cash-register-s1417",
+   "source_page": "https://bigsoundbank.com/beep-of-a-cash-register-s1417.html",
+   "title": "Beep of a Cash Register #1",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/1417.ogg"
+   ],
+   "edit": {
+    "gain": -6
+   },
+   "note": "ffmpeg: -6 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.2,
+   "files": [
+    {
+     "path": "res://assets/audio/taser_beep.ogg",
+     "bytes": 4696,
+     "sha256": "c325d375eb696ac6623068de219f17761e434183553cfe95bea90f5add670fe6",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tape_rip",
+   "type": "audio",
+   "slot": "tape_rip",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "cj_ascoli/444366",
+   "source_page": "https://freesound.org/people/cj_ascoli/sounds/444366/",
+   "title": "duct tape.WAV",
+   "author": "cj_ascoli",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/444/444366_4636389-hq.ogg"
+   ],
+   "edit": {
+    "gain": -1
+   },
+   "note": "ffmpeg: -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 2.425,
+   "files": [
+    {
+     "path": "res://assets/audio/tape_rip.ogg",
+     "bytes": 28383,
+     "sha256": "6e0045e337b1fb4d5a0fdba59a6df3144d1cabd6fd3e6ab462d0a37a7391bb11",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tape_rip_2",
+   "type": "audio",
+   "slot": "tape_rip",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "AlaskaRobotics/245200",
+   "source_page": "https://freesound.org/people/AlaskaRobotics/sounds/245200/",
+   "title": "duct tape unroll 5",
+   "author": "AlaskaRobotics",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/245/245200_1282865-hq.ogg"
+   ],
+   "edit": {
+    "gain": -1
+   },
+   "note": "ffmpeg: -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.922,
+   "files": [
+    {
+     "path": "res://assets/audio/tape_rip_2.ogg",
+     "bytes": 22404,
+     "sha256": "7899c76ab0d9a0349acb4dcf01bd98e880dce86d29ef83a2a0c0615aafd73c19",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tape_rip_3",
+   "type": "audio",
+   "slot": "tape_rip",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "adhesive-tape-1-s0297",
+   "source_page": "https://bigsoundbank.com/adhesive-tape-1-s0297.html",
+   "title": "Adhesive tape #1",
+   "author": "DenisChardonnet",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/0297.ogg"
+   ],
+   "edit": {
+    "fade_in": 0.03,
+    "fade_out": 0.1,
+    "trim": [
+     4.3,
+     7.45
+    ]
+   },
+   "note": "ffmpeg: trimmed to 4.30-7.45 s, fades 0.03/0.10 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 3.15,
+   "files": [
+    {
+     "path": "res://assets/audio/tape_rip_3.ogg",
+     "bytes": 40968,
+     "sha256": "09b50bb58036a6206ef5b6681785aa40bf7500141735ce47c565c208209cb110",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tape_snap",
+   "type": "audio",
+   "slot": "tape_snap",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "_natiKatz/223375",
+   "source_page": "https://freesound.org/people/_natiKatz/sounds/223375/",
+   "title": "Duct Tape 1",
+   "author": "_natiKatz",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/223/223375_1621161-hq.ogg"
+   ],
+   "edit": {
+    "gain": -1
+   },
+   "note": "ffmpeg: -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.499,
+   "files": [
+    {
+     "path": "res://assets/audio/tape_snap.ogg",
+     "bytes": 9629,
+     "sha256": "aa728adaaabb8f6b710e6fbf3793c1f274eb442d68db5611591b99d9cf6eee04",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tape_snap_2",
+   "type": "audio",
+   "slot": "tape_snap",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "baidonovan/187338",
+   "source_page": "https://freesound.org/people/baidonovan/sounds/187338/",
+   "title": "Duct Tape Ripped Off.wav",
+   "author": "baidonovan",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/187/187338_3297044-hq.ogg"
+   ],
+   "edit": {
+    "gain": 6,
+    "trim": [
+     0.12,
+     0.46
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.12-0.46 s, +6 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.34,
+   "files": [
+    {
+     "path": "res://assets/audio/tape_snap_2.ogg",
+     "bytes": 7084,
+     "sha256": "c56009889ed6a1ecd8759d40bbdddd2542502d1b51e77a7bec481360301fd65d",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "salt_shatter",
+   "type": "audio",
+   "slot": "salt_shatter",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "broken-glass-of-champagne-s1591",
+   "source_page": "https://bigsoundbank.com/broken-glass-of-champagne-s1591.html",
+   "title": "Broken Glass of Champagne",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/1591.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.3,
+    "gain": -1,
+    "trim": [
+     0.0,
+     1.2
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-1.20 s, fades 0.00/0.30 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.2,
+   "files": [
+    {
+     "path": "res://assets/audio/salt_shatter.ogg",
+     "bytes": 14510,
+     "sha256": "41d40386b8763defdb697ca74a6368642c0cf2432b084c7aa284dc9a7538eaa8",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "salt_shatter_2",
+   "type": "audio",
+   "slot": "salt_shatter",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "glass-burst-s0148",
+   "source_page": "https://bigsoundbank.com/glass-burst-s0148.html",
+   "title": "Glass Burst",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/0148.ogg"
+   ],
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.907,
+   "files": [
+    {
+     "path": "res://assets/audio/salt_shatter_2.ogg",
+     "bytes": 70982,
+     "sha256": "3e96096148e0d8c1706137ef98b9b4299f3230e3b06182efaade51d923f73f1d",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "salt_burst",
+   "type": "audio",
+   "slot": "salt_burst",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "Qvantor/880771",
+   "source_page": "https://freesound.org/people/Qvantor/sounds/880771/",
+   "title": "Sparkle Burst",
+   "author": "Qvantor",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/880/880771_19512113-hq.ogg"
+   ],
+   "edit": {
+    "gain": 8
+   },
+   "note": "ffmpeg: +8 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 2.597,
+   "files": [
+    {
+     "path": "res://assets/audio/salt_burst.ogg",
+     "bytes": 25853,
+     "sha256": "279ee0ff0edab5661e79a86ffdc4a20f14e08f9f213544ce80b880001db4c996",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "demon_roar",
+   "type": "audio",
+   "slot": "demon_roar",
+   "status": "ok",
+   "source": "OpenGameArt",
+   "source_id": "big-scary-troll-sounds:troll-roars.ogg",
+   "source_page": "https://opengameart.org/content/big-scary-troll-sounds",
+   "title": "Big scary troll sounds",
+   "author": "Darsycho",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://opengameart.org/sites/default/files/troll-roars_0.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.1,
+    "gain": -1,
+    "trim": [
+     7.0,
+     8.85
+    ]
+   },
+   "note": "ffmpeg: trimmed to 7.00-8.85 s, fades 0.00/0.10 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.85,
+   "files": [
+    {
+     "path": "res://assets/audio/demon_roar.ogg",
+     "bytes": 19234,
+     "sha256": "8f779b0562187d862caa1f7d0a9a3a53767e161e46903c327e3fde2b33dd96db",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "demon_roar_2",
+   "type": "audio",
+   "slot": "demon_roar",
+   "status": "ok",
+   "source": "OpenGameArt",
+   "source_id": "cc0-deep-monster-roar:monster_roar.wav",
+   "source_page": "https://opengameart.org/content/cc0-deep-monster-roar",
+   "title": "CC0 Deep Monster Roar",
+   "author": "trazzz123",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://opengameart.org/sites/default/files/monster_roar.wav"
+   ],
+   "edit": {
+    "fade_out": 0.8,
+    "trim": [
+     0.08,
+     4.4
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.08-4.40 s, fades 0.00/0.80 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 4.32,
+   "files": [
+    {
+     "path": "res://assets/audio/demon_roar_2.ogg",
+     "bytes": 27247,
+     "sha256": "0c857484e1d6aee5278fd16816b965c2983cc853810f4263b153f658f0386141",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "demon_roar_3",
+   "type": "audio",
+   "slot": "demon_roar",
+   "status": "ok",
+   "source": "OpenGameArt",
+   "source_id": "big-scary-troll-sounds:troll-roars.ogg",
+   "source_page": "https://opengameart.org/content/big-scary-troll-sounds",
+   "title": "Big scary troll sounds",
+   "author": "Darsycho",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://opengameart.org/sites/default/files/troll-roars_0.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.1,
+    "gain": -1,
+    "trim": [
+     3.55,
+     4.9
+    ]
+   },
+   "note": "ffmpeg: trimmed to 3.55-4.90 s, fades 0.00/0.10 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.35,
+   "files": [
+    {
+     "path": "res://assets/audio/demon_roar_3.ogg",
+     "bytes": 14651,
+     "sha256": "f89f0e6d9f54c4382f3c1226620686e015bb5178c731ddda706ed3d37a227d38",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "demon_roar_4",
+   "type": "audio",
+   "slot": "demon_roar",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "uagadugu/222523",
+   "source_page": "https://freesound.org/people/uagadugu/sounds/222523/",
+   "title": "Deep Monster Growl",
+   "author": "uagadugu",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/222/222523_255863-hq.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.3,
+    "trim": [
+     0.2,
+     3.6
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.20-3.60 s, fades 0.00/0.30 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 3.4,
+   "files": [
+    {
+     "path": "res://assets/audio/demon_roar_4.ogg",
+     "bytes": 33949,
+     "sha256": "ad1961b1df318cbed81b7e39472553b531b15035cd2dc1fccaf9275b14747caa",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "demon_screech",
+   "type": "audio",
+   "slot": "demon_screech",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "barn-owl-s1400",
+   "source_page": "https://bigsoundbank.com/barn-owl-s1400.html",
+   "title": "Barn Owl #1",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/1400.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.15,
+    "gain": -1,
+    "trim": [
+     0.1,
+     2.0
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.10-2.00 s, fades 0.00/0.15 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.9,
+   "files": [
+    {
+     "path": "res://assets/audio/demon_screech.ogg",
+     "bytes": 20384,
+     "sha256": "8947b1d6a25fc2afcdc13a50a2d04876ae8cac544fec5f5354f8619af6ad2186",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "demon_screech_2",
+   "type": "audio",
+   "slot": "demon_screech",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "sika-deer-rut-call-2-s3618",
+   "source_page": "https://bigsoundbank.com/sika-deer-rut-call-2-s3618.html",
+   "title": "Sika deer rut call #2",
+   "author": "Joseph SARDIN & Axeline T.",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/3618.ogg"
+   ],
+   "edit": {
+    "fade_in": 0.15,
+    "fade_out": 0.6,
+    "gain": -1,
+    "trim": [
+     1.0,
+     4.6
+    ]
+   },
+   "note": "ffmpeg: trimmed to 1.00-4.60 s, fades 0.15/0.60 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 3.6,
+   "files": [
+    {
+     "path": "res://assets/audio/demon_screech_2.ogg",
+     "bytes": 41290,
+     "sha256": "3414c1be08af6ae7f6b3cde0dc08b2d51d8ce14347490a030cefbf2c7fc21484",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "tk_whoosh",
+   "type": "audio",
+   "slot": "tk_whoosh",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "TheEndOfACycle/674292",
+   "source_page": "https://freesound.org/people/TheEndOfACycle/sounds/674292/",
+   "title": "Reversed Crash Cymbal - Low",
+   "author": "TheEndOfACycle",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/674/674292_3130497-hq.ogg"
+   ],
+   "edit": {
+    "trim": [
+     0.4,
+     2.69
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.40-2.69 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 2.287,
+   "files": [
+    {
+     "path": "res://assets/audio/tk_whoosh.ogg",
+     "bytes": 26813,
+     "sha256": "a694c8aa014cda8edd63fda5ca5c294a6802ee9f59a19bef8c6fb6656522ef8f",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "ragdoll_thud",
+   "type": "audio",
+   "slot": "ragdoll_thud",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "body-fall-2-s2453",
+   "source_page": "https://bigsoundbank.com/body-fall-2-s2453.html",
+   "title": "Body Fall #2",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/2453.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.15,
+    "gain": -1,
+    "trim": [
+     0.0,
+     1.0
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-1.00 s, fades 0.00/0.15 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.0,
+   "files": [
+    {
+     "path": "res://assets/audio/ragdoll_thud.ogg",
+     "bytes": 12476,
+     "sha256": "98117947326736d8b9042d0976bcc4ae6db8654940bbcee4efd79d888e77dde3",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "ragdoll_thud_2",
+   "type": "audio",
+   "slot": "ragdoll_thud",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "body-fall-1-s2452",
+   "source_page": "https://bigsoundbank.com/body-fall-1-s2452.html",
+   "title": "Body Fall #1",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/2452.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.1,
+    "gain": -1,
+    "trim": [
+     0.0,
+     1.15
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-1.15 s, fades 0.00/0.10 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.15,
+   "files": [
+    {
+     "path": "res://assets/audio/ragdoll_thud_2.ogg",
+     "bytes": 13458,
+     "sha256": "87f509ada5537df5ed177ce7240f8e699a405f0df45708cc8998b58683aa2494",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "van_door_slam",
+   "type": "audio",
+   "slot": "van_door_slam",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "car-door-3-s1524",
+   "source_page": "https://bigsoundbank.com/car-door-3-s1524.html",
+   "title": "Car door #3",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/1524.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.2,
+    "gain": -1,
+    "trim": [
+     1.85,
+     2.85
+    ]
+   },
+   "note": "ffmpeg: trimmed to 1.85-2.85 s, fades 0.00/0.20 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.0,
+   "files": [
+    {
+     "path": "res://assets/audio/van_door_slam.ogg",
+     "bytes": 11905,
+     "sha256": "bbcdef63fa457a8806f80934efe003c80a856b1ee989a78b37ee448f033bc402",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "van_door_slam_2",
+   "type": "audio",
+   "slot": "van_door_slam",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "car-sliding-door-2-s1494",
+   "source_page": "https://bigsoundbank.com/car-sliding-door-2-s1494.html",
+   "title": "Car sliding door #2",
+   "author": "Joseph SARDIN",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/1494.ogg"
+   ],
+   "edit": {
+    "gain": -1,
+    "trim": [
+     0.12,
+     1.89
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.12-1.89 s, -1 dB, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.759,
+   "files": [
+    {
+     "path": "res://assets/audio/van_door_slam_2.ogg",
+     "bytes": 18192,
+     "sha256": "765211d2a5630b8656eabbe3ad069237d1f542e8ed74fa39ebcf3f19d9f8bf42",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "van_bang",
+   "type": "audio",
+   "slot": "van_bang",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "kyles/637480",
+   "source_page": "https://freesound.org/people/kyles/sounds/637480/",
+   "title": "door metal knock heavy bang from other side.flac",
+   "author": "kyles",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/637/637480_612689-hq.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.12,
+    "trim": [
+     0.08,
+     1.45
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.08-1.45 s, fades 0.00/0.12 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.37,
+   "files": [
+    {
+     "path": "res://assets/audio/van_bang.ogg",
+     "bytes": 15321,
+     "sha256": "6e74a8a9f0b78e8a52e906518a197a0a9798617691eedddc92d2a510141d3fe6",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "van_bang_2",
+   "type": "audio",
+   "slot": "van_bang",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "dster777/344565",
+   "source_page": "https://freesound.org/people/dster777/sounds/344565/",
+   "title": "Metal Knock 1.wav",
+   "author": "dster777",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/344/344565_5048307-hq.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.2,
+    "trim": [
+     0.15,
+     1.25
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.15-1.25 s, fades 0.00/0.20 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.1,
+   "files": [
+    {
+     "path": "res://assets/audio/van_bang_2.ogg",
+     "bytes": 13727,
+     "sha256": "6fb5a68c1bd86f792f91a4e58147bbc6c2c7f11b488a112dd78e12b199d944b5",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "heartbeat",
+   "type": "audio",
+   "slot": "heartbeat",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "heartbeat-2-s0244",
+   "source_page": "https://bigsoundbank.com/heartbeat-2-s0244.html",
+   "title": "Heartbeat #2",
+   "author": "DenisChardonnet",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/0244.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.2,
+    "trim": [
+     0.0,
+     0.75
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-0.75 s, fades 0.00/0.20 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.75,
+   "files": [
+    {
+     "path": "res://assets/audio/heartbeat.ogg",
+     "bytes": 7488,
+     "sha256": "cd463a9ec3b097daf2b7830ead587b289ca78c46d5ce58815cd668a6e86600bd",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "heartbeat_2",
+   "type": "audio",
+   "slot": "heartbeat",
+   "status": "ok",
+   "source": "BigSoundBank",
+   "source_id": "heartbeat-1-s0243",
+   "source_page": "https://bigsoundbank.com/heartbeat-1-s0243.html",
+   "title": "Heartbeat #1",
+   "author": "DenisChardonnet",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://bigsoundbank.com/UPLOAD/ogg/0243.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.15,
+    "trim": [
+     0.0,
+     0.8
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-0.80 s, fades 0.00/0.15 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.8,
+   "files": [
+    {
+     "path": "res://assets/audio/heartbeat_2.ogg",
+     "bytes": 7590,
+     "sha256": "5487e72e1aa402915b522768a8dab6c1a5e2ac7f12d2f23dbb7fbd95fb5691e0",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "cash_register",
+   "type": "audio",
+   "slot": "cash_register",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "clubmydia+/584168",
+   "source_page": "https://freesound.org/people/clubmydia+/sounds/584168/",
+   "title": "old cash register open and close with a bing",
+   "author": "clubmydia+",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/584/584168_11720717-hq.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.3,
+    "trim": [
+     1.42,
+     4.5
+    ]
+   },
+   "note": "ffmpeg: trimmed to 1.42-4.50 s, fades 0.00/0.30 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 3.08,
+   "files": [
+    {
+     "path": "res://assets/audio/cash_register.ogg",
+     "bytes": 38458,
+     "sha256": "b0e1e9494dd23aff77bf6887a233522d1c71f003585591e903c4697806e59b4f",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "cash_register_2",
+   "type": "audio",
+   "slot": "cash_register",
+   "status": "ok",
+   "source": "Freesound",
+   "source_id": "CapsLok/184438",
+   "source_page": "https://freesound.org/people/CapsLok/sounds/184438/",
+   "title": "Cash Register Fake.wav",
+   "author": "CapsLok",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://cdn.freesound.org/previews/184/184438_850742-hq.ogg"
+   ],
+   "edit": {
+    "fade_out": 0.2,
+    "trim": [
+     0.0,
+     1.45
+    ]
+   },
+   "note": "ffmpeg: trimmed to 0.00-1.45 s, fades 0.00/0.20 s, mono, 44.1 kHz Ogg Vorbis q4",
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 1.45,
+   "files": [
+    {
+     "path": "res://assets/audio/cash_register_2.ogg",
+     "bytes": 15019,
+     "sha256": "036ce3338fe73d298313010c0d161e97be68bc48271815103be8b4d867c2b252",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "ui_click",
+   "type": "audio",
+   "slot": "ui_click",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "interface-sounds:Audio/click_001.ogg",
+   "source_page": "https://kenney.nl/assets/interface-sounds",
+   "title": "Interface Sounds: click_001",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696e746572666163652d736f756e6473"
+   ],
+   "note": "Audio/click_001.ogg extracted from the pack's zip",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.1,
+   "files": [
+    {
+     "path": "res://assets/audio/ui_click.ogg",
+     "bytes": 4876,
+     "sha256": "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "ui_buy",
+   "type": "audio",
+   "slot": "ui_buy",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "interface-sounds:Audio/confirmation_001.ogg",
+   "source_page": "https://kenney.nl/assets/interface-sounds",
+   "title": "Interface Sounds: confirmation_001",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696e746572666163652d736f756e6473"
+   ],
+   "note": "Audio/confirmation_001.ogg extracted from the pack's zip",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.29,
+   "files": [
+    {
+     "path": "res://assets/audio/ui_buy.ogg",
+     "bytes": 8968,
+     "sha256": "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "ui_deny",
+   "type": "audio",
+   "slot": "ui_deny",
+   "status": "ok",
+   "source": "Kenney",
+   "source_id": "interface-sounds:Audio/error_004.ogg",
+   "source_page": "https://kenney.nl/assets/interface-sounds",
+   "title": "Interface Sounds: error_004",
+   "author": "Kenney",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://kenney.nl/download-link/6173736574732f696e746572666163652d736f756e6473"
+   ],
+   "note": "Audio/error_004.ogg extracted from the pack's zip; ffmpeg: mono, 44.1 kHz Ogg Vorbis q4",
+   "edit": {},
+   "codec": "vorbis",
+   "channels": 1,
+   "sample_rate": 44100,
+   "seconds": 0.107,
+   "files": [
+    {
+     "path": "res://assets/audio/ui_deny.ogg",
+     "bytes": 4906,
+     "sha256": "84a19fdb72e6260ad238848c0109668f9cf3db19c9f3925f15850c7be11172f7",
+     "format": "ogg",
+     "verified": true
+    }
+   ]
+  }
+ ],
+ "fonts": [
+  {
+   "name": "Oswald-Bold",
+   "type": "font",
+   "status": "ok",
+   "source": "GitHub",
+   "source_id": "googlefonts/OswaldFont@89795261ac9eeb9aa8cd99f43982c4e4b0e53261:fonts/ttf/Oswald-Bold.ttf",
+   "source_page": "https://github.com/googlefonts/OswaldFont",
+   "author": "Copyright 2016 The Oswald Project Authors (https://github.com/googlefonts/OswaldFont)",
+   "license": "SIL Open Font License 1.1",
+   "download_urls": [
+    "https://raw.githubusercontent.com/googlefonts/OswaldFont/89795261ac9eeb9aa8cd99f43982c4e4b0e53261/fonts/ttf/Oswald-Bold.ttf",
+    "https://raw.githubusercontent.com/googlefonts/OswaldFont/89795261ac9eeb9aa8cd99f43982c4e4b0e53261/OFL.txt"
+   ],
+   "family": "Oswald",
+   "style": "Bold",
+   "version": "Version 4.103; ttfautohint (v1.8.4.7-5d5b);gftools[0.9.33.dev8+g029e19f]",
+   "glyphs": 771,
+   "codepoints": 737,
+   "cyrillic": true,
+   "variable": false,
+   "title": "Oswald Bold",
+   "files": [
+    {
+     "path": "res://assets/fonts/Oswald-Bold.ttf",
+     "bytes": 108496,
+     "sha256": "eb7d46f856dd57f18a8c03d033c57802692bf127f01dbd95ba8984338e6b5135",
+     "format": "ttf",
+     "verified": true
+    },
+    {
+     "path": "res://assets/fonts/OFL-Oswald.txt",
+     "bytes": 4483,
+     "sha256": "0fd731a904b729a4e02eaf5e8ebd06783edd9abe400e8882760160230675b652",
+     "format": "text",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "Inter-Medium",
+   "type": "font",
+   "status": "ok",
+   "source": "GitHub release",
+   "source_id": "rsms/inter@v4.1:Inter-4.1.zip:extras/ttf/Inter-Medium.ttf",
+   "source_page": "https://github.com/rsms/inter/releases/tag/v4.1",
+   "author": "Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/inter)",
+   "license": "SIL Open Font License 1.1",
+   "download_urls": [
+    "https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip"
+   ],
+   "note": "extras/ttf/Inter-Medium.ttf and LICENSE.txt extracted from Inter-4.1.zip",
+   "family": "Inter",
+   "style": "Medium",
+   "version": "Version 4.001;git-9221beed3",
+   "glyphs": 2937,
+   "codepoints": 2852,
+   "cyrillic": true,
+   "variable": false,
+   "title": "Inter Medium",
+   "files": [
+    {
+     "path": "res://assets/fonts/Inter-Medium.ttf",
+     "bytes": 417300,
+     "sha256": "97ad806f526e41546d46365bb3a393145f75b7b1568913db74549ad8b8dba872",
+     "format": "ttf",
+     "verified": true
+    },
+    {
+     "path": "res://assets/fonts/OFL-Inter.txt",
+     "bytes": 4380,
+     "sha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
+     "format": "text",
+     "verified": true
+    }
+   ]
+  },
+  {
+   "name": "JetBrainsMono-Medium",
+   "type": "font",
+   "status": "ok",
+   "source": "GitHub",
+   "source_id": "JetBrains/JetBrainsMono@19371302b95d218af43299bce79ddbddd0bc364d:fonts/ttf/JetBrainsMono-Medium.ttf",
+   "source_page": "https://github.com/JetBrains/JetBrainsMono",
+   "author": "Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)",
+   "license": "SIL Open Font License 1.1",
+   "download_urls": [
+    "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/19371302b95d218af43299bce79ddbddd0bc364d/fonts/ttf/JetBrainsMono-Medium.ttf",
+    "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/19371302b95d218af43299bce79ddbddd0bc364d/OFL.txt"
+   ],
+   "family": "JetBrains Mono",
+   "style": "Medium",
+   "version": "Version 2.305; ttfautohint (v1.8.4.7-5d5b)",
+   "glyphs": 1754,
+   "codepoints": 1372,
+   "cyrillic": true,
+   "variable": false,
+   "title": "JetBrains Mono Medium",
+   "files": [
+    {
+     "path": "res://assets/fonts/JetBrainsMono-Medium.ttf",
+     "bytes": 270316,
+     "sha256": "d16e6dc99672734698d629705f617c79f6eb6040f5113efe3a145204dc988109",
+     "format": "ttf",
+     "verified": true
+    },
+    {
+     "path": "res://assets/fonts/OFL-JetBrainsMono.txt",
+     "bytes": 4399,
+     "sha256": "a76abf002c49097d146e86740a3105a5d00450b1592e820a1109a8c5680cd697",
+     "format": "text",
+     "verified": true
     }
    ]
   }

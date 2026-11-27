@@ -7,6 +7,10 @@ extends Node
 ## (0..1) mixes in a hard electrical stutter that eases back out when released.
 
 const GROUP := &"haunt_lights"
+const POPS_PER_FRAME := 3
+
+static var _pop_frame := -1
+static var _pops := 0
 
 @export var base_energy := 2.0
 ## Share of the energy that wobbles with the noise (0 = steady, 1 = wild).
@@ -41,6 +45,8 @@ func _ready() -> void:
 
 ## Blown out by the demon: dead for `seconds`, then it stutters back to life.
 func blackout(seconds: float) -> void:
+	if _blackout_left <= 0.0 and seconds > 0.0:
+		_pop()
 	_blackout_left = maxf(_blackout_left, seconds)
 
 
@@ -51,6 +57,18 @@ func is_blacked_out() -> bool:
 ## Current haunt strength (0..1) after smoothing.
 func get_haunt() -> float:
 	return _haunt
+
+
+## The filament giving up: a faint spark at the bulb. A room going dark at once pops a few times, not a dozen.
+func _pop() -> void:
+	var frame := Engine.get_physics_frames()
+	if frame != _pop_frame:
+		_pop_frame = frame
+		_pops = 0
+	_pops += 1
+	if _pops > POPS_PER_FRAME or _light == null or not _light.is_inside_tree():
+		return
+	SoundManager.play_3d(&"taser_zap", _light.global_position, -13.0, randf_range(1.5, 1.9), 0.0)
 
 
 func _process(delta: float) -> void:
