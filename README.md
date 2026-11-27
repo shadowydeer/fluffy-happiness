@@ -4,10 +4,11 @@ A 3D physics-based co-op comedy-horror game for Godot 4.3+. One to four
 exorcists break into a cursed house, tackle and bind a ragdoll demon, and
 shove it into the back of a van.
 
-This repository currently contains **Stages 1, 1.5 and 2**: the cursed house and
+This repository currently contains **Stages 1, 1.5, 2 and 2.5**: the cursed house and
 yard, the extraction van, the physics player controller and HUD, the CC0 model and
-PBR texture pass, and the active-ragdoll demon with its poltergeist AI, knockdowns
-and drag-to-van capture. All assets live under `assets/`, so the game runs offline.
+PBR texture pass, the active-ragdoll demon with its poltergeist AI, knockdowns
+and drag-to-van capture, and the rigged, skinned demon model that ragdoll now wears.
+All assets live under `assets/`, so the game runs offline.
 
 ## Running it
 
@@ -52,7 +53,7 @@ scenes/
   Main.tscn              Entry scene (one node + Main.gd)
   Player.tscn            CharacterBody3D, capsule, head, spring-arm camera, headlamp, model
   HUD.tscn               CanvasLayer + HUD.gd
-  Demon.tscn             Ragdoll root (DemonRagdoll.gd) with Visuals, Audio and AI children
+  Demon.tscn             Ragdoll root (DemonRagdoll.gd) with Driver, Visuals, Audio and AI children
 scripts/
   Main.gd                WorldEnvironment (ACES, SSAO, fog, volumetric fog, glow) and moonlight
   LevelBuilder.gd        Yard, house shell, rooms, lamps, moonbeams, markings, triggers, props
@@ -64,12 +65,16 @@ scripts/
   FlickerLight.gd        Noise-driven flicker and brown-outs for any Light3D
   Player.gd              Movement, stamina, camera modes, headlamp, grab / throw, interaction
   ExorcistModel.gd       Rigged hazmat exorcist: skeletal clips plus procedural crouch, lean and arm IK
+  FirstPersonArms.gd     Smooth sleeves and jointed tactical gloves shown in first person
   HUD.gd                 Objective banner, demon status panel, stamina bar, gadget slots, prompts
-  DemonRagdoll.gd        11 rigid bodies on 10 6-DOF joints, balance, poses, stun / bind / struggle
-  DemonVisuals.gd        Sculpted anatomy per segment, ember cracks, eyes, ash and spark particles
+  DemonRagdoll.gd        11 collider-only rigid bodies on 10 6-DOF joints, fitted to the model's skeleton
+  DemonSkeletonDriver.gd Loads the rigged .glb, sizes the ragdoll from it and poses its bones from the bodies
+  DemonVisuals.gd        Charred hide shader, molten veins, ember eyes, ash and spark particles, mood
   DemonAI.gd             State machine, waypoint navigation, haunting, swipes, poltergeist throws
   DemonAudio.gd          Procedural rasp, roar, buzz, thud and whoosh buffers
   Crosshair.gd           Reactive reticle
+shaders/
+  demon_skin.gdshader    Soot-and-ash wet hide over the model's paint, vein mask, Fresnel rim
 ```
 
 ## How the pieces fit
@@ -119,7 +124,7 @@ scripts/
 - **Ragdoll**: `Pelvis`, `Torso`, `Head` and four two-segment limbs (54 kg, 26 kg of it
   in the core) joined by `Generic6DOFJoint3D` with anatomical limits. Awake, a PD upright
   torque and foot-ray support keep it standing while pose targets drive the lurch, arm
-  swings and head tracking. Stunned, the drives drop out and it falls in a heap.
+  swings and head tracking. Stunned, the drives drop out and it goes down full length.
 - **Stun and bind**: `stun_meter` drains from 100; at 0 it scrambles up `ENRAGED`.
   `bind_level` 0-3 weakens its struggle pulses and eases the drag (Stage 3 gadgets set it).
 - **AI**: `LURKING` around the ritual room, `STALKING` once you are inside (a direct
@@ -145,6 +150,49 @@ scripts/
    into the cage. `L` changes how hard it thrashes. `F` on the doors seals the capture.
 5. `K` again wakes it early, to watch it scramble upright.
 
+## Stage 2.5: the rigged demon
+
+- **Model**: `assets/models/demon/demon.glb`, "Demon sorcerer, rigged (Meshy)" from
+  vibeassets.io (asset `6lgzyditwz`, CC0 1.0, a text-to-3D model with an automatic rig):
+  one skinned mesh of 21,225 vertices on a 24-bone `Skeleton3D`. `tools/fetch_assets.py`
+  downloads it, refuses anything that is not CC0, a valid binary glTF, skinned and
+  carrying every bone the game maps, and prints the bone hierarchy with rest positions
+  and the bounding box. The game never goes online: the file is committed.
+- **Height**: the model is scaled so its horn tips stand at 2.30 m with the legs straight
+  (`standing_height` on the `Driver` node; the skull is at 2.14 m), against a 1.80 m
+  exorcist. It keeps most of that while it hunts and ducks under lintels and the van roof.
+- **Physics fitted to the skeleton**: `DemonSkeletonDriver.prepare()` reads the rest pose
+  and hands the ragdoll a layout: where each segment sits, how long and how thick it is
+  (thickness is measured from the skin weighted to each bone), and where the joints go.
+  The bodies carry colliders only. Nothing renders but the skin.
+- **Bone mapping**:
+
+  | Ragdoll segment | Bone | Also carried |
+  | --- | --- | --- |
+  | `Pelvis` | `Hips` | `Spine02`, `Spine01` blended toward the torso |
+  | `Torso` | `Spine` | `LeftShoulder`, `RightShoulder`, half of `neck` |
+  | `Head` | `Head` | `head_end`, `headfront` |
+  | `UpperArmL` / `UpperArmR` | `LeftArm` / `RightArm` | |
+  | `LowerArmL` / `LowerArmR` | `LeftForeArm` / `RightForeArm` | `LeftHand` / `RightHand` |
+  | `UpperLegL` / `UpperLegR` | `LeftUpLeg` / `RightUpLeg` | |
+  | `LowerLegL` / `LowerLegR` | `LeftLeg` / `RightLeg` | `LeftFoot`, `LeftToeBase` / right |
+
+- **Driving the bones**: at start-up the driver stores each bone's rest offset from the
+  body that carries it. Every physics tick it poses the bones parents first from the
+  body transforms, with lightly smoothed rotations and fixed bone lengths (a joint may
+  give 7 cm at most), so the skin cannot tear or turn inside out. Awake, it adds the
+  head's stare and twitch, hunched shoulders, flexing claws and flat feet. Stunned, all
+  of that fades out and the mesh is the limp ragdoll.
+- **Collapse**: a stunned demon is tipped over like a felled tree, arms flung ahead of
+  it, so it lies its full length on the floor instead of folding into a heap.
+- **Look**: `demon_skin.gdshader` chars the model's painted anatomy down to soot and ash
+  under a wet sheen, adds a crimson-amber rim and molten veins across the chest and
+  back that flare when it is enraged or casting and gutter when it is stunned. Ember
+  eyes with a shadowless glow ride the `Head` bone, ash and sparks the `Spine` bone.
+- **First-person arms**: in first person the rig's faceted arms are swapped for round
+  sleeves and gloves with jointed fingers. The two hands rest in different spots, close
+  their fingers on whatever is held, and sag, reach and tremble with its weight.
+
 ## Checks
 
 ```
@@ -157,8 +205,12 @@ input paths (F on the van doors, grab, haul up the ramp, throw, house triggers, 
 Ctrl / Space). It then runs the Stage 2 loop: ragdoll layout and layers, locating the
 demon, haunted lights, swipe and thrown-prop knockdowns, `K` / `J` / `L` / `F1` as real
 key presses, dragging the stunned demon up the ramp, capture and sealing, and a final
-check that no segment ever went non-finite. `tools/setup_sandbox.sh` installs Godot 4.3
-and a software Vulkan stack for headless Linux machines.
+check that no segment ever went non-finite. For Stage 2.5 it also checks the rigged
+model (every mapped bone, vertex count, 2.25 - 2.35 m height, collider-only segments),
+that the skeleton pose is valid and sits on the physics on every tick, the mood glow,
+the full-length collapse and the first-person arms. `tools/setup_sandbox.sh` installs
+Godot 4.3 and a software Vulkan stack for headless Linux machines.
 
-Headless runs print `Parameter "m" is null` on exit. That is the dummy renderer freeing
-meshes and predates Stage 2; it does not appear with a real renderer.
+Headless runs print `Parameter "m" is null` many times. That is the dummy renderer
+being asked about meshes it never stores, and predates Stage 2; it does not appear
+with a real renderer.

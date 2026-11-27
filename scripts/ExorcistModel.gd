@@ -13,6 +13,7 @@ extends Node3D
 signal pose_updated
 
 const Mats := preload("res://scripts/MaterialLibrary.gd")
+const ViewArms := preload("res://scripts/FirstPersonArms.gd")
 
 enum Suit { ORANGE, TEAL, OLIVE, PURPLE }
 
@@ -83,6 +84,17 @@ var _hand_world: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
 var _showcase_wait := 0.0
 var _knocked := false
 
+# First-person arms: smooth sleeves and gloves that stand in for the rig's faceted ones.
+var _view_arms: ViewArms
+var _sleeve_material: StandardMaterial3D
+var _arms_swapped := false
+## Harness and backpack: like the head, they only cast shadows in first person.
+var _chest_gear: Array[GeometryInstance3D] = []
+## 0..1: how heavy the held thing is, and how far the grip is from where it wants to be.
+var _load := 0.0
+var _load_target := 0.0
+var _strain := 0.0
+
 
 func _ready() -> void:
 	_build()
@@ -96,6 +108,8 @@ func apply_suit(index: int) -> void:
 	suit = posmod(index, SUIT_COLORS.size()) as Suit
 	var color := SUIT_COLORS[suit]
 	_suit_material.albedo_color = color
+	if _sleeve_material:
+		_sleeve_material.albedo_color = color
 	_pants_material.albedo_color = color.darkened(0.3)
 	_trim_material.albedo_color = color.darkened(0.6)
 	var visor := VISOR_COLORS[suit]
@@ -119,8 +133,12 @@ func set_look_pitch(pitch: float) -> void:
 
 
 ## While `active`, the arms stretch toward `global_target` (the grab point).
-func set_reach(active: bool, global_target: Vector3 = Vector3.ZERO) -> void:
+## `load` (0..1) is how heavy the held thing is and `strain` (0..1) how hard the grip is
+## being pulled: first-person arms sag, reach further and tremble with them.
+func set_reach(active: bool, global_target: Vector3 = Vector3.ZERO, load: float = 0.0, strain: float = 0.0) -> void:
 	_reaching = active
+	_load_target = clampf(load, 0.0, 1.0) if active else 0.0
+	_strain = clampf(strain, 0.0, 1.0) if active else 0.0
 	if active:
 		_reach_target = global_target
 
@@ -130,12 +148,14 @@ func set_view(camera_transform: Transform3D) -> void:
 	_view = camera_transform
 
 
-## In first person the head and its gear only cast shadows, so the camera never
-## looks out through its own mask; the body and arms stay visible.
+## In first person the head, the harness and their gear only cast shadows, so the camera
+## never looks out through its own mask or past its own shoulder straps; the body stays visible.
 func set_first_person(enabled: bool) -> void:
 	_first_person = enabled
 	var cast := GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY if enabled else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	for part in _head_parts:
+		part.cast_shadow = cast
+	for part in _chest_gear:
 		part.cast_shadow = cast
 	for part in _fallback_parts:
 		part.visible = not enabled
@@ -189,6 +209,10 @@ func _process(delta: float) -> void:
 	_air = move_toward(_air, 0.0 if _on_floor else 1.0, delta * 6.0)
 	_reach_weight = move_toward(_reach_weight, 1.0 if _reaching else 0.0, delta * 7.0)
 	_arms_weight = move_toward(_arms_weight, 1.0 if _first_person and not _knocked else 0.0, delta * 5.0)
+	_load = lerpf(_load, _load_target, minf(1.0, delta * 5.0))
+	var swap := _view_arms != null and _arms_weight > 0.5
+	if swap != _arms_swapped:
+		_swap_arms(swap)
 	var lean_target := 0.0 if _first_person else (0.16 if _sprinting else 0.0) + 0.3 * _crouch
 	_lean = lerpf(_lean, lean_target, minf(1.0, delta * 9.0))
 	if _speed > 0.3 and _on_floor:
@@ -286,7 +310,35 @@ func _apply_pose(skeleton: Skeleton3D) -> void:
 			var pole := (-up * 0.8 + right * sign * 0.7 - forward * 0.35).normalized()
 			_solve_limb(skeleton, _bone("UpperArm.%s" % side), _bone("LowerArm.%s" % side), wrist, goal, pole)
 		_hand_world[i] = skeleton.global_transform * skeleton.get_bone_global_pose(wrist).origin
+		if _arms_swapped:
+			var upper_arm := _bone("UpperArm.%s" % side)
+			var shoulder := skeleton.global_transform * skeleton.get_bone_global_pose(upper_arm).origin
+			var elbow := skeleton.global_transform * skeleton.get_bone_global_pose(_bone("LowerArm.%s" % side)).origin
+			var hand := _hand_basis(sign, elbow, _hand_world[i])
+			_view_arms.pose_arm(i, shoulder, elbow, _hand_world[i], hand, _reach_weight)
+			# The tether leaves the palm, not the wrist.
+			_hand_world[i] += hand * Vector3(0.0, -0.02, -0.08)
+			# The rig's own faceted arm (and its cuff bands) folds away into the shoulder, under the sleeve.
+			var tucked := skeleton.get_bone_global_pose(upper_arm)
+			tucked.basis = tucked.basis.scaled(Vector3.ONE * 0.001)
+			skeleton.set_bone_global_pose(upper_arm, tucked)
 	pose_updated.emit()
+
+
+## Orientation of a first-person glove: -Z along the fingers, +Y out of the back of the hand.
+## Relaxed, the hands point ahead and a little inward with the knuckles rolled outward;
+## gripping, they turn toward the grab point and roll further, palms closing on the load.
+func _hand_basis(sign: float, elbow: Vector3, wrist: Vector3) -> Basis:
+	var view := _view.basis.orthonormalized()
+	var forward := ((wrist - elbow).normalized() * 0.55 - view.z * 0.45 - view.x * sign * 0.14).normalized()
+	var to_grab := _reach_target - wrist
+	if _reach_weight > 0.001 and to_grab.length_squared() > 0.0004:
+		forward = forward.lerp(to_grab.normalized(), 0.55 * _reach_weight).normalized()
+	# The right hand is carried a touch flatter than the left: no two hands rest alike.
+	var roll := 0.62 - sign * 0.07 + (0.42 + 0.22 * _load) * _reach_weight + sin(_clock * 0.7 + sign * 1.3) * 0.03
+	var back := view.y * cos(roll) + view.x * sign * sin(roll)
+	back = (back - forward * back.dot(forward)).normalized()
+	return Basis(back.cross(-forward), back, -forward)
 
 
 ## Where a hand wants to be this frame, in world space.
@@ -294,18 +346,23 @@ func _hand_goal(sign: float, shoulder_world: Vector3) -> Vector3:
 	var goal: Vector3
 	if _arms_weight > 0.5:
 		# First-person hands: low in the frame, bobbing with the stride and trailing the view.
+		# The two rest spots differ (the right hand rides higher and further out, ready to
+		# grab) and each drifts on its own slow rhythm, so they never look mirrored.
 		var bob := Vector3(sin(_stride_phase * 0.5) * 0.012, absf(cos(_stride_phase * 0.5)) * 0.016, 0.0) * clampf(_speed / 4.4, 0.0, 1.4)
-		var breathe := Vector3(0.0, sin(_clock * 1.6 + sign) * 0.004, 0.0)
-		var rest := Vector3(sign * 0.27 - _sway.x * 0.6, -0.32 + _sway.y * 0.5, -0.46) + bob * Vector3(sign, 1.0, 1.0) + breathe
+		var drift := Vector3(sin(_clock * 0.9 + sign * 0.8) * 0.005, sin(_clock * 1.6 + sign) * 0.005, cos(_clock * 0.6 + sign * 2.1) * 0.006)
+		var home := Vector3(0.215, -0.3, -0.5) if sign > 0.0 else Vector3(-0.24, -0.33, -0.465)
+		var rest := home + Vector3(-_sway.x * 0.6, _sway.y * 0.5, 0.0) + bob * Vector3(sign, 1.0, 1.0) + drift
 		goal = _view * rest
 		if _reach_weight > 0.001:
-			var toward := (_reach_target - goal).limit_length(0.16)
-			goal += toward * _reach_weight + _view.basis * Vector3(-sign * 0.05, 0.05, 0.0) * _reach_weight
+			# A heavy load drags the arms out and down toward it, and a grip near breaking shakes them.
+			var toward := (_reach_target - goal).limit_length(0.16 + 0.12 * _load)
+			var tremble := Vector3(sin(_clock * 31.0 + sign * 2.0), cos(_clock * 27.0 + sign), 0.0) * 0.005 * _strain
+			goal += toward * _reach_weight + _view.basis * (Vector3(-sign * 0.05, 0.05 - 0.07 * _load, 0.0) + tremble) * _reach_weight
 	else:
 		# Third person: both gloves go for the grab point, slightly apart.
 		goal = _reach_target + global_transform.basis.x * sign * 0.1
 	# Never ask for more than the arm can reach.
-	return shoulder_world + (goal - shoulder_world).limit_length(0.56)
+	return shoulder_world + (goal - shoulder_world).limit_length(0.56 + 0.05 * _load * _arms_weight)
 
 
 func _bone(bone_name: String) -> int:
@@ -397,6 +454,9 @@ func _build() -> void:
 
 	_dress_rig()
 	_build_gear()
+	# Only a player-driven exorcist is ever seen through its own eyes.
+	if not showcase:
+		_build_view_arms()
 
 	var modifier := PoseModifier.new()
 	modifier.name = "PoseModifier"
@@ -452,6 +512,25 @@ func _dress_rig() -> void:
 				replacement = hood
 			if replacement:
 				mesh.set_surface_override_material(surface, replacement)
+
+
+## Smooth sleeves and gloves for the first-person view (see FirstPersonArms.gd).
+func _build_view_arms() -> void:
+	_sleeve_material = _suit_material.duplicate() as StandardMaterial3D
+	# These meshes are built in metres, unlike the rig's.
+	_sleeve_material.uv1_scale = Vector3.ONE * 3.0
+	var glove := Mats.solid(Color(0.105, 0.108, 0.115), 0.82)
+	var guard := Mats.solid(Color(0.02, 0.021, 0.024), 0.32)
+	_view_arms = ViewArms.new()
+	_view_arms.name = "FirstPersonArms"
+	add_child(_view_arms)
+	_view_arms.build(_sleeve_material, Mats.glow(Color(0.5, 0.53, 0.5), 0.12), glove, guard)
+
+
+## Shows the first-person arms in place of the rig's own (or puts the rig's back).
+func _swap_arms(first_person_arms: bool) -> void:
+	_arms_swapped = first_person_arms
+	_view_arms.set_shown(first_person_arms)
 
 
 ## Rebuilds a skinned mesh so the triangles of `surface` that follow the wrist
@@ -590,6 +669,10 @@ func _build_gear() -> void:
 		_limb_band("LowerArm.%s" % side, "Wrist.%s" % side, 0.78, 0.043, 0.02, reflective)
 		_limb_band("LowerArm.%s" % side, "Wrist.%s" % side, 0.95, 0.042, 0.025, rubber)
 		_limb_band("LowerLeg.%s" % side, "LowerLeg.%s_end" % side, 0.66, 0.07, 0.025, reflective)
+	for part in chest.find_children("*", "GeometryInstance3D", true, false):
+		var gear := part as GeometryInstance3D
+		if not _head_parts.has(gear) and gear.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON:
+			_chest_gear.append(gear)
 
 
 ## Bone rest position in this node's space (metres).

@@ -1,15 +1,20 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/DemonRagdoll.gd" id="1_ragdoll"]
 [ext_resource type="Script" path="res://scripts/DemonVisuals.gd" id="2_visuals"]
 [ext_resource type="Script" path="res://scripts/DemonAudio.gd" id="3_audio"]
 [ext_resource type="Script" path="res://scripts/DemonAI.gd" id="4_ai"]
+[ext_resource type="Script" path="res://scripts/DemonSkeletonDriver.gd" id="5_driver"]
 
 [node name="Demon" type="Node3D"]
 script = ExtResource("1_ragdoll")
 
 [node name="Visuals" type="Node3D" parent="."]
 script = ExtResource("2_visuals")
+
+[node name="Driver" type="Node" parent="."]
+script = ExtResource("5_driver")
+standing_height = 2.3
 
 [node name="Audio" type="Node3D" parent="."]
 script = ExtResource("3_audio")

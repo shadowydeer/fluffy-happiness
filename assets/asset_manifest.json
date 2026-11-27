@@ -1,14 +1,14 @@
 {
  "generator": "tools/fetch_assets.py",
- "generated_utc": "2026-11-26T15:15:00Z",
+ "generated_utc": "2026-11-26T16:37:11Z",
  "license_summary": "Every asset is CC0 1.0 (public domain dedication). Attribution is not required; authors are listed as a courtesy.",
  "totals": {
-  "models": 81,
+  "models": 82,
   "texture_sets": 26,
-  "files": 182,
-  "model_bytes": 163116456,
+  "files": 183,
+  "model_bytes": 164673120,
   "texture_bytes": 65805173,
-  "triangles": 1184754,
+  "triangles": 1199328,
   "failed": 0
  },
  "models": [
@@ -2903,6 +2903,415 @@
      "verified": true
     }
    ]
+  },
+  {
+   "name": "demon",
+   "type": "model",
+   "category": "demon",
+   "status": "ok",
+   "source": "vibeassets",
+   "source_id": "6lgzyditwz",
+   "source_page": "https://vibeassets.io/a/6lgzyditwz",
+   "title": "Demon sorcerer, rigged (Meshy)",
+   "author": "vibeassets.io contributor (text-to-3D, auto-rigged)",
+   "license": "CC0 1.0",
+   "download_urls": [
+    "https://vibeassets.io/download/6lgzyditwz"
+   ],
+   "note": "1 embedded JPEG(s) re-ordered losslessly to 1x1 sampling so Godot can decode them; mesh, skin and pixels are unchanged",
+   "triangles": 14574,
+   "meshes": 1,
+   "materials": 1,
+   "embedded_images": 1,
+   "animations": 1,
+   "skins": 1,
+   "rig": {
+    "skeleton": "Armature",
+    "joints": 24,
+    "vertices": 21225,
+    "bounds_min": [
+     -0.8091,
+     0.0,
+     -0.4457
+    ],
+    "bounds_max": [
+     0.8091,
+     2,
+     0.4457
+    ],
+    "height": 2.0,
+    "bones": [
+     {
+      "name": "Hips",
+      "parent": "",
+      "rest": [
+       -0.0058,
+       1.1128,
+       -0.3011
+      ],
+      "rotation": [
+       0.3874,
+       0.0704,
+       -0.0,
+       0.9192
+      ]
+     },
+     {
+      "name": "LeftUpLeg",
+      "parent": "Hips",
+      "rest": [
+       0.1353,
+       1.0131,
+       -0.28
+      ],
+      "rotation": [
+       0.8731,
+       0.026,
+       -0.0127,
+       0.4867
+      ]
+     },
+     {
+      "name": "LeftLeg",
+      "parent": "LeftUpLeg",
+      "rest": [
+       0.1922,
+       0.6145,
+       -0.1958
+      ],
+      "rotation": [
+       0.1692,
+       0.036,
+       0.0206,
+       0.9847
+      ]
+     },
+     {
+      "name": "LeftFoot",
+      "parent": "LeftLeg",
+      "rest": [
+       0.2231,
+       0.1443,
+       -0.2564
+      ],
+      "rotation": [
+       -0.515,
+       -0.17,
+       -0.116,
+       0.8321
+      ]
+     },
+     {
+      "name": "LeftToeBase",
+      "parent": "LeftFoot",
+      "rest": [
+       0.3153,
+       0.0409,
+       -0.109
+      ],
+      "rotation": [
+       -0.2643,
+       -0.0758,
+       -0.0208,
+       0.9612
+      ]
+     },
+     {
+      "name": "RightUpLeg",
+      "parent": "Hips",
+      "rest": [
+       -0.1315,
+       1.0103,
+       -0.2883
+      ],
+      "rotation": [
+       0.8852,
+       -0.0345,
+       0.1436,
+       0.4411
+      ]
+     },
+     {
+      "name": "RightLeg",
+      "parent": "RightUpLeg",
+      "rest": [
+       -0.1812,
+       0.6002,
+       -0.2371
+      ],
+      "rotation": [
+       0.0848,
+       -0.0173,
+       -0.0094,
+       0.9962
+      ]
+     },
+     {
+      "name": "RightFoot",
+      "parent": "RightLeg",
+      "rest": [
+       -0.2198,
+       0.1441,
+       -0.2572
+      ],
+      "rotation": [
+       -0.4768,
+       0.1581,
+       0.1115,
+       0.8575
+      ]
+     },
+     {
+      "name": "RightToeBase",
+      "parent": "RightFoot",
+      "rest": [
+       -0.3123,
+       0.0384,
+       -0.1084
+      ],
+      "rotation": [
+       -0.2673,
+       0.0763,
+       0.0212,
+       0.9603
+      ]
+     },
+     {
+      "name": "Spine02",
+      "parent": "Hips",
+      "rest": [
+       -0.0049,
+       1.2247,
+       -0.2475
+      ],
+      "rotation": [
+       -0.1741,
+       -0.0669,
+       0.0113,
+       0.9824
+      ]
+     },
+     {
+      "name": "Spine01",
+      "parent": "Spine02",
+      "rest": [
+       -0.0039,
+       1.3367,
+       -0.1939
+      ],
+      "rotation": [
+       -0.0,
+       -0.0,
+       -0.0,
+       1
+      ]
+     },
+     {
+      "name": "Spine",
+      "parent": "Spine01",
+      "rest": [
+       -0.0029,
+       1.4486,
+       -0.1404
+      ],
+      "rotation": [
+       -0.0922,
+       0.001,
+       -0.0024,
+       0.9957
+      ]
+     },
+     {
+      "name": "LeftShoulder",
+      "parent": "Spine",
+      "rest": [
+       0.035,
+       1.5719,
+       -0.1129
+      ],
+      "rotation": [
+       0.2149,
+       0.5937,
+       -0.7712,
+       0.0813
+      ]
+     },
+     {
+      "name": "LeftArm",
+      "parent": "LeftShoulder",
+      "rest": [
+       0.1705,
+       1.5545,
+       -0.453
+      ],
+      "rotation": [
+       -0.0846,
+       0.1257,
+       0.8482,
+       0.5075
+      ]
+     },
+     {
+      "name": "LeftForeArm",
+      "parent": "LeftArm",
+      "rest": [
+       0.4382,
+       1.4111,
+       -0.1182
+      ],
+      "rotation": [
+       -0.1307,
+       -0.03,
+       0.0794,
+       0.9878
+      ]
+     },
+     {
+      "name": "LeftHand",
+      "parent": "LeftForeArm",
+      "rest": [
+       0.6195,
+       1.3842,
+       0.2174
+      ],
+      "rotation": [
+       0.2081,
+       0.049,
+       -0.0926,
+       0.9725
+      ]
+     },
+     {
+      "name": "RightShoulder",
+      "parent": "Spine",
+      "rest": [
+       -0.0384,
+       1.5765,
+       -0.114
+      ],
+      "rotation": [
+       0.2403,
+       -0.5884,
+       0.7695,
+       0.0623
+      ]
+     },
+     {
+      "name": "RightArm",
+      "parent": "RightShoulder",
+      "rest": [
+       -0.1821,
+       1.5545,
+       -0.453
+      ],
+      "rotation": [
+       -0.1042,
+       -0.1223,
+       -0.8454,
+       0.5093
+      ]
+     },
+     {
+      "name": "RightForeArm",
+      "parent": "RightArm",
+      "rest": [
+       -0.4301,
+       1.4137,
+       -0.1255
+      ],
+      "rotation": [
+       -0.1253,
+       0.0293,
+       -0.0624,
+       0.9897
+      ]
+     },
+     {
+      "name": "RightHand",
+      "parent": "RightForeArm",
+      "rest": [
+       -0.6114,
+       1.3808,
+       0.2037
+      ],
+      "rotation": [
+       0.1823,
+       -0.0426,
+       0.0907,
+       0.9781
+      ]
+     },
+     {
+      "name": "neck",
+      "parent": "Spine",
+      "rest": [
+       -0.0016,
+       1.5126,
+       -0.1098
+      ],
+      "rotation": [
+       0.0922,
+       0.0028,
+       -0.0025,
+       0.9957
+      ]
+     },
+     {
+      "name": "Head",
+      "parent": "neck",
+      "rest": [
+       0.0,
+       1.5926,
+       -0.0715
+      ],
+      "rotation": [
+       0.1907,
+       -0.0002,
+       0.0042,
+       0.9816
+      ]
+     },
+     {
+      "name": "head_end",
+      "parent": "Head",
+      "rest": [
+       0.0052,
+       1.8627,
+       0.004
+      ],
+      "rotation": [
+       -0.2751,
+       -0.0,
+       -0.0053,
+       0.9614
+      ]
+     },
+     {
+      "name": "headfront",
+      "parent": "Head",
+      "rest": [
+       0.0,
+       1.5926,
+       0.1484
+      ],
+      "rotation": [
+       0.3619,
+       0.0,
+       0.0069,
+       0.9322
+      ]
+     }
+    ]
+   },
+   "files": [
+    {
+     "path": "res://assets/models/demon/demon.glb",
+     "bytes": 1556664,
+     "sha256": "e0d02ffbc2129adc1c4620b03c68e3e4bf29088d017e0ff800e9d00110ad5717",
+     "format": "glb",
+     "verified": true
+    }
+   ]
   }
  ],
  "textures": [
@@ -4299,6 +4708,7 @@
     "roughness",
     "ao"
    ],
+   "cached": true,
    "files": [
     {
      "path": "res://assets/textures/demon/charred_skin/charred_skin_albedo.jpg",
@@ -4353,6 +4763,7 @@
     "normal",
     "roughness"
    ],
+   "cached": true,
    "files": [
     {
      "path": "res://assets/textures/demon/cracked_bone/cracked_bone_albedo.jpg",

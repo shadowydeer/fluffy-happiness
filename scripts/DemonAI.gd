@@ -301,7 +301,7 @@ func _update_mood() -> void:
 			rage = 0.7 if _freeze_left > 0.0 else 0.25
 		State.ENRAGED, State.POLTERGEIST_THROW:
 			rage = 1.0
-	_visuals.call(&"set_mood", rage, _ragdoll.is_stunned, state == State.CAPTURED)
+	_visuals.call(&"set_mood", rage, _ragdoll.is_stunned, state == State.CAPTURED, state == State.POLTERGEIST_THROW)
 
 
 # --- States ------------------------------------------------------------------------------

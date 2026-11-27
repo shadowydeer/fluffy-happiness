@@ -5,6 +5,9 @@ extends SceneTree
 ## Stage 1 / 1.5: van doors, grab, ramp, throw, house trigger, camera, lamp, crouch, jump.
 ## Stage 2: ragdoll layout and stability, grab prompts, haunting, knockdown,
 ##          poltergeist throw, stun / bind, dragging the demon up the ramp, capture.
+## Stage 2.5: the rigged demon .glb (bones, height, hidden colliders), skin-to-physics
+##          alignment and pose validity on every tick, mood glow, the full-length
+##          collapse, and the first-person arms.
 ## Exits 0 when every check passes, 1 otherwise.
 
 const ENRAGED := 2
@@ -35,6 +38,13 @@ var _peak_lift := 0.0
 var _peak_vignette := 0.0
 var _lowest_eye := 9.0
 var _drag_start := Vector3.ZERO
+var _driver: Node
+var _worst_gap := 0.0
+var _worst_gap_bone := ""
+var _gap_total := 0.0
+var _gap_samples := 0
+var _bad_poses := 0
+var _rage_glow := 0.0
 
 
 func _initialize() -> void:
@@ -98,6 +108,36 @@ func _demon_height() -> float:
 	return _torso().global_position.y - (_demon.call("get_ground_position") as Vector3).y
 
 
+## Every tick: the skinned bones must sit on the physics segments that drive them, and stay finite.
+func _track_skin() -> void:
+	if _driver == null or not _driver.call("is_ready"):
+		return
+	if not _driver.call("is_pose_valid"):
+		_bad_poses += 1
+	var names: Array = _driver.get("PART_BONES")
+	var bodies: Array = _demon.call("get_bodies")
+	for part in bodies.size():
+		var offset: Transform3D = _driver.call("get_bone_local_offset", part)
+		var want := (bodies[part] as RigidBody3D).global_transform * offset.origin
+		var gap := want.distance_to(_driver.call("get_bone_world_position", names[part]))
+		_gap_total += gap
+		_gap_samples += 1
+		if gap > _worst_gap:
+			_worst_gap = gap
+			_worst_gap_bone = names[part]
+
+
+## Molten vein brightness the skin shader is being fed right now.
+func _core_glow() -> float:
+	var mesh: MeshInstance3D = _driver.call("get_mesh_instance")
+	var skin := mesh.get_surface_override_material(0) as ShaderMaterial
+	return float(skin.get_shader_parameter(&"core_energy")) if skin else -1.0
+
+
+func _view_arms() -> Node3D:
+	return (_player.get("_model") as Node).get_node_or_null("FirstPersonArms") as Node3D
+
+
 func _physics_process(_delta: float) -> bool:
 	_tick += 1
 	_step_tick += 1
@@ -106,6 +146,7 @@ func _physics_process(_delta: float) -> bool:
 		_hud = _main.get("hud")
 		_demon = _main.get("demon")
 		_brain = _demon.get_node("AI")
+		_driver = _demon.get_node_or_null("Driver")
 		_van = (_main.get("level") as Node).get("van")
 		# Keep the demon lurking until the Stage 2 half of the run.
 		_brain.set("passive", true)
@@ -117,6 +158,7 @@ func _physics_process(_delta: float) -> bool:
 		_player.connect("knocked_down", func(_duration: float) -> void: _knockdowns += 1)
 		return false
 	_peak_vignette = maxf(_peak_vignette, (_hud.get("_vignette") as Control).modulate.a)
+	_track_skin()
 	match _step:
 		0:  # settle
 			if _step_tick == 40:
@@ -128,6 +170,7 @@ func _physics_process(_delta: float) -> bool:
 				_state.call("revoke_step", &"enter_house")
 				_check("tracker starts on the van", str(_state.call("get_current_task")).begins_with("Open the van"))
 				_check_demon_layout()
+				_check_demon_model()
 				var left: Node3D = _van.get("left_door")
 				var right: Node3D = _van.get("right_door")
 				_rear = (left.global_position + right.global_position) * 0.5
@@ -177,6 +220,7 @@ func _physics_process(_delta: float) -> bool:
 			if _step_tick == 110:
 				_check("grab tether is drawn", (_player.get_node("GrabTether") as Node3D).visible)
 				_check("prop is carried, not frozen", not _prop.freeze and _prop.global_position.y > 0.7, str(_prop.global_position))
+				_check("third person keeps the rig's own arms", _view_arms() != null and not _view_arms().visible)
 				_next()
 		3:  # haul it up the ramp into the cargo bay
 			if _step_tick == 1:
@@ -211,6 +255,11 @@ func _physics_process(_delta: float) -> bool:
 				Input.action_press(&"crouch")
 			if _step_tick == 40:
 				_check("V switches to first person", _player.get("first_person") == true)
+				var arms := _view_arms()
+				var hands := (arms.get_node("HandL") as Node3D).global_position.distance_to((arms.get_node("HandR") as Node3D).global_position) if arms else 0.0
+				var eye := (_player.get_node("Head") as Node3D).global_position
+				_check("first-person sleeves and gloves are in view", arms != null and arms.visible and hands > 0.25 and hands < 0.75
+						and (arms.get_node("HandR") as Node3D).global_position.distance_to(eye) < 0.9, "hands %.2f m apart" % hands)
 				_check("T switches the headlamp off", _player.get("flashlight_on") == false and not (_player.get_node("Head/Flashlight") as Node3D).visible)
 				var capsule := (_player.get_node("CollisionShape3D") as CollisionShape3D).shape as CapsuleShape3D
 				_check("Ctrl crouches", capsule.height < 1.25, "%.2f m" % capsule.height)
@@ -255,6 +304,8 @@ func _physics_process(_delta: float) -> bool:
 				_check("knockdown drops whatever was held", _player.call("get_held") == null)
 				_check("red vignette flashes", _peak_vignette > 0.4, "%.2f" % _peak_vignette)
 				_check("knockback sends the player sliding", Vector2(_player.velocity.x, _player.velocity.z).length() > 1.0 or _player.global_position.distance_to(Vector3(-6.2, 0.45, -16.3)) > 1.0)
+				_rage_glow = _core_glow()
+				_check("enraged: molten veins flare", _rage_glow > 1.5, "core energy %.2f" % _rage_glow)
 				# Park the demon while the player recovers.
 				_tap(KEY_K)
 			if _step_tick == 110:
@@ -270,6 +321,7 @@ func _physics_process(_delta: float) -> bool:
 				var torso_upright := _torso().global_transform.basis.y.y
 				_check("stunned demon collapses", chest_up < 0.6 or torso_upright < 0.5, "chest %.2f m above the floor, upright %.2f" % [chest_up, torso_upright])
 				_check("stun meter drains", float(_demon.get("stun_meter")) < 99.0, "%.1f" % float(_demon.get("stun_meter")))
+				_check("stunned: veins gutter to coals", _core_glow() < _rage_glow * 0.5, "core energy %.2f, was %.2f enraged" % [_core_glow(), _rage_glow])
 				_check("player gets back up", not _player.call("is_knocked_down"))
 				_check("knockdown immunity holds", _player.call("is_knockdown_immune") and not _player.call("knock_down", Vector3(3, 2, 0)))
 				_tap(KEY_L)
@@ -324,6 +376,10 @@ func _physics_process(_delta: float) -> bool:
 			if _step_tick > 80 and _step_tick < 100:
 				_aim_at(_torso().global_position)
 			if _step_tick == 100:
+				var bodies: Array = _demon.call("get_bodies")
+				var ankles := ((bodies[8] as RigidBody3D).global_position + (bodies[10] as RigidBody3D).global_position) * 0.5
+				var length := (bodies[2] as RigidBody3D).global_position.distance_to(ankles)
+				_check("stunned demon lies full length, not in a heap", length > 1.2, "%.2f m from head to ankles" % length)
 				var prompt := str(_player.get("_aim_prompt"))
 				_check("stunned demon offers a drag prompt", prompt.contains("DRAG DEMON ("), prompt)
 				Input.action_press(&"grab")
@@ -384,13 +440,85 @@ func _check_demon_layout() -> void:
 	_check("demon PBR texture sets are local", textured)
 
 
+## Stage 2.5: the skinned model, its skeleton and the way the physics is fitted to it.
+func _check_demon_model() -> void:
+	_check("demon model: rigged .glb is local", ResourceLoader.exists("res://assets/models/demon/demon.glb"))
+	if _driver == null or not _driver.call("is_ready"):
+		_check("demon model: skeleton driver is bound", false)
+		return
+	var skeleton: Skeleton3D = _driver.call("get_skeleton")
+	var mesh: MeshInstance3D = _driver.call("get_mesh_instance")
+	var layout: Dictionary = _demon.call("get_layout")
+	var missing := PackedStringArray()
+	for bone: String in _driver.call("get_required_bones"):
+		if skeleton.find_bone(bone) < 0:
+			missing.append(bone)
+	_check("demon model: every mapped bone exists", missing.is_empty() and skeleton.get_bone_count() >= 20,
+			"%d bones, missing %s" % [skeleton.get_bone_count(), str(missing)])
+	_check("demon model: skinned mesh has vertices", mesh.skin != null and int(layout.get("vertices", 0)) > 1000, "%d vertices" % int(layout.get("vertices", 0)))
+	var height: float = _demon.call("get_standing_height")
+	var bind_height := ((_driver.call("get_bind_mesh_transform") as Transform3D) * mesh.get_aabb()).size.y
+	_check("demon stands 2.25 - 2.35 m", height >= 2.25 and height <= 2.35 and bind_height > height - 0.2 and bind_height <= height + 0.01,
+			"%.2f m standing straight, %.2f m in its hunched bind pose" % [height, bind_height])
+	var player_height := ((_player.get_node("CollisionShape3D") as CollisionShape3D).shape as CapsuleShape3D).height
+	_check("demon towers over the exorcist", height > player_height + 0.4, "%.2f m against %.2f m" % [height, player_height])
+
+	var bodies: Array = _demon.call("get_bodies")
+	var names: Array = _driver.get("PART_BONES")
+	var hidden := true
+	var fitted := true
+	var worst := 0.0
+	for part in bodies.size():
+		var body: RigidBody3D = bodies[part]
+		var shapes := 0
+		for child in body.get_children():
+			if child is CollisionShape3D:
+				shapes += 1
+		if shapes == 0 or not body.find_children("*", "VisualInstance3D", true, false).is_empty():
+			hidden = false
+		var offset: Transform3D = _driver.call("get_bone_local_offset", part)
+		if not offset.origin.is_finite() or absf(offset.basis.determinant() - 1.0) > 0.01:
+			fitted = false
+		# The segment has to sit where the model's bone is: within the bone's own reach of it.
+		worst = maxf(worst, offset.origin.length())
+	_check("ragdoll segments are collider-only (nothing renders but the skin)", hidden)
+	_check("ragdoll segments are fitted to the skeleton", fitted and worst < 0.5, "furthest bone %.2f m from its segment's centre" % worst)
+
+	var skin := mesh.get_surface_override_material(0) as ShaderMaterial
+	_check("charred hide shader is applied", skin != null and skin.shader != null and skin.shader.resource_path.ends_with("demon_skin.gdshader"))
+	var eye_glow := _demon.find_child("EyeGlow", true, false) as OmniLight3D
+	var eyes := _demon.find_children("Eye?", "MeshInstance3D", true, false)
+	_check("ember eyes and their glow ride the head bone", eyes.size() == 2 and eye_glow != null and not eye_glow.shadow_enabled and _is_under(eye_glow, "BoneAttachment3D"))
+	var ash := _demon.find_child("Ash", true, false) as GPUParticles3D
+	_check("ash drifts off the spine bone", ash != null and ash.emitting and _is_under(ash, "BoneAttachment3D"))
+	print("demon skeleton: ", ", ".join(_driver.call("get_bone_names")))
+	for part in bodies.size():
+		print("  %-10s <- %s" % [(bodies[part] as RigidBody3D).name, names[part]])
+
+
+func _is_under(node: Node, type: String) -> bool:
+	var parent := node.get_parent()
+	while parent:
+		if parent.is_class(type):
+			return true
+		parent = parent.get_parent()
+	return false
+
+
 func _finish() -> void:
 	var finite := true
 	for body: RigidBody3D in _demon.call("get_bodies"):
 		if not (body.global_position.is_finite() and body.linear_velocity.is_finite() and body.angular_velocity.is_finite()):
 			finite = false
 	_check("ragdoll stayed finite and never needed rebuilding", finite and int(_demon.get("fault_count")) == 0,
-			"%d rebuilds, peak segment speed %.1f m/s" % [int(_demon.get("fault_count")), float(_demon.get("peak_speed"))])
+				"%d rebuilds, peak segment speed %.1f m/s" % [int(_demon.get("fault_count")), float(_demon.get("peak_speed"))])
+	_check("skeleton stayed valid on every tick (no NaN, no flipped bones)", _bad_poses == 0 and int(_driver.get("fault_frames")) == 0,
+			"%d bad poses, %d skipped frames" % [_bad_poses, int(_driver.get("fault_frames"))])
+	# Bone rotations are smoothed and bone lengths kept, so a limb whipped through a swipe or yanked
+	# on a stretched joint may trail its segment for a tick; on average the skin has to sit on the physics.
+	var typical_gap := _gap_total / maxf(1.0, _gap_samples)
+	_check("skin stays on its physics segments", typical_gap < 0.03 and _worst_gap < 0.5,
+			"%.3f m on average, %.3f m at worst (%s)" % [typical_gap, _worst_gap, _worst_gap_bone])
 	var cues: Dictionary = _demon.get_node("Audio").get("cue_counts")
 	_check("audio cues fired", int(cues["roar"]) > 0 and int(cues["whoosh"]) > 0 and int(cues["buzz"]) > 0, str(cues))
 	var loader := root.get_node("ModelLoader")

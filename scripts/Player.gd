@@ -252,7 +252,8 @@ func _physics_process(delta: float) -> void:
 	_model.set_motion(horizontal_speed, is_on_floor(), _crouch, _sprinting, backward)
 	_model.set_look_pitch(_pitch)
 	if _holding and is_instance_valid(_held):
-		_model.set_reach(true, _held.global_transform * _held_local_point)
+		# Arms sag and reach with the weight in hand, and shake as the grip nears breaking.
+		_model.set_reach(true, _held.global_transform * _held_local_point, clampf((_carry_mass - 3.0) / 36.0, 0.0, 1.0), _held_strain)
 	else:
 		_model.set_reach(false)
 

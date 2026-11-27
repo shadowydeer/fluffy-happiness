@@ -6,6 +6,10 @@ extends Node3D
 ## of them masks it, so limbs can never collide with (or explode against) each
 ## other, while still hitting the world, props, doors and the player.
 ##
+## The segments are invisible collider-only drivers. Their sizes, positions and
+## joint anchors come from the rest pose of the skinned demon model (see
+## DemonSkeletonDriver.gd), which is the only thing that renders.
+##
 ## Conscious: a PD torque keeps pelvis and torso upright, a hover spring fed by
 ## ground rays under the hips and feet carries the weight (so it walks stairs),
 ## and every limb is steered toward a procedural pose.
@@ -31,27 +35,16 @@ const PART_LABELS: Array[String] = ["HIPS", "TORSO", "HEAD", "ARM", "WRIST", "AR
 const PART_MASS: Array[float] = [10.0, 16.0, 4.0, 3.0, 2.6, 3.0, 2.6, 3.5, 3.0, 3.5, 3.0]
 const PART_PARENT: Array[int] = [-1, Part.PELVIS, Part.TORSO, Part.TORSO, Part.UPPER_ARM_L, Part.TORSO, Part.UPPER_ARM_R, Part.PELVIS, Part.UPPER_LEG_L, Part.PELVIS, Part.UPPER_LEG_R]
 
-# Rest pose, in metres above the soles (the demon faces -Z, +X is its right).
-const PELVIS_Y := 1.12
-const WAIST_Y := 1.22
-const TORSO_Y := 1.53
-const NECK_Y := 1.86
-const HEAD_Y := 2.0
-const SHOULDER_X := 0.22
-const SHOULDER_Y := 1.77
-const UPPER_ARM := 0.56
-const LOWER_ARM := 0.58
-const HIP_X := 0.11
-const HIP_Y := 1.08
-const UPPER_LEG := 0.52
-const LOWER_LEG := 0.50
-const FOOT_CLEARANCE := 0.07
-
-# Pelvis height and forward lean for each Pose.
-const POSE_HEIGHT: Array[float] = [0.80, 0.94, 1.03, 1.10, 0.86]
-const POSE_HUNCH: Array[float] = [0.72, 0.52, 0.34, -0.12, 0.6]
+# Hip height for each Pose as a share of the straight-legged height, and extra forward
+# lean in radians. The model's rest pose is already hunched, so the lean stays modest
+# and the demon keeps its full towering height.
+const POSE_STANCE: Array[float] = [0.87, 0.94, 0.955, 0.995, 0.9]
+const POSE_HUNCH: Array[float] = [0.30, 0.16, 0.10, -0.2, 0.26]
 ## N*m at 90 degrees of lean: cancels most of the droop from the head and arms hanging off the chest.
 const CHEST_LIFT := 60.0
+## It stoops this much further while something hangs low over its horns (a lintel, the van roof).
+const DUCK_HUNCH := 0.22
+const DUCK_STANCE := 0.06
 
 const HOVER_STIFFNESS := 60.0
 const HOVER_DAMPING := 12.0
@@ -60,7 +53,13 @@ const MAX_MOVE_ACCELERATION := 16.0
 const RISE_TIME := 0.6
 const MAX_SPEED := 22.0
 const MAX_SPIN := 30.0
-const MAX_STRETCH := 2.6
+## A segment this many body heights from the hips means a joint has let go.
+const MAX_STRETCH_RATIO := 1.3
+## Seconds a collapsing body keeps its line (see `_topple`), and the m/s^2 that tip the
+## chest over and fling the arms out ahead of it.
+const FALL_TIME := 0.9
+const FALL_TIP := 5.0
+const FALL_FLING := 22.0
 
 ## Stun points lost per second at bind level 0..3.
 const STUN_DECAY: Array[float] = [2.5, 2.0, 1.5, 1.0]
@@ -96,11 +95,26 @@ var _rest: Array[Vector3] = []
 var _inertia: Array[float] = []
 var _total_mass := 0.0
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
+var _driver: Node
+
+# Rest-pose measurements in metres above the soles (the demon faces -Z, +X is its right).
+# Filled from the skinned model's skeleton; `_fallback_layout()` covers a missing model.
+var _layout: Dictionary = {}
+var _pelvis_y := 1.12
+var _hip_y := 1.08
+var _upper_leg := 0.52
+var _lower_leg := 0.50
+var _ankle := 0.07
+var _standing_height := 2.1
 
 var _time := 0.0
 var _yaw := 0.0
 var _height := 0.8
-var _hunch := 0.6
+var _hunch := 0.3
+var _duck := 0.0
+var _duck_left := 0.0
+var _fall_left := 0.0
+var _fall_direction := Vector3.FORWARD
 var _gait := 0.0
 var _support := 1.0
 var _ground_y := 0.0
@@ -125,8 +139,16 @@ func _ready() -> void:
 	add_to_group(GameState.GROUP_DEMON)
 	var spawn := global_transform
 	global_transform = Transform3D.IDENTITY
+	# The skinned model is measured first: the physics is built to fit it.
+	_driver = get_node_or_null("Driver")
+	if _driver and _driver.has_method(&"prepare"):
+		_layout = _driver.call(&"prepare", self)
+	if _layout.is_empty():
+		_layout = _fallback_layout()
 	_build_bodies()
 	_build_joints()
+	if _driver and _driver.has_method(&"bind"):
+		_driver.call(&"bind", _bodies)
 	for helper_name: String in ["Visuals", "Audio"]:
 		var helper := get_node_or_null(helper_name)
 		if helper and helper.has_method(&"build"):
@@ -150,6 +172,16 @@ func get_joint_count() -> int:
 
 func get_total_mass() -> float:
 	return _total_mass
+
+
+## Height of the horn tips when it stands straight, in metres.
+func get_standing_height() -> float:
+	return _standing_height
+
+
+## Rest-pose measurements the bodies were built from (see DemonSkeletonDriver.prepare).
+func get_layout() -> Dictionary:
+	return _layout
 
 
 ## Chest position: what the AI, the audio and the HUD treat as "where the demon is".
@@ -199,6 +231,11 @@ func place(xf: Transform3D) -> void:
 	_grounded = true
 	_safe = clean
 	_safe_left = 0.5
+	if is_stunned:
+		# Stood back up while out cold: it goes down full length again rather than crumpling on the spot.
+		_begin_fall()
+	if _driver and _driver.has_method(&"snap"):
+		_driver.call(&"snap")
 
 
 ## Adds stun; the demon collapses when the meter fills.
@@ -297,19 +334,22 @@ func report_strain(strain: float) -> void:
 # --- Construction -------------------------------------------------------------------
 
 func _build_bodies() -> void:
-	_rest = [
-		Vector3(0.0, PELVIS_Y, 0.0),
-		Vector3(0.0, TORSO_Y, 0.0),
-		Vector3(0.0, HEAD_Y, -0.02),
-		Vector3(-SHOULDER_X, SHOULDER_Y - UPPER_ARM * 0.5, 0.0),
-		Vector3(-SHOULDER_X, SHOULDER_Y - UPPER_ARM - LOWER_ARM * 0.5, 0.0),
-		Vector3(SHOULDER_X, SHOULDER_Y - UPPER_ARM * 0.5, 0.0),
-		Vector3(SHOULDER_X, SHOULDER_Y - UPPER_ARM - LOWER_ARM * 0.5, 0.0),
-		Vector3(-HIP_X, HIP_Y - UPPER_LEG * 0.5, 0.0),
-		Vector3(-HIP_X, HIP_Y - UPPER_LEG - LOWER_LEG * 0.5, 0.0),
-		Vector3(HIP_X, HIP_Y - UPPER_LEG * 0.5, 0.0),
-		Vector3(HIP_X, HIP_Y - UPPER_LEG - LOWER_LEG * 0.5, 0.0),
-	]
+	var rest: Array = _layout["rest"]
+	var lengths: Array = _layout["length"]
+	var radii: Array = _layout["radius"]
+	var hands: Array = _layout["hands"]
+	var feet: Array = _layout["feet"]
+	_rest.clear()
+	for part in Part.size():
+		_rest.append(rest[part] as Vector3)
+	_pelvis_y = _rest[Part.PELVIS].y
+	_hip_y = 0.5 * (((_layout["anchor"] as Array)[Part.UPPER_LEG_L] as Vector3).y + ((_layout["anchor"] as Array)[Part.UPPER_LEG_R] as Vector3).y)
+	_upper_leg = 0.5 * (float(lengths[Part.UPPER_LEG_L]) + float(lengths[Part.UPPER_LEG_R]))
+	_lower_leg = 0.5 * (float(lengths[Part.LOWER_LEG_L]) + float(lengths[Part.LOWER_LEG_R]))
+	_ankle = float(_layout["ankle"])
+	_standing_height = float(_layout["height"])
+	_height = _pelvis_y * POSE_STANCE[Pose.LURK]
+
 	var surface := PhysicsMaterial.new()
 	surface.friction = 0.5
 	surface.bounce = 0.0
@@ -326,32 +366,31 @@ func _build_bodies() -> void:
 		body.set_meta(&"demon_part", part)
 		body.set_meta(&"demon_label", PART_LABELS[part])
 		body.set_meta(&"display_name", "Demon")
-		var length := 0.3
+		var radius := float(radii[part])
+		var length := float(lengths[part])
+		var here := _rest[part]
 		match part:
 			Part.PELVIS:
-				_capsule(body, 0.12, 0.36, Vector3.ZERO, true)
-				length = 0.36
+				_capsule_between(body, Vector3.LEFT * length * 0.5, Vector3.RIGHT * length * 0.5, radius)
 			Part.TORSO:
-				_capsule(body, 0.15, 0.64, Vector3.ZERO, false)
-				length = 0.64
+				var chest: Array = _layout["chest"]
+				var shoulders: Array = _layout["shoulders"]
+				_capsule_between(body, (chest[0] as Vector3) - here, (chest[1] as Vector3) - here, radius)
+				_capsule_between(body, (shoulders[0] as Vector3) - here, (shoulders[1] as Vector3) - here, float(_layout["shoulder_radius"]))
 			Part.HEAD:
-				_sphere(body, 0.135, Vector3(0.0, 0.01, 0.02))
-				length = 0.3
-			Part.UPPER_ARM_L, Part.UPPER_ARM_R:
-				_capsule(body, 0.05, UPPER_ARM, Vector3.ZERO, false)
-				length = UPPER_ARM
+				_sphere(body, radius, Vector3.ZERO)
+			Part.UPPER_ARM_L, Part.UPPER_ARM_R, Part.UPPER_LEG_L, Part.UPPER_LEG_R:
+				_capsule_between(body, Vector3.UP * (length * 0.5 - radius), Vector3.DOWN * (length * 0.5 - radius), radius)
 			Part.LOWER_ARM_L, Part.LOWER_ARM_R:
-				_capsule(body, 0.045, LOWER_ARM, Vector3.ZERO, false)
-				_sphere(body, 0.07, Vector3(0.0, -LOWER_ARM * 0.5 - 0.1, -0.01))
-				length = LOWER_ARM
-			Part.UPPER_LEG_L, Part.UPPER_LEG_R:
-				_capsule(body, 0.065, UPPER_LEG, Vector3.ZERO, false)
-				length = UPPER_LEG
+				var hand: Dictionary = hands[0 if part == Part.LOWER_ARM_L else 1]
+				_capsule_between(body, Vector3.UP * (length * 0.5 - radius), Vector3.DOWN * (length * 0.5 - radius), radius)
+				_sphere(body, float(hand["palm_radius"]), (hand["palm"] as Vector3) - here)
+				_sphere(body, float(hand["claw_radius"]), (hand["claws"] as Vector3) - here)
 			Part.LOWER_LEG_L, Part.LOWER_LEG_R:
-				_capsule(body, 0.05, LOWER_LEG, Vector3.ZERO, false)
-				_sphere(body, 0.06, Vector3(0.0, -LOWER_LEG * 0.5, 0.0))
-				_sphere(body, 0.045, Vector3(0.0, -LOWER_LEG * 0.5 - 0.015, -0.12))
-				length = LOWER_LEG
+				var foot: Dictionary = feet[0 if part == Part.LOWER_LEG_L else 1]
+				_capsule_between(body, Vector3.UP * (length * 0.5 - radius), Vector3.DOWN * (length * 0.5 - radius), radius)
+				_sphere(body, float(foot["heel_radius"]), (foot["heel"] as Vector3) - here)
+				_sphere(body, float(foot["toe_radius"]), (foot["toe"] as Vector3) - here)
 		# Thin limbs have almost no inertia around their own axis, which is where
 		# ragdolls start to buzz. A padded, isotropic inertia keeps them calm and
 		# lets every pose drive use one known value.
@@ -370,15 +409,16 @@ func _build_bodies() -> void:
 	_apply_damping()
 
 
-func _capsule(body: RigidBody3D, radius: float, height: float, at: Vector3, sideways: bool) -> void:
+## Capsule whose round ends are centred on two points in the body's own space.
+func _capsule_between(body: RigidBody3D, from: Vector3, to: Vector3, radius: float) -> void:
 	var shape := CapsuleShape3D.new()
 	shape.radius = radius
-	shape.height = maxf(height, radius * 2.0)
+	shape.height = from.distance_to(to) + radius * 2.0
 	var collider := CollisionShape3D.new()
 	collider.shape = shape
-	collider.position = at
-	if sideways:
-		collider.rotation.z = PI * 0.5
+	collider.position = (from + to) * 0.5
+	if from.distance_squared_to(to) > 0.000001:
+		collider.basis = Basis(Quaternion(Vector3.UP, (to - from).normalized()))
 	body.add_child(collider)
 
 
@@ -391,23 +431,65 @@ func _sphere(body: RigidBody3D, radius: float, at: Vector3) -> void:
 	body.add_child(collider)
 
 
+## Proportions used when the skinned model is missing, in the same form the driver returns.
+func _fallback_layout() -> Dictionary:
+	var shoulder := Vector3(0.22, 1.77, 0.0)
+	var hip := Vector3(0.11, 1.08, 0.0)
+	var upper_arm := 0.56
+	var lower_arm := 0.58
+	var upper_leg := 0.52
+	var lower_leg := 0.50
+	var rest: Array = [Vector3(0.0, 1.12, 0.0), Vector3(0.0, 1.53, 0.0), Vector3(0.0, 2.0, -0.02)]
+	var anchor: Array = [Vector3(0.0, 1.12, 0.0), Vector3(0.0, 1.22, 0.0), Vector3(0.0, 1.86, 0.0)]
+	var hands: Array = []
+	var feet: Array = []
+	for side: float in [-1.0, 1.0]:
+		var top := Vector3(side * shoulder.x, shoulder.y, 0.0)
+		rest.append(top + Vector3.DOWN * upper_arm * 0.5)
+		rest.append(top + Vector3.DOWN * (upper_arm + lower_arm * 0.5))
+		anchor.append(top)
+		anchor.append(top + Vector3.DOWN * upper_arm)
+		var wrist := top + Vector3.DOWN * (upper_arm + lower_arm)
+		hands.append({"palm": wrist + Vector3.DOWN * 0.1, "palm_radius": 0.07, "claws": wrist + Vector3.DOWN * 0.2, "claw_radius": 0.04})
+	for side: float in [-1.0, 1.0]:
+		var top := Vector3(side * hip.x, hip.y, 0.0)
+		rest.append(top + Vector3.DOWN * upper_leg * 0.5)
+		rest.append(top + Vector3.DOWN * (upper_leg + lower_leg * 0.5))
+		anchor.append(top)
+		anchor.append(top + Vector3.DOWN * upper_leg)
+		feet.append({"heel": Vector3(top.x, 0.09, 0.0), "heel_radius": 0.06, "toe": Vector3(top.x, 0.07, -0.12), "toe_radius": 0.045})
+	return {
+		"rest": rest,
+		"anchor": anchor,
+		"length": [0.22, 0.64, 0.3, upper_arm, lower_arm, upper_arm, lower_arm, upper_leg, lower_leg, upper_leg, lower_leg],
+		"radius": [0.12, 0.15, 0.135, 0.05, 0.045, 0.05, 0.045, 0.065, 0.05, 0.065, 0.05],
+		"chest": [Vector3(0.0, 1.22, 0.0), Vector3(0.0, 1.86, 0.0)],
+		"shoulders": [Vector3(-shoulder.x, shoulder.y, 0.0), Vector3(shoulder.x, shoulder.y, 0.0)],
+		"shoulder_radius": 0.09,
+		"hands": hands,
+		"feet": feet,
+		"ankle": 0.07,
+		"height": 2.15,
+	}
+
+
 func _build_joints() -> void:
+	var anchor: Array = _layout["anchor"]
 	# Limits are [min, max] per axis for the child's rotation relative to its
 	# parent: X pitches a hanging limb forward, Z lifts a right limb out sideways.
-	_joint(Part.TORSO, Vector3(0.0, WAIST_Y, 0.0), Vector2(-0.9, 0.35), Vector2(-0.6, 0.6), Vector2(-0.35, 0.35))
-	_joint(Part.HEAD, Vector3(0.0, NECK_Y, 0.0), Vector2(-0.7, 0.6), Vector2(-1.1, 1.1), Vector2(-0.45, 0.45))
+	_joint(Part.TORSO, anchor[Part.TORSO], Vector2(-0.9, 0.35), Vector2(-0.6, 0.6), Vector2(-0.35, 0.35))
+	_joint(Part.HEAD, anchor[Part.HEAD], Vector2(-0.7, 0.6), Vector2(-1.1, 1.1), Vector2(-0.45, 0.45))
 	for i in 2:
-		var side := -1.0 if i == 0 else 1.0
 		var out := Vector2(-0.25, 1.7) if i == 1 else Vector2(-1.7, 0.25)
 		var upper_arm: int = Part.UPPER_ARM_L if i == 0 else Part.UPPER_ARM_R
 		var lower_arm: int = Part.LOWER_ARM_L if i == 0 else Part.LOWER_ARM_R
-		_joint(upper_arm, Vector3(side * SHOULDER_X, SHOULDER_Y, 0.0), Vector2(-1.0, 2.9), Vector2(-0.7, 0.7), out)
-		_joint(lower_arm, Vector3(side * SHOULDER_X, SHOULDER_Y - UPPER_ARM, 0.0), Vector2(0.0, 2.5), Vector2(-0.25, 0.25), Vector2(-0.05, 0.05))
+		_joint(upper_arm, anchor[upper_arm], Vector2(-1.0, 2.9), Vector2(-0.7, 0.7), out)
+		_joint(lower_arm, anchor[lower_arm], Vector2(0.0, 2.5), Vector2(-0.25, 0.25), Vector2(-0.05, 0.05))
 		var splay := Vector2(-0.15, 0.7) if i == 1 else Vector2(-0.7, 0.15)
 		var upper_leg: int = Part.UPPER_LEG_L if i == 0 else Part.UPPER_LEG_R
 		var lower_leg: int = Part.LOWER_LEG_L if i == 0 else Part.LOWER_LEG_R
-		_joint(upper_leg, Vector3(side * HIP_X, HIP_Y, 0.0), Vector2(-0.6, 1.9), Vector2(-0.4, 0.4), splay)
-		_joint(lower_leg, Vector3(side * HIP_X, HIP_Y - UPPER_LEG, 0.0), Vector2(-2.4, 0.0), Vector2(-0.1, 0.1), Vector2(-0.05, 0.05))
+		_joint(upper_leg, anchor[upper_leg], Vector2(-0.6, 1.9), Vector2(-0.4, 0.4), splay)
+		_joint(lower_leg, anchor[lower_leg], Vector2(-2.4, 0.0), Vector2(-0.1, 0.1), Vector2(-0.05, 0.05))
 
 
 func _joint(child: int, anchor: Vector3, x: Vector2, y: Vector2, z: Vector2) -> void:
@@ -456,8 +538,9 @@ func _tick_active(delta: float) -> void:
 	var pelvis := _bodies[Part.PELVIS]
 	var torso := _bodies[Part.TORSO]
 	_support = move_toward(_support, 1.0, delta / RISE_TIME)
-	_height = lerpf(_height, POSE_HEIGHT[pose], minf(1.0, delta * 4.0))
-	_hunch = lerpf(_hunch, POSE_HUNCH[pose], minf(1.0, delta * 4.0))
+	_probe_headroom(delta)
+	_height = lerpf(_height, _pelvis_y * (POSE_STANCE[pose] - DUCK_STANCE * _duck), minf(1.0, delta * 4.0))
+	_hunch = lerpf(_hunch, POSE_HUNCH[pose] + DUCK_HUNCH * _duck, minf(1.0, delta * 4.0))
 	_probe_ground(delta)
 	_roll_twitches(delta)
 
@@ -505,8 +588,8 @@ func _tick_active(delta: float) -> void:
 
 ## Folds the legs to fit the gap between hips and floor, then swings them with the gait.
 func _drive_legs(frame: Basis, stride: float) -> void:
-	var hip_height := _bodies[Part.PELVIS].global_position.y - (PELVIS_Y - HIP_Y) - _ground_y - FOOT_CLEARANCE
-	var fold := acos(clampf(hip_height / (UPPER_LEG + LOWER_LEG), 0.36, 1.0))
+	var hip_height := _bodies[Part.PELVIS].global_position.y - (_pelvis_y - _hip_y) - _ground_y - _ankle
+	var fold := acos(clampf(hip_height / (_upper_leg + _lower_leg), 0.36, 1.0))
 	for i in 2:
 		var side := -1.0 if i == 0 else 1.0
 		var phase := _gait + (0.0 if i == 0 else PI)
@@ -524,26 +607,30 @@ func _drive_arms(chest: Basis, stride: float) -> void:
 	for i in 2:
 		var side := -1.0 if i == 0 else 1.0
 		var offset := float(i) * 1.9
-		var pitch := 0.3
-		var spread := 0.12
-		var elbow := 0.45
+		# pitch swings the arm forward from hanging, spread opens it away from the body,
+		# elbow folds the forearm up. The shoulders sit well back on the hunched frame,
+		# so the arms are carried forward of the chest instead of out to the sides.
+		var pitch := 0.45
+		var spread := 0.3
+		var elbow := 0.5
 		var response := 9.0
 		var gain := 1.4
 		match pose:
 			Pose.LURK:
-				# Knuckles nearly on the floor, breathing slowly.
-				pitch = 0.32 + sin(_time * 1.1 + offset) * 0.05 + _jitter[i] * 0.12
-				elbow = 0.45 + sin(_time * 0.9 + offset) * 0.06
+				# Long arms hanging ahead of the knees, breathing slowly.
+				pitch = 0.5 + sin(_time * 1.1 + offset) * 0.05 + _jitter[i] * 0.1
+				spread = 0.26 + sin(_time * 0.7 + offset) * 0.04
+				elbow = 0.55 + sin(_time * 0.9 + offset) * 0.07
 			Pose.STALK:
-				# Reaching, hunched, with small involuntary twitches.
-				pitch = 0.75 + sin(_time * 1.3 + offset) * 0.18 + _jitter[i] * 0.35
-				spread = 0.22 + sin(_time * 0.8 + offset) * 0.08
-				elbow = 0.75 + sin(_time * 2.1 + offset) * 0.2 + _jitter[1 - i] * 0.25
+				# Reaching hungrily ahead, elbows low, with small involuntary twitches.
+				pitch = 1.05 + sin(_time * 1.3 + offset) * 0.14 + _jitter[i] * 0.3
+				spread = 0.32 + sin(_time * 0.8 + offset) * 0.07
+				elbow = 0.75 + sin(_time * 2.1 + offset) * 0.18 + _jitter[1 - i] * 0.22
 			Pose.CHASE:
-				# Long arms windmilling out of step with the legs.
-				pitch = 0.95 + sin(_gait + (PI if i == 0 else 0.0)) * (0.5 + 0.5 * stride) + _jitter[i] * 0.5
-				spread = 0.45 + sin(_time * 5.3 + offset) * 0.28
-				elbow = 0.9 + sin(_gait * 1.7 + offset) * 0.55
+				# Both arms thrown forward, clawing alternately out of step with the legs.
+				pitch = 1.3 + sin(_gait + (PI if i == 0 else 0.0)) * (0.4 + 0.45 * stride) + _jitter[i] * 0.4
+				spread = 0.36 + sin(_time * 5.3 + offset) * 0.2
+				elbow = 0.7 + sin(_gait * 1.7 + offset) * 0.5
 				response = 11.0
 			Pose.CAST:
 				# Both arms thrown up and wide, trembling.
@@ -553,21 +640,23 @@ func _drive_arms(chest: Basis, stride: float) -> void:
 				response = 13.0
 			Pose.FREEZE:
 				# Shielding its eyes from the torch beam.
-				pitch = 1.95 + _jitter[i] * 0.3
-				spread = -0.15
+				pitch = 2.0 + _jitter[i] * 0.3
+				spread = 0.05
 				elbow = 1.7 + _jitter[1 - i] * 0.3
 				response = 14.0
 		if i == _swipe_arm:
 			response = 18.0
 			gain = 3.0
 			if _swipe_time < 0.2:
-				pitch = -0.7
-				spread = 1.35
-				elbow = 0.9
+				# Wound back over the shoulder.
+				pitch = 2.6
+				spread = 0.9
+				elbow = 1.3
 			elif _swipe_time < 0.44:
-				pitch = 1.7
-				spread = -0.2
-				elbow = 0.15
+				# Raked down and across the body.
+				pitch = 1.25
+				spread = -0.35
+				elbow = 0.2
 		var upper := chest * Basis(Vector3.BACK, side * spread) * Basis(Vector3.RIGHT, pitch)
 		var lower := upper * Basis(Vector3.RIGHT, elbow)
 		var upper_part: int = Part.UPPER_ARM_L if i == 0 else Part.UPPER_ARM_R
@@ -628,6 +717,26 @@ func _probe_ground(delta: float) -> void:
 		_grounded = false
 
 
+## Looks for a lintel or low ceiling over the horns (and just ahead when moving) and stoops under it.
+func _probe_headroom(delta: float) -> void:
+	_duck_left -= delta
+	if _duck_left <= 0.0:
+		_duck_left = 0.1
+		var space := get_world_3d().direct_space_state
+		var hips := _bodies[Part.PELVIS].global_position
+		var floor_y := _ground_y if _grounded else hips.y - _height
+		var crown := floor_y + _standing_height
+		var ahead := Vector3(_bodies[Part.PELVIS].linear_velocity.x, 0.0, _bodies[Part.PELVIS].linear_velocity.z).limit_length(1.0) * 0.9
+		var low := false
+		for probe: Vector3 in [hips, hips + ahead, _bodies[Part.HEAD].global_position]:
+			var from := Vector3(probe.x, hips.y, probe.z)
+			var query := PhysicsRayQueryParameters3D.create(from, Vector3(probe.x, crown + 0.35, probe.z), GameState.LAYER_WORLD)
+			if not space.intersect_ray(query).is_empty():
+				low = true
+				break
+		_duck = 1.0 if low else 0.0
+
+
 ## Sample-and-hold noise for the involuntary jerks of arms and head.
 func _roll_twitches(delta: float) -> void:
 	var busy := pose == Pose.CHASE or pose == Pose.FREEZE
@@ -648,6 +757,13 @@ func _tick_limp(delta: float) -> void:
 	_swipe_arm = -1
 	_grounded = false
 	var dragged := is_dragged()
+	if _fall_left > 0.0:
+		_fall_left -= delta
+		# A hand on it ends the fall: from then on the body belongs to whoever is hauling it.
+		if dragged:
+			_fall_left = 0.0
+		else:
+			_topple(clampf(_fall_left / FALL_TIME, 0.0, 1.0))
 	_struggle_left -= delta
 	if _struggle_left <= 0.0:
 		var strength := STRUGGLE[bind_level] * (1.0 if dragged else 0.25)
@@ -698,9 +814,42 @@ func _collapse() -> void:
 	_support = 0.0
 	_struggle_left = randf_range(0.8, 1.4)
 	_apply_damping()
-	# A shove off balance so it folds forward instead of sinking straight down.
-	_bodies[Part.TORSO].apply_central_impulse(get_facing() * PART_MASS[Part.TORSO] * 1.1)
+	_begin_fall()
 	stun_changed.emit(true)
+
+
+## Starts the felled-tree fall (see `_topple`). Always the way it faces: its weight hangs
+## forward of its hips, so any other way it only sits down and folds over its own legs.
+func _begin_fall() -> void:
+	_fall_left = FALL_TIME
+	_fall_direction = get_facing()
+	# A shove off balance so it pitches over instead of sinking straight down.
+	_bodies[Part.TORSO].apply_central_impulse(_fall_direction * PART_MASS[Part.TORSO] * 1.1)
+
+
+## The first moments of a collapse: hips, spine and knees keep some of their line while
+## the chest is tipped over sliding feet, so the demon goes down like a felled
+## tree and measures its whole length on the floor instead of folding into a heap.
+## `weight` fades 1 -> 0 over FALL_TIME; after that the body is dead weight.
+func _topple(weight: float) -> void:
+	var pelvis := _bodies[Part.PELVIS]
+	var torso := _bodies[Part.TORSO]
+	_steer(pelvis, torso.global_transform.basis, Part.PELVIS, 8.0, 1.0, 1.4 * weight, 500.0)
+	var hips := pelvis.global_transform.basis
+	var tip := _fall_direction * _total_mass * FALL_TIP * weight
+	torso.apply_central_force(tip)
+	for i in 2:
+		var upper: int = Part.UPPER_LEG_L if i == 0 else Part.UPPER_LEG_R
+		var lower: int = Part.LOWER_LEG_L if i == 0 else Part.LOWER_LEG_R
+		_steer(_bodies[upper], hips, upper, 8.0, 1.0, 1.2 * weight, 160.0)
+		_steer(_bodies[lower], _bodies[upper].global_transform.basis, lower, 8.0, 1.0, 0.7 * weight, 100.0)
+		# Equal and opposite to the push on the chest: it lays the body out without sliding it away.
+		_bodies[lower].apply_central_force(tip * -0.5)
+		# The arms are flung out ahead of the fall rather than trapped under the ribs.
+		var wrist: int = Part.LOWER_ARM_L if i == 0 else Part.LOWER_ARM_R
+		var fling := (_fall_direction + Vector3.UP * 0.25) * PART_MASS[wrist] * FALL_FLING * weight
+		_bodies[wrist].apply_central_force(fling)
+		pelvis.apply_central_force(-fling)
 
 
 ## Last line of defence: velocities are capped every tick, and a body that still
@@ -714,7 +863,7 @@ func _tick_safety(delta: float) -> void:
 			var at := body.global_position
 			var velocity := body.linear_velocity
 			var spin := body.angular_velocity
-			if not (at.is_finite() and velocity.is_finite() and spin.is_finite()) or at.distance_to(hips) > MAX_STRETCH:
+			if not (at.is_finite() and velocity.is_finite() and spin.is_finite()) or at.distance_to(hips) > _standing_height * MAX_STRETCH_RATIO:
 				broken = true
 				break
 			var speed := velocity.length()
