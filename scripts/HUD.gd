@@ -1,12 +1,13 @@
 extends CanvasLayer
 ## Minimal helmet-display HUD, built in code:
 ##   top-right    contract banner (number, bank balance, task text, progress bar);
-##                once the demon has been found, a status strip under it (AI state,
-##                stun decay bar, bind pips)
+##                once the demon has been found, a status strip under it (which
+##                archetype it is, AI state, stun decay bar, bind pips)
 ##   bottom-left  health bar (with the solo second-wind pip), stamina bar and the
-##                gadget belt: three drawn slot icons with their keys, the taser's
-##                battery and the lasso's status
-##   bottom-right control hints for whatever is in hand
+##                gadget belt: four drawn slot icons with their keys, the taser's
+##                battery, the lasso's status and the salt grenades left
+##   bottom-right control hints for whatever is in hand, on a dark backdrop that
+##                keeps them readable over the salt circle or the tape roll
 ##   centre       reactive crosshair with a context prompt underneath and the
 ##                duct tape's wrap ring round it
 ##   top-left     collapsible list of the test keys (F1); in co-op, the crew roster
@@ -17,6 +18,7 @@ extends CanvasLayer
 
 const Crosshair := preload("res://scripts/Crosshair.gd")
 const SlotIcon := preload("res://scripts/GadgetSlotIcon.gd")
+const DemonArchetypes := preload("res://scripts/DemonArchetypes.gd")
 
 const INK := Color(0.93, 0.95, 0.92)
 const DIM := Color(0.60, 0.67, 0.68)
@@ -25,9 +27,14 @@ const ACCENT := Color(0.95, 0.42, 0.08)
 const TEAL := Color(0.25, 0.92, 0.82)
 const WARN := Color(0.95, 0.27, 0.15)
 const GOLD := Color(1.0, 0.78, 0.3)
-const CONTROLS_HINT := "WASD move   SHIFT sprint   SPACE jump   CTRL crouch   F use   Q shove   V camera   T torch   ESC menu\n1 lasso   2 taser   3 duct tape   0 / wheel: hands   E always grabs by hand (hold on a downed crewmate to revive)"
+const CONTROLS_HINT := "WASD move   SHIFT sprint   SPACE jump   CTRL crouch   F use   Q shove   V camera   T torch   ESC menu\n1 lasso   2 taser   3 duct tape   4 salt grenade   0 / wheel: hands\nE always grabs by hand (hold on a downed crewmate to revive)"
 const DEBUG_HINT_CLOSED := "F1  test keys"
-const DEBUG_HINT_OPEN := "F1  hide test keys\nK   stun / wake the demon\nJ   cycle AI: lurking > enraged > poltergeist throw\nL   cycle bind level 0-3\nP   summon the demon in front of you"
+const DEBUG_HINT_OPEN := "F1  hide test keys\nK   stun / wake the demon\nJ   cycle AI: lurking > enraged > poltergeist throw\nL   cycle bind level 0-3\nP   summon the demon in front of you\nM   next demon archetype\nG   +$1000 test cash"
+## Behind the key hints: dark enough that they stay crisp over the white salt circle or the silver tape roll.
+const HINT_BACKDROP := Color(0.05, 0.06, 0.08, 0.72)
+## Key hints run on one line up to this width, then wrap (the Russian ones are about a third longer).
+const HINT_MAX_WIDTH := 760.0
+const HINT_INK := Color(0.8, 0.85, 0.85)
 const HINT_DURATION := 16.0
 const NOTICE_DURATION := 3.5
 ## Demon AI state index -> label colour (LURKING, STALKING, ENRAGED, POLTERGEIST, STUNNED, CAPTURED).
@@ -48,7 +55,9 @@ var _crosshair: Crosshair
 var _prompt: Label
 var _notice: Label
 var _hint: Label
+var _hint_panel: PanelContainer
 var _debug_hint: Label
+var _debug_panel: PanelContainer
 var _vignette: TextureRect
 var _slots: Array[SlotIcon] = []
 var _tool_title: Label
@@ -57,7 +66,11 @@ var _progress_label: Label
 var _bank: Label
 var _top_right: VBoxContainer
 var _demon_panel: PanelContainer
+var _demon_style: StyleBoxFlat
+var _demon_caption: Label
 var _demon_state: Label
+var _stun_caption: Label
+var _bind_caption: Label
 var _stun_bar: ProgressBar
 var _stun_value: Label
 var _bind_pips: Array[StyleBoxFlat] = []
@@ -112,9 +125,15 @@ func _ready() -> void:
 	GameState.objective_changed.connect(_on_objective_changed)
 	GameState.notice_posted.connect(_on_notice_posted)
 	GameState.bank_changed.connect(_on_bank_changed)
+	GameState.loadout_changed.connect(_on_loadout_changed)
+	GameState.archetype_changed.connect(_on_archetype_changed)
+	Loc.language_changed.connect(_on_language_changed)
 	_bank_target = GameState.bank_cash
 	_bank_shown = float(_bank_target)
 	_bank.text = _money(_bank_target)
+	_on_loadout_changed()
+	_refresh_archetype()
+	_refit()
 	GameState.refresh()
 
 
@@ -140,6 +159,7 @@ func bind_demon(demon: Node) -> void:
 	_demon_panel.visible = false
 	_demon_panel.modulate.a = 0.0
 	_stun_bar.value = 0.0
+	_refresh_archetype()
 	_demon_ai.connect(&"state_changed", _on_demon_state_changed)
 	_demon_ai.connect(&"discovered", _on_demon_discovered)
 	demon.connect(&"bind_changed", _on_bind_changed)
@@ -149,8 +169,11 @@ func bind_demon(demon: Node) -> void:
 		_on_demon_discovered()
 
 
-## One of the three belt slots (0-2, for keys 1-3).
+## One of the four belt slots (0-3, for keys 1-4). The salt grenade's also answers to
+## its key number, 4.
 func get_gadget_slot(index: int) -> Control:
+	if index == SlotIcon.Kind.SALT and _slots.size() == SlotIcon.Kind.SALT:
+		index -= 1
 	return _slots[index] if index >= 0 and index < _slots.size() else null
 
 
@@ -172,6 +195,16 @@ func get_bank_text() -> String:
 
 func is_demon_status_visible() -> bool:
 	return _demon_panel.visible
+
+
+## The status strip's first line ("DEMON // BRUTE"); "" until the demon has been found.
+func get_archetype_text() -> String:
+	return _demon_caption.text if _demon_panel.visible else ""
+
+
+## The dark rounded panel behind the bottom-right key hints.
+func get_hint_backdrop() -> PanelContainer:
+	return _hint_panel
 
 
 func get_health_bar() -> ProgressBar:
@@ -197,6 +230,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_debug_open = not _debug_open
 		_debug_hint.text = DEBUG_HINT_OPEN if _debug_open else DEBUG_HINT_CLOSED
 		_debug_hint.modulate.a = 0.9 if _debug_open else 0.5
+		_debug_panel.self_modulate.a = 1.0 if _debug_open else 0.55
 
 
 func _process(delta: float) -> void:
@@ -210,6 +244,9 @@ func _process(delta: float) -> void:
 	if _hint_left > 0.0:
 		_hint_left -= delta
 		_hint.modulate.a = clampf(_hint_left / 2.0, 0.0, 1.0) * 0.85
+		# Once faded the lines fold away, and the backdrop shrinks to the gadget's own hint.
+		_hint.visible = _hint_left > 0.0
+	_hint_panel.visible = _hint.visible or not _gadget_hint.text.is_empty()
 
 	_clock += delta
 	_health.value = lerpf(_health.value, _health_target, minf(1.0, delta * 10.0))
@@ -243,7 +280,10 @@ func _update_gadgets(_delta: float) -> void:
 	_slots[1].battery = float(_gadgets.call(&"get_battery"))
 	_tool_title.text = str(_gadgets.call(&"get_title"))
 	_tool_title.modulate = GOLD if active != 0 else DIM
-	_gadget_hint.text = str(_gadgets.call(&"get_hint"))
+	var hint := str(_gadgets.call(&"get_hint"))
+	if hint != _gadget_hint.text:
+		_gadget_hint.text = hint
+		_fit(_gadget_hint, HINT_MAX_WIDTH)
 	var caption := str(_gadgets.call(&"get_progress_label"))
 	_progress_label.text = caption
 	_progress_label.visible = not caption.is_empty()
