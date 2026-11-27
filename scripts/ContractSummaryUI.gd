@@ -8,12 +8,16 @@ extends CanvasLayer
 ## $0, head office's remarks, and RETRY CONTRACT / MAIN MENU (`retry_pressed`,
 ## `menu_pressed`). In co-op only the host decides what happens next, so a client's
 ## first button is greyed out until the host has pressed theirs.
+## Both cards name the kind of demon the job was about (the payout adds its hazard
+## bonus as a line item) and carry OPEN FIELD SHOP, which anyone may press.
 ## The whole screen swallows mouse clicks while the card is up.
 
 signal next_pressed
 signal explore_pressed
 signal retry_pressed
 signal menu_pressed
+
+const DemonArchetypes := preload("res://scripts/DemonArchetypes.gd")
 
 const INK := Color(0.93, 0.95, 0.92)
 const DIM := Color(0.60, 0.67, 0.68)
@@ -36,6 +40,7 @@ var _total: Label
 var _bank: Label
 var _next: Button
 var _explore: Button
+var _shop_button: Button
 var _target_total := 0
 var _shown_total := 0.0
 
@@ -84,8 +89,11 @@ func _ready() -> void:
 	_kicker = _label("EXTRACTION REPORT", 12, DIM)
 	column.add_child(_kicker)
 	_header = _label("", 30, GOLD)
+	_header.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	Loc.style_header(_header)
 	column.add_child(_header)
 	_sub = _label("", 14, DIM)
+	_sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_sub)
 	column.add_child(_rule())
 	_rows = VBoxContainer.new()
@@ -95,9 +103,11 @@ func _ready() -> void:
 	var total_row := _row(column, "TOTAL PAYOUT", 18, INK)
 	_total_caption = total_row.get_child(0) as Label
 	_total = _label("$0", 30, GOLD)
+	Loc.style_header(_total)
 	total_row.add_child(_total)
 	var bank_row := _row(column, "BANK", 14, DIM)
 	_bank = _label("$0", 18, TEAL)
+	Loc.style_header(_bank)
 	bank_row.add_child(_bank)
 
 	var spacer := Control.new()
@@ -112,8 +122,19 @@ func _ready() -> void:
 	_explore = _button("KEEP EXPLORING", Color(0.2, 0.24, 0.27))
 	_explore.pressed.connect(_on_second_pressed)
 	buttons.add_child(_explore)
+	# Its own row under the two decisions, so their order and meaning stay what they were.
+	_shop_button = _button("OPEN FIELD SHOP", Color(0.1, 0.115, 0.13))
+	_shop_button.name = "ShopButton"
+	_shop_button.add_theme_color_override(&"font_color", ACCENT.lightened(0.25))
+	for state: StringName in [&"normal", &"hover", &"pressed"]:
+		var frame := _shop_button.get_theme_stylebox(state) as StyleBoxFlat
+		frame.set_border_width_all(1)
+		frame.border_color = Color(ACCENT, 0.75)
+	_shop_button.pressed.connect(_on_shop_pressed)
+	column.add_child(_shop_button)
 	_keys = _label("[ENTER] next contract     [ESC] keep exploring", 11, Color(DIM, 0.8))
 	_keys.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_keys.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_keys)
 
 
@@ -148,6 +169,23 @@ func get_explore_button() -> Button:
 	return _explore
 
 
+## OPEN FIELD SHOP, on both cards; hidden when the site has no shop.
+func get_shop_button() -> Button:
+	return _shop_button
+
+
+## Every text on the card's line items, top to bottom (captions and amounts).
+func get_line_texts() -> PackedStringArray:
+	var texts := PackedStringArray()
+	for row in _rows.get_children():
+		if row.is_queued_for_deletion():
+			continue
+		for label in ([row] if row is Label else row.get_children()):
+			if label is Label:
+				texts.append((label as Label).text)
+	return texts
+
+
 func show_summary(payout: Dictionary, host: bool = true) -> void:
 	_set_mode(false, host)
 	_header.text = "CONTRACT #%04d COMPLETE" % int(payout.get("contract", 0))
@@ -156,6 +194,12 @@ func show_summary(payout: Dictionary, host: bool = true) -> void:
 	for child in _rows.get_children():
 		child.queue_free()
 	_line("Base capture bounty", int(payout.get("base", 0)), INK)
+	# Hazard pay for the kind of demon it was; older payouts simply do not have the line.
+	var kind := int(payout.get("archetype", -1))
+	var target := str(payout.get("archetype_name", ""))
+	var hazard := int(payout.get("archetype_bonus", 0))
+	if not target.is_empty() and (hazard > 0 or DemonArchetypes.PLAYABLE.has(kind)):
+		_line("TARGET: %s" % target, hazard, _archetype_color(kind))
 	_line("Speed bonus", int(payout.get("speed", 0)), INK)
 	var bind := int(payout.get("bind_level", 0))
 	_line("Gift-wrapped!  Binding bonus (3/3)" if bind >= 3 else "Binding bonus (%d/3)" % bind, int(payout.get("bind", 0)), GOLD if bind >= 3 else INK)
@@ -177,6 +221,11 @@ func show_failure(report: Dictionary, host: bool = true) -> void:
 	_sub.text = "%s   //   TIME %02d:%02d   //   CREW DOWN   //   DEMON AT LARGE" % [GameState.SITE_NAME, int(seconds / 60.0), seconds % 60]
 	for child in _rows.get_children():
 		child.queue_free()
+	var kind := int(report.get("archetype", GameState.demon_archetype))
+	if DemonArchetypes.PLAYABLE.has(kind):
+		var target := _label("TARGET AT LARGE: %s" % str(report.get("archetype_name", DemonArchetypes.title(kind))), 16, _archetype_color(kind))
+		target.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_rows.add_child(target)
 	for line: Variant in report.get("lines", []):
 		var note := _label("-  %s" % str(line), 15, INK)
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -202,6 +251,7 @@ func _set_mode(failed: bool, host: bool) -> void:
 	_next.text = "RETRY CONTRACT" if failed else "NEXT CONTRACT"
 	_explore.text = "MAIN MENU" if failed else "KEEP EXPLORING"
 	_next.disabled = not host
+	_shop_button.visible = _shop() != null
 	if not host:
 		_next.text = "WAITING FOR HOST..."
 	if failed:
@@ -221,15 +271,46 @@ func hide_summary() -> void:
 	_root.visible = false
 
 
+## The site's field shop when it can put its screen up, else null.
+func _shop() -> Node:
+	var shop: Node = GameState.shop
+	return shop if is_instance_valid(shop) and shop.has_method(&"open_ui") else null
+
+
+func _shop_open() -> bool:
+	var shop := _shop()
+	return shop != null and shop.has_method(&"is_ui_open") and bool(shop.call(&"is_ui_open"))
+
+
+func _on_shop_pressed() -> void:
+	var shop := _shop()
+	if shop:
+		SoundManager.play_ui(&"ui_click")
+		shop.call(&"open_ui")
+
+
+## Eye colour of the archetype, lifted a little so it reads as text on the dark card.
+func _archetype_color(kind: int) -> Color:
+	if not DemonArchetypes.PLAYABLE.has(kind):
+		return INK
+	var eye: Color = DemonArchetypes.profile(kind).get("eye_color", INK)
+	return eye.lerp(Color.WHITE, 0.25)
+
+
 func _process(delta: float) -> void:
-	if not _root.visible or is_equal_approx(_shown_total, float(_target_total)):
+	if not _root.visible:
+		return
+	# The shop screen took the focus with it when it closed: hand it back to the card.
+	if get_viewport().gui_get_focus_owner() == null and not _shop_open():
+		_focus()
+	if is_equal_approx(_shown_total, float(_target_total)):
 		return
 	_shown_total = move_toward(_shown_total, float(_target_total), delta * maxf(400.0, _target_total * 1.4))
 	_total.text = _money(int(_shown_total))
 
 
 func _input(event: InputEvent) -> void:
-	if not _root.visible:
+	if not _root.visible or _shop_open():
 		return
 	var key := event as InputEventKey
 	if key and key.pressed and not key.echo and key.physical_keycode == KEY_ESCAPE and not _failed:
@@ -288,6 +369,7 @@ func _button(text: String, color: Color) -> Button:
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.add_theme_font_size_override(&"font_size", 16)
 	button.add_theme_color_override(&"font_color", INK)
+	Loc.style_header(button)
 	for state: Array in [["normal", 0.0], ["hover", 0.18], ["pressed", -0.2], ["focus", 0.0]]:
 		var style := StyleBoxFlat.new()
 		var shade: float = state[1]
