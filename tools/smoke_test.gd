@@ -60,6 +60,8 @@ var _charge_speed := 0.0
 
 
 func _initialize() -> void:
+	# Stage 1-4 numbers are checked against the classic demon; tools/stage5_*_test.gd cover the archetypes.
+	root.get_node("GameState").set("archetype_lock", 3)
 	_main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
 	root.add_child(_main)
 	_state = root.get_node("GameState")
