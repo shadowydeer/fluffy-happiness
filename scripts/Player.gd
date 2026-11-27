@@ -20,6 +20,7 @@ signal recovered
 enum AimKind { NONE, GRABBABLE, INTERACTABLE, HOLDING }
 
 const ExorcistModel := preload("res://scripts/ExorcistModel.gd")
+const GadgetManager := preload("res://scripts/gadgets/GadgetManager.gd")
 
 const STAND_HEIGHT := 1.8
 const CROUCH_HEIGHT := 1.15
@@ -95,8 +96,14 @@ const KNOCK_SLIDE := 6.0
 var stamina := 100.0
 var first_person := false
 var flashlight_on := true
+## The tool belt (lasso, taser, tape). Built in `_ready`.
+var gadgets: GadgetManager
+## Set while a menu owns the mouse: no movement, grabbing or gadget use.
+var controls_locked := false
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
+## Velocity something is hauling the player along with this tick (a taut lasso).
+var _drag := Vector3.ZERO
 var _pitch := 0.0
 var _crouch := 0.0
 var _camera_blend := 1.0
@@ -165,6 +172,10 @@ func _ready() -> void:
 	_add_suit_glow()
 	_build_tether()
 	_build_hit_sensor()
+	gadgets = GadgetManager.new()
+	gadgets.name = "Gadgets"
+	add_child(gadgets)
+	gadgets.setup(self, _model, _camera)
 	# The tether follows the hands, so it is redrawn once their final pose is known.
 	_model.pose_updated.connect(_update_tether)
 	stamina = max_stamina
@@ -194,7 +205,76 @@ func get_camera() -> Camera3D:
 	return _camera
 
 
+## Where the crosshair's ray starts and points, as of the last physics tick.
+func get_aim_origin() -> Vector3:
+	return _aim_origin
+
+
+func get_aim_forward() -> Vector3:
+	return _aim_forward
+
+
+func get_look_pitch() -> float:
+	return _pitch
+
+
+## True once the camera is close enough in that the body is hidden and the gloves are shown.
+func is_first_person_view() -> bool:
+	return _model_hidden
+
+
+## True while something is being carried or dragged by hand.
+func is_hand_grabbing() -> bool:
+	return _holding
+
+
+## Hauls the player along at `pull` (m/s, horizontal) for this tick. Movement can fight it.
+func apply_drag(pull: Vector3) -> void:
+	_drag = Vector3(pull.x, 0.0, pull.z).limit_length(5.0)
+
+
+## Burns stamina outside of sprinting (a tug of war on the lasso).
+func drain_stamina(amount: float) -> void:
+	if amount <= 0.0:
+		return
+	stamina = maxf(0.0, stamina - amount)
+	_regen_wait = regen_delay
+	if stamina <= 0.0:
+		_exhausted = true
+	stamina_changed.emit(stamina, max_stamina)
+
+
+## Camera shake of at least `amount` (0..1), without stacking the way `add_trauma` does.
+func shake(amount: float) -> void:
+	_trauma = maxf(_trauma, clampf(amount, 0.0, 1.0))
+
+
+## Back beside the van with full stamina and fresh gadgets: the next contract is starting.
+func reset_for_contract(spawn: Transform3D) -> void:
+	_release_held()
+	for entry in _released:
+		if is_instance_valid(entry["body"]):
+			(entry["body"] as RigidBody3D).remove_collision_exception_with(self)
+	_released.clear()
+	if _knock_left > 0.0:
+		_model.set_knockdown(false)
+		recovered.emit()
+	_knock_left = 0.0
+	_immune_left = 0.0
+	_trauma = 0.0
+	_drag = Vector3.ZERO
+	velocity = Vector3.ZERO
+	global_transform = spawn
+	_pitch = 0.0
+	stamina = max_stamina
+	_exhausted = false
+	stamina_changed.emit(stamina, max_stamina)
+	gadgets.reset()
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	if controls_locked:
+		return
 	if event is InputEventMouseMotion:
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			var motion := event as InputEventMouseMotion
@@ -204,9 +284,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif event is InputEventMouseButton and (event as InputEventMouseButton).pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-		# This click only recaptures the cursor; it must not also start a grab.
+		# This click only recaptures the cursor; it must not also start a grab or fire a gadget.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		_grab_locked = true
+		gadgets.lock_fire()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"toggle_camera"):
 		set_first_person(not first_person)
@@ -234,8 +315,8 @@ func set_flashlight(enabled: bool) -> void:
 
 func _physics_process(delta: float) -> void:
 	_update_knockdown(delta)
-	# Flat on the floor there is no steering.
-	var input := Vector2.ZERO if _knock_left > 0.0 else Input.get_vector(&"move_left", &"move_right", &"move_forward", &"move_back")
+	# Flat on the floor (or looking at a menu) there is no steering.
+	var input := Vector2.ZERO if _knock_left > 0.0 or controls_locked else Input.get_vector(&"move_left", &"move_right", &"move_forward", &"move_back")
 	_refresh_grab_tuning()
 	_update_crouch(delta)
 	_update_stamina(delta, input)
@@ -300,7 +381,7 @@ func _update_stamina(delta: float, input: Vector2) -> void:
 func _move(delta: float, input: Vector2) -> void:
 	var on_floor := is_on_floor()
 	_coyote = COYOTE_TIME if on_floor else maxf(0.0, _coyote - delta)
-	_jump_buffer = JUMP_BUFFER if Input.is_action_just_pressed(&"jump") and _knock_left <= 0.0 else maxf(0.0, _jump_buffer - delta)
+	_jump_buffer = JUMP_BUFFER if Input.is_action_just_pressed(&"jump") and _knock_left <= 0.0 and not controls_locked else maxf(0.0, _jump_buffer - delta)
 
 	var speed := walk_speed
 	if _crouch > 0.5:
@@ -320,7 +401,9 @@ func _move(delta: float, input: Vector2) -> void:
 		rate = ground_acceleration if wish.length_squared() > 0.001 else ground_deceleration
 		if _knock_left > 0.0:
 			rate = KNOCK_SLIDE
-	horizontal = horizontal.move_toward(wish * speed, rate * delta)
+	# A taut lasso on something that pulls back hauls the holder along with it.
+	horizontal = horizontal.move_toward(wish * speed + _drag, rate * delta)
+	_drag = Vector3.ZERO
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 
@@ -470,12 +553,13 @@ func _publish_aim() -> void:
 		prompt = "[F] %s" % action
 	elif _aim_body:
 		kind = AimKind.GRABBABLE
+		var keys := "E" if gadgets.is_armed() else "LMB / E"
 		var demon := _demon_of(_aim_body)
 		if demon:
 			# Awake it can only be grabbed at (and it hits back); stunned it can be dragged.
-			prompt = "[LMB / E] %s DEMON (%s)" % ["DRAG" if demon.get(&"is_stunned") else "GRAB", str(_aim_body.get_meta(&"demon_label", "LIMB"))]
+			prompt = "[%s] %s DEMON (%s)" % [keys, "DRAG" if demon.get(&"is_stunned") else "GRAB", str(_aim_body.get_meta(&"demon_label", "LIMB"))]
 		else:
-			prompt = "[LMB / E] Grab %s" % str(_aim_body.get_meta(&"display_name", _aim_body.name))
+			prompt = "[%s] Grab %s" % [keys, str(_aim_body.get_meta(&"display_name", _aim_body.name))]
 	if kind != _aim_kind or prompt != _aim_prompt:
 		_aim_kind = kind
 		_aim_prompt = prompt
@@ -488,7 +572,9 @@ func _try_interact() -> void:
 
 
 func _update_grab(delta: float) -> void:
-	var wants := Input.is_action_pressed(&"grab") and _knock_left <= 0.0
+	# E always grabs by hand. LMB does too, unless it is busy working a gadget.
+	var asked := Input.is_action_pressed(&"hand_grab") or (Input.is_action_pressed(&"grab") and not gadgets.is_armed())
+	var wants := asked and _knock_left <= 0.0 and not controls_locked
 	if not wants:
 		_grab_locked = false
 	if _holding and not is_instance_valid(_held):

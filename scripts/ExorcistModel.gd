@@ -37,6 +37,8 @@ const CROUCH_DROP := 0.5
 ## The rig's arms are short; first-person hands borrow some length to sit in frame.
 const FIRST_PERSON_ARM_STRETCH := 0.35
 const SIDES: Array[String] = ["L", "R"]
+## Centre of the palm in a first-person glove's own frame.
+const PALM_OFFSET := Vector3(0.0, -0.02, -0.08)
 const HAND_BONES: Array[String] = ["Wrist", "Index", "Middle", "Ring", "Pinky", "Thumb"]
 
 ## Glove-split copies of the shared body mesh, keyed by the imported mesh.
@@ -90,6 +92,12 @@ var _sleeve_material: StandardMaterial3D
 var _arms_swapped := false
 ## Harness and backpack: like the head, they only cast shadows in first person.
 var _chest_gear: Array[GeometryInstance3D] = []
+## A gadget in hand: where each palm grips it (world space, left then right).
+var _tool_on := false
+var _tool_weight := 0.0
+var _tool_palm: Array[Transform3D] = [Transform3D.IDENTITY, Transform3D.IDENTITY]
+var _tool_two_handed := false
+var _tool_grip := 1.0
 ## 0..1: how heavy the held thing is, and how far the grip is from where it wants to be.
 var _load := 0.0
 var _load_target := 0.0
@@ -146,6 +154,23 @@ func set_reach(active: bool, global_target: Vector3 = Vector3.ZERO, load: float 
 ## Camera transform; in first person the gloved hands are posed relative to it.
 func set_view(camera_transform: Transform3D) -> void:
 	_view = camera_transform
+
+
+## A gadget in hand. The palm frames are in world space (-Z along the fingers, +Y out of the
+## back of the hand); the arms are solved onto them in first and third person alike.
+func set_tool(active: bool, right_palm: Transform3D = Transform3D.IDENTITY, left_palm: Transform3D = Transform3D.IDENTITY,
+		two_handed: bool = false, grip: float = 1.0) -> void:
+	_tool_on = active
+	if active:
+		_tool_palm[0] = left_palm
+		_tool_palm[1] = right_palm
+		_tool_two_handed = two_handed
+		_tool_grip = grip
+
+
+## World position of a palm after IK (0 left, 1 right): where a held tool is hung.
+func get_palm_position(side: int = 1) -> Vector3:
+	return get_hand_position(side)
 
 
 ## In first person the head, the harness and their gear only cast shadows, so the camera
@@ -210,6 +235,7 @@ func _process(delta: float) -> void:
 	_reach_weight = move_toward(_reach_weight, 1.0 if _reaching else 0.0, delta * 7.0)
 	_arms_weight = move_toward(_arms_weight, 1.0 if _first_person and not _knocked else 0.0, delta * 5.0)
 	_load = lerpf(_load, _load_target, minf(1.0, delta * 5.0))
+	_tool_weight = move_toward(_tool_weight, 1.0 if _tool_on and not _knocked else 0.0, delta * 9.0)
 	var swap := _view_arms != null and _arms_weight > 0.5
 	if swap != _arms_swapped:
 		_swap_arms(swap)
@@ -296,7 +322,9 @@ func _apply_pose(skeleton: Skeleton3D) -> void:
 		var side := SIDES[i]
 		var wrist := _bone("Wrist.%s" % side)
 		var sign := -1.0 if i == 0 else 1.0
-		var weight := maxf(_arms_weight, _reach_weight)
+		# A tool in hand overrides the resting pose, but never a reach for something grabbed.
+		var held := _tool_weight * (1.0 if i == 1 or _tool_two_handed else 0.0) * (1.0 - _reach_weight)
+		var weight := maxf(maxf(_arms_weight, _reach_weight), held)
 		if weight > 0.001:
 			var upper := _bone("UpperArm.%s" % side)
 			if _arms_weight > 0.001 and upper >= 0:
@@ -306,6 +334,12 @@ func _apply_pose(skeleton: Skeleton3D) -> void:
 			var current := skeleton.get_bone_global_pose(wrist).origin
 			var shoulder_world := skeleton.global_transform * skeleton.get_bone_global_pose(_bone("UpperArm.%s" % side)).origin
 			var goal_world := _hand_goal(sign, shoulder_world)
+			if held > 0.001:
+				# The wrist sits behind the palm that grips the tool.
+				var palm := _tool_palm[i]
+				var grip_point := palm.origin - palm.basis * (PALM_OFFSET if _arms_swapped else Vector3(0.0, 0.0, -0.07))
+				var resting := goal_world if maxf(_arms_weight, _reach_weight) > 0.001 else grip_point
+				goal_world = shoulder_world + (resting.lerp(grip_point, held) - shoulder_world).limit_length(0.6)
 			var goal := current.lerp(to_skeleton * goal_world, smoothstep(0.0, 1.0, weight))
 			var pole := (-up * 0.8 + right * sign * 0.7 - forward * 0.35).normalized()
 			_solve_limb(skeleton, _bone("UpperArm.%s" % side), _bone("LowerArm.%s" % side), wrist, goal, pole)
@@ -315,13 +349,19 @@ func _apply_pose(skeleton: Skeleton3D) -> void:
 			var shoulder := skeleton.global_transform * skeleton.get_bone_global_pose(upper_arm).origin
 			var elbow := skeleton.global_transform * skeleton.get_bone_global_pose(_bone("LowerArm.%s" % side)).origin
 			var hand := _hand_basis(sign, elbow, _hand_world[i])
-			_view_arms.pose_arm(i, shoulder, elbow, _hand_world[i], hand, _reach_weight)
-			# The tether leaves the palm, not the wrist.
-			_hand_world[i] += hand * Vector3(0.0, -0.02, -0.08)
+			if held > 0.001:
+				hand = Basis(hand.get_rotation_quaternion().slerp(_tool_palm[i].basis.get_rotation_quaternion(), held))
+			_view_arms.pose_arm(i, shoulder, elbow, _hand_world[i], hand, maxf(_reach_weight, _tool_grip * held))
+			# The tether (and any tool) leaves the palm, not the wrist.
+			_hand_world[i] += hand * PALM_OFFSET
 			# The rig's own faceted arm (and its cuff bands) folds away into the shoulder, under the sleeve.
 			var tucked := skeleton.get_bone_global_pose(upper_arm)
 			tucked.basis = tucked.basis.scaled(Vector3.ONE * 0.001)
 			skeleton.set_bone_global_pose(upper_arm, tucked)
+		elif held > 0.001:
+			# Third person: the rig's own palm is a little way down the line of the forearm.
+			var elbow_world := skeleton.global_transform * skeleton.get_bone_global_pose(_bone("LowerArm.%s" % side)).origin
+			_hand_world[i] += (_hand_world[i] - elbow_world).normalized() * 0.07 * held
 	pose_updated.emit()
 
 
