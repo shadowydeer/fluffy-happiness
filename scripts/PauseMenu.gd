@@ -1,5 +1,7 @@
 extends CanvasLayer
-## Esc menu: RESUME, back to the MAIN MENU, or QUIT.
+## Esc menu: RESUME, back to the MAIN MENU, or QUIT, plus the settings that have to be
+## reachable mid-contract: the EN | RU switch and the MASTER / SFX / AMBIENT volumes
+## (kept by `Loc` and `SoundManager` in user://settings.cfg).
 ##
 ## Solo, the whole tree is paused while it is open. In co-op the world belongs to
 ## everybody, so only this player's controls are locked and the contract carries on
@@ -12,12 +14,17 @@ const DIM := Color(0.60, 0.67, 0.68)
 const ACCENT := Color(0.95, 0.42, 0.08)
 const WARN := Color(0.95, 0.27, 0.15)
 const PANEL := Color(0.025, 0.032, 0.04, 0.95)
+## Audio bus and its caption, top to bottom.
+const VOLUME_ROWS: Array[Array] = [["Master", "MASTER"], ["SFX", "SFX"], ["Ambient", "AMBIENT"]]
 
 var _main: Node
 var _root: Control
 var _resume: Button
 var _leave: Button
 var _session: Label
+var _language: Button
+var _sliders: Dictionary = {}
+var _readouts: Dictionary = {}
 var _was_locked := false
 
 
@@ -57,13 +64,22 @@ func _ready() -> void:
 	style.content_margin_bottom = 26.0
 	var card := PanelContainer.new()
 	card.name = "Card"
-	card.custom_minimum_size = Vector2(400.0, 0.0)
+	card.custom_minimum_size = Vector2(440.0, 0.0)
 	card.add_theme_stylebox_override(&"panel", style)
 	centre.add_child(card)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override(&"separation", 12)
 	card.add_child(column)
-	column.add_child(_label("PAUSED", 30, INK))
+	var head := HBoxContainer.new()
+	column.add_child(head)
+	var title := _label("PAUSED", 32, INK)
+	title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	Loc.style_header(title)
+	head.add_child(title)
+	_language = Loc.make_toggle()
+	_language.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	head.add_child(_language)
 	_session = _label("", 12, DIM)
 	column.add_child(_session)
 	var gap := Control.new()
@@ -78,9 +94,11 @@ func _ready() -> void:
 	var quit := _button("QUIT TO DESKTOP", Color(0.16, 0.08, 0.07))
 	quit.pressed.connect(_on_quit)
 	column.add_child(quit)
+	_build_volumes(column)
 	var keys := _label("[ESC] resume", 11, Color(DIM, 0.8))
 	keys.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(keys)
+	SoundManager.volume_changed.connect(_on_volume_changed)
 
 
 func is_open() -> bool:
@@ -89,6 +107,16 @@ func is_open() -> bool:
 
 func get_leave_button() -> Button:
 	return _leave
+
+
+## The EN | RU switch in the card's top-right corner.
+func get_language_toggle() -> Button:
+	return _language
+
+
+## The slider of an audio bus: "Master", "SFX" or "Ambient".
+func get_volume_slider(bus: StringName) -> HSlider:
+	return _sliders.get(String(bus)) as HSlider
 
 
 func open() -> void:
@@ -111,6 +139,8 @@ func open() -> void:
 		NetworkManager.Mode.CLIENT:
 			_session.text = "CO-OP  -  the contract carries on without you"
 			_leave.text = "DISCONNECT & MAIN MENU"
+	for bus: String in _sliders:
+		_show_volume(bus, SoundManager.get_volume(StringName(bus)))
 	_root.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_resume.grab_focus()
@@ -147,6 +177,78 @@ func _on_leave() -> void:
 func _on_quit() -> void:
 	NetworkManager.leave()
 	get_tree().quit()
+
+
+# --- Volumes ---------------------------------------------------------------------------
+
+## MASTER / SFX / AMBIENT: a caption, a 0..1 slider and its percentage, under a thin rule.
+func _build_volumes(column: VBoxContainer) -> void:
+	var rule := ColorRect.new()
+	rule.color = Color(DIM, 0.25)
+	rule.custom_minimum_size = Vector2(0.0, 1.0)
+	column.add_child(rule)
+	column.add_child(_label("VOLUME", 11, DIM))
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color(DIM, 0.22)
+	track.set_corner_radius_all(2)
+	track.content_margin_top = 2.0
+	track.content_margin_bottom = 2.0
+	var fill := track.duplicate() as StyleBoxFlat
+	fill.bg_color = ACCENT
+	for entry in VOLUME_ROWS:
+		var bus: String = entry[0]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override(&"separation", 12)
+		column.add_child(row)
+		var caption := _label(str(entry[1]), 12, INK)
+		caption.autowrap_mode = TextServer.AUTOWRAP_OFF
+		caption.custom_minimum_size = Vector2(104.0, 0.0)
+		row.add_child(caption)
+		var slider := HSlider.new()
+		slider.name = "%sVolume" % bus
+		slider.min_value = 0.0
+		slider.max_value = 1.0
+		slider.step = 0.01
+		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		slider.custom_minimum_size = Vector2(160.0, 20.0)
+		slider.add_theme_stylebox_override(&"slider", track)
+		slider.add_theme_stylebox_override(&"grabber_area", fill)
+		slider.add_theme_stylebox_override(&"grabber_area_highlight", fill)
+		slider.value_changed.connect(_on_slider_moved.bind(bus))
+		slider.drag_ended.connect(_on_slider_released)
+		row.add_child(slider)
+		var readout := _label("100%", 12, DIM)
+		readout.autowrap_mode = TextServer.AUTOWRAP_OFF
+		readout.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		readout.custom_minimum_size = Vector2(46.0, 0.0)
+		readout.add_theme_font_override(&"font", Loc.mono_font())
+		row.add_child(readout)
+		_sliders[bus] = slider
+		_readouts[bus] = readout
+		_show_volume(bus, SoundManager.get_volume(StringName(bus)))
+
+
+func _on_slider_moved(value: float, bus: String) -> void:
+	(_readouts[bus] as Label).text = "%d%%" % roundi(value * 100.0)
+	SoundManager.set_volume(StringName(bus), value)
+
+
+## Lets the new level be heard.
+func _on_slider_released(changed: bool) -> void:
+	if changed:
+		SoundManager.play_ui(&"ui_click")
+
+
+## The mixer moved for another reason (settings loaded, another menu): follow it.
+func _on_volume_changed(bus: StringName, linear: float) -> void:
+	if _sliders.has(String(bus)):
+		_show_volume(String(bus), linear)
+
+
+func _show_volume(bus: String, linear: float) -> void:
+	(_sliders[bus] as HSlider).set_value_no_signal(linear)
+	(_readouts[bus] as Label).text = "%d%%" % roundi(clampf(linear, 0.0, 1.0) * 100.0)
 
 
 func _label(text: String, font_size: int, color: Color) -> Label:
