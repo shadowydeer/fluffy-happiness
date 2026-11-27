@@ -12,6 +12,7 @@ extends Node3D
 const Driver := preload("res://scripts/DemonSkeletonDriver.gd")
 const Mats := preload("res://scripts/MaterialLibrary.gd")
 const SKIN_SHADER := preload("res://shaders/demon_skin.gdshader")
+const Parts := preload("res://scripts/gadgets/GadgetParts.gd")
 
 const SKIN_SET := "demon/charred_skin"
 const HEAD_BONE := "Head"
@@ -43,6 +44,13 @@ var _casting := false
 var _stunned := false
 var _captured := false
 var _flash := 0.0
+var _shock := 0.0
+## Tape bands by bind level (1..3); built hidden, shown as the demon is wrapped.
+var _tape: Array[Array] = [[], [], [], []]
+var _tape_mounts: Dictionary = {}
+var _tape_points := PackedVector3Array()
+var _tape_bones := PackedInt32Array()
+var _tape_settle := 0.0
 
 
 func build(ragdoll: Node3D) -> void:
@@ -63,6 +71,9 @@ func build(ragdoll: Node3D) -> void:
 	_build_eyes(head)
 	_build_lights(head, chest)
 	_build_particles(chest)
+	_build_tape()
+	ragdoll.connect(&"bind_changed", _on_bind_changed)
+	_on_bind_changed(int(ragdoll.get(&"bind_level")))
 	_apply_mood()
 
 
@@ -96,6 +107,8 @@ func _process(delta: float) -> void:
 	_rage = move_toward(_rage, _rage_target, delta * 2.5)
 	_cast = move_toward(_cast, 1.0 if _casting else 0.0, delta * 5.0)
 	_flash = maxf(0.0, _flash - delta * 1.6)
+	_shock = maxf(0.0, _shock - delta * 5.0)
+	_settle_tape(delta)
 	_apply_mood()
 
 
@@ -121,6 +134,7 @@ func _apply_mood() -> void:
 	_skin.set_shader_parameter(&"limb_energy", limbs)
 	_skin.set_shader_parameter(&"paint_energy", paint)
 	_skin.set_shader_parameter(&"pulse", beat)
+	_skin.set_shader_parameter(&"shock", _shock * (0.7 + 0.3 * sin(_time * 71.0)))
 	_skin.set_shader_parameter(&"rim_energy", 0.3 + 0.35 * _rage + 0.4 * _cast)
 	# The vein mask is anchored to the ribcage, so it has to follow the chest bone.
 	var chest := _skeleton.get_bone_global_pose(_chest_bone)
@@ -365,3 +379,176 @@ func _ramp(offsets: Array, colors: Array) -> GradientTexture1D:
 	var texture := GradientTexture1D.new()
 	texture.gradient = gradient
 	return texture
+
+
+## The taser's electric rim light: `amount` 0..1. It fades by itself.
+func set_shock(amount: float) -> void:
+	_shock = maxf(_shock, clampf(amount, 0.0, 1.0))
+
+
+## How many tape bands are showing right now.
+func get_tape_count() -> int:
+	var count := 0
+	for tier in _tape:
+		for band: MeshInstance3D in tier:
+			if band.visible:
+				count += 1
+	return count
+
+
+# --- Duct tape ---------------------------------------------------------------------------
+
+const TAPE_CORE: Array[String] = ["Hips", "Spine02", "Spine01", "Spine", "neck", "LeftShoulder", "RightShoulder"]
+
+## Builds every band the three bind levels can show and hides them. Each band is fitted to
+## the skin round its slice of the body and hung on that bone with a BoneAttachment3D, so it
+## stays put however the ragdoll is dragged.
+##   level 1  chest and upper arms
+##   level 2  forearms, wrists, knees and shins
+##   level 3  crossed straps over the torso, the waist, more leg wraps, a strip across the jaw
+func _build_tape() -> void:
+	_scan_skin()
+	if _tape_points.is_empty():
+		return
+	_torso_band(1, 0.44, 0.075, 0.0)
+	_torso_band(1, 0.74, 0.07, 0.0)
+	_torso_band(3, 0.58, 0.085, 0.5)
+	_torso_band(3, 0.58, 0.085, -0.5)
+	_torso_band(3, 0.12, 0.08, 0.0)
+	for side: String in ["Left", "Right"]:
+		_limb_band(1, side + "Arm", side + "ForeArm", 0.5, 0.062)
+		_limb_band(2, side + "ForeArm", side + "Hand", 0.4, 0.055)
+		_limb_band(2, side + "ForeArm", side + "Hand", 0.88, 0.045)
+		_limb_band(2, side + "UpLeg", side + "Leg", 0.82, 0.07)
+		_limb_band(2, side + "Leg", side + "Foot", 0.22, 0.065)
+		_limb_band(3, side + "Arm", side + "ForeArm", 0.86, 0.055)
+		_limb_band(3, side + "UpLeg", side + "Leg", 0.42, 0.075)
+		_limb_band(3, side + "Leg", side + "Foot", 0.68, 0.065)
+	_jaw_strip()
+	# Only needed for the fitting.
+	_tape_points.clear()
+	_tape_bones.clear()
+
+
+## Rest-pose position (ragdoll space) and dominant bone of every skin vertex.
+func _scan_skin() -> void:
+	var skin := _mesh.skin
+	var bind_bone := PackedInt32Array()
+	for bind in skin.get_bind_count():
+		var bone := skin.get_bind_bone(bind)
+		if bone < 0:
+			bone = _skeleton.find_bone(skin.get_bind_name(bind))
+		bind_bone.append(bone)
+	var to_root := _driver.get_bind_mesh_transform()
+	for surface in _mesh.mesh.get_surface_count():
+		var arrays := _mesh.mesh.surface_get_arrays(surface)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var joints: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+		var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+		if vertices.is_empty() or joints.is_empty():
+			continue
+		@warning_ignore("integer_division")
+		var per := joints.size() / vertices.size()
+		for v in vertices.size():
+			var best := 0
+			for k in range(1, per):
+				if weights[v * per + k] > weights[v * per + best]:
+					best = k
+			_tape_points.append(to_root * vertices[v])
+			_tape_bones.append(bind_bone[joints[v * per + best]])
+
+
+## A band round a limb, `along` (0..1) of the way from `bone` to `tip`.
+func _limb_band(level: int, bone: String, tip: String, along: float, width: float) -> void:
+	var from := _driver.get_bind_transform(bone).origin
+	var to := _driver.get_bind_transform(tip).origin
+	var axis := (to - from).normalized()
+	var bones := PackedInt32Array([_skeleton.find_bone(bone), _skeleton.find_bone(tip)])
+	_add_band(level, bone, bones, from.lerp(to, along), axis, Vector3.RIGHT if absf(axis.x) < 0.8 else Vector3.BACK, width, TAU, 0.0)
+
+
+## A band round the trunk, `along` (0..1) of the way from waist to neck; `slant` tips it into a diagonal strap.
+func _torso_band(level: int, along: float, width: float, slant: float) -> void:
+	var waist := _driver.get_bind_transform(WAIST_BONE).origin
+	var neck := _driver.get_bind_transform(NECK_BONE).origin
+	var bones := PackedInt32Array()
+	for bone_name in TAPE_CORE:
+		bones.append(_skeleton.find_bone(bone_name))
+	var bone := WAIST_BONE if along < 0.3 else ("Spine01" if along < 0.6 else CHEST_BONE)
+	_add_band(level, bone, bones, waist.lerp(neck, along), (neck - waist).normalized(), Vector3.RIGHT, width, TAU, slant)
+
+
+## One strip slapped across the snout, open at the back of the head.
+func _jaw_strip() -> void:
+	var head := _driver.get_bind_transform(HEAD_BONE).origin
+	var crown := _driver.get_bind_transform(CROWN_BONE).origin
+	var front := Vector3.FORWARD
+	var bones := PackedInt32Array([_skeleton.find_bone(HEAD_BONE), _skeleton.find_bone(CROWN_BONE)])
+	if _skeleton.find_bone("headfront") >= 0:
+		front = (_driver.get_bind_transform("headfront").origin - head).normalized()
+		bones.append(_skeleton.find_bone("headfront"))
+	_add_band(3, HEAD_BONE, bones, head + (crown - head) * 0.12, (crown - head).normalized(), front, 0.055, 3.5, 0.0)
+
+
+## Measures the skin of `bones` in a slice round `centre` and wraps a band of tape to fit.
+## `side` is the direction the band's first half-axis runs in (and where an open arc faces).
+func _add_band(level: int, bone: String, bones: PackedInt32Array, centre: Vector3, axis: Vector3, side: Vector3,
+		width: float, arc: float, slant: float) -> void:
+	side = (side - axis * side.dot(axis)).normalized()
+	var depth := side.cross(axis)
+	var across := PackedFloat32Array()
+	var through := PackedFloat32Array()
+	for v in _tape_points.size():
+		if not bones.has(_tape_bones[v]):
+			continue
+		var offset := _tape_points[v] - centre
+		if absf(offset.dot(axis)) > width * 0.6:
+			continue
+		across.append(offset.dot(side))
+		through.append(offset.dot(depth))
+	if across.size() < 8:
+		return
+	across.sort()
+	through.sort()
+	var last := across.size() - 1
+	var low := Vector2(across[int(last * 0.03)], through[int(last * 0.03)])
+	var high := Vector2(across[int(last * 0.97)], through[int(last * 0.97)])
+	# The bone rarely runs down the middle of the flesh: centre the band on the skin itself.
+	var middle := centre + side * (low.x + high.x) * 0.5 + depth * (low.y + high.y) * 0.5
+	var rx := (high.x - low.x) * 0.5 * 1.07 + 0.008
+	var rz := (high.y - low.y) * 0.5 * 1.07 + 0.008
+	var frame := Basis(side, axis, depth)
+	if slant != 0.0:
+		frame = Basis(depth, slant) * frame
+		rx /= cos(slant)
+	var bands: Array = _tape[level]
+	var band := MeshInstance3D.new()
+	band.name = "Tape%d_%d" % [level, bands.size()]
+	band.mesh = Parts.band(rx, rz, width, arc, float(bands.size()) + level * 5.0)
+	band.material_override = Parts.tape()
+	band.transform = Transform3D(frame, middle - _driver.get_bind_transform(bone).origin)
+	band.visible = false
+	if not _tape_mounts.has(bone):
+		_tape_mounts[bone] = _driver.make_attachment(bone, "Tape_%s" % bone)
+	(_tape_mounts[bone] as Node3D).add_child(band)
+	bands.append(band)
+
+
+func _on_bind_changed(level: int) -> void:
+	for tier in range(1, _tape.size()):
+		for band: MeshInstance3D in _tape[tier]:
+			var wrapped := tier <= level
+			if wrapped and not band.visible:
+				# Slapped on loose, then cinched tight.
+				band.scale = Vector3.ONE * 1.35
+				_tape_settle = 0.5
+			band.visible = wrapped
+
+
+func _settle_tape(delta: float) -> void:
+	if _tape_settle <= 0.0:
+		return
+	_tape_settle -= delta
+	for tier in _tape:
+		for band: MeshInstance3D in tier:
+			band.scale = band.scale.lerp(Vector3.ONE, minf(1.0, delta * 16.0)) if _tape_settle > 0.0 else Vector3.ONE
