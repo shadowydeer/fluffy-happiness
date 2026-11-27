@@ -6,7 +6,8 @@ extends RefCounted
 ## fitted to that model: a box for boxy things, a simplified convex hull for
 ## round or irregular ones, and a seat + backrest pair for seating.
 ## Mass, friction and bounce are tuned per object so paint cans clatter, books
-## slide, and a sofa has to be shouldered across the room.
+## slide, and a sofa has to be shouldered across the room. Each prop also carries
+## the material it sounds like when it lands (see `IMPACTS`).
 
 const Mats := preload("res://scripts/MaterialLibrary.gd")
 const FlickerLight := preload("res://scripts/FlickerLight.gd")
@@ -123,6 +124,21 @@ const RECIPES := {
 			"mass": 9.0, "friction": 0.5, "bounce": 0.1, "shape": CONVEX, "size": Vector3(0.55, 1.3, 0.64)},
 }
 
+## What a prop sounds like when it hits something: stored on the body as the `impact`
+## meta, where SoundManager reads it. Anything not listed here is wood.
+const WOOD := &"wood"
+const METAL := &"metal"
+const THUD := &"thud"
+const GLASS := &"glass"
+const IMPACTS := {
+	&"sofa": THUD, &"armchair": THUD, &"green_chair": THUD, &"box": THUD, &"book": THUD,
+	&"bust": THUD, &"tyre": THUD, &"cone": THUD,
+	&"wheelchair": METAL, &"desk": METAL, &"lamp": METAL, &"oil_lantern": METAL, &"radio": METAL,
+	&"paint_can": METAL, &"spray_can": METAL, &"toolbox": METAL, &"tool_chest": METAL, &"goblet": METAL,
+	&"trash_can": METAL, &"generator": METAL, &"hand_truck": METAL,
+	&"bottle": GLASS, &"tv": GLASS,
+}
+
 const BOOK_PARTS := 20
 const BOTTLE_PARTS: Array[String] = ["wine_bottles_01_bordeaux", "wine_bottles_01_alsace", "wine_bottles_01_burgundy", "wine_bottles_01_champagne"]
 const SPRAY_PARTS: Array[String] = ["spray_paint_bottles", "spray_paint_bottles_dirty"]
@@ -164,6 +180,7 @@ static func create(kind: StringName, rng: RandomNumberGenerator, lit: bool = fal
 			fit["part"] = GOBLET_PARTS[rng.randi() % GOBLET_PARTS.size()]
 
 	var body := _body(recipe["label"], mass, recipe["friction"], recipe["bounce"], recipe.get("damp", 0.35))
+	body.set_meta(&"impact", IMPACTS.get(kind, WOOD))
 	var model := ModelLoader.instance(recipe["model"], fit)
 	model.name = "Model"
 	body.add_child(model)
