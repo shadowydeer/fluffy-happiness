@@ -30,8 +30,13 @@ missing fog shafts.
 | `Space` | Jump |
 | `Ctrl` | Crouch (hold) |
 | Mouse | Look |
-| `LMB` / `E` (hold) | Grab a physics prop, or any part of the demon, within 3.2 m |
+| `1` / `2` / `3` | Holy Lasso / Holy Taser / Duct Tape (the active slot's key again puts it away) |
+| `0`, mouse wheel | Empty hands / cycle slots |
+| `LMB` / `E` (hold) | Empty hands: grab a physics prop, or any part of the demon, within 3.2 m |
 | `RMB` (while holding) | Throw / shove the prop or the demon |
+| `E` (hold) | Grab by hand at any time; a gadget in hand is lowered while the grab lasts |
+| `LMB` / `RMB` | With a gadget out: work the gadget (see Stage 3) |
+| `R` | Detach / reel in the lasso, from any slot |
 | `F` | Use doors (van rear doors, front doors) |
 | `V` | Toggle first / third person |
 | `T` | Toggle headlamp |
@@ -39,6 +44,8 @@ missing fog shafts.
 | `K` | Test: stun / wake the demon |
 | `J` | Test: cycle demon AI (lurking > enraged > poltergeist throw) |
 | `L` | Test: cycle bind level 0-3 |
+| `P` | Test: summon the demon a few steps in front of you |
+| `N` | After KEEP EXPLORING: bring the payout card back |
 | `F1` | Show / hide the test-key hint on the HUD |
 
 Bindings live in **Project Settings > Input Map**.
@@ -193,12 +200,45 @@ shaders/
   sleeves and gloves with jointed fingers. The two hands rest in different spots, close
   their fingers on whatever is held, and sag, reach and tremble with its weight.
 
+## Stage 3: gadgets and the contract loop
+
+- **Belt** (`scripts/GadgetManager.gd`, `scripts/gadgets/`): three tools built from
+  lathed / swept PBR parts (`GadgetParts.gd`), held by the first-person gloves and
+  carried by the third-person character, with equip swing, walk bob, sway and recoil.
+- **Holy Lasso** (`1`): `LMB` throws up to 11 m (ray plus a 0.22 m swept ball) at any
+  demon segment or loose prop and cinches a glowing collar on it. The rope is a one-way
+  damped spring applied at the attachment point; hold `LMB` to reel, tap to let go.
+  A conscious demon pulls back and drains stamina. `RMB` within 3.5 m of a wall, post
+  or floor hammers in an anchor pin and frees your hands; an enraged demon snaps it
+  after 8 - 12 s.
+- **Holy Taser** (`2`): hold `LMB` inside 3.8 m. +48 stun/s, convulsions and an electric
+  rim on the demon's skin; 32 %/s drain, 24 %/s recharge after 0.6 s, 2.8 s overheat
+  lockout when run flat.
+- **Duct Tape** (`3`): hold `LMB` within 2.6 m of a stunned or anchored demon, 1.8 s per
+  wrap, +20 stun each. Bind levels 1 - 3 show tape bands fitted to the skin and hung on
+  `BoneAttachment3D` nodes; each level makes the demon calmer and easier to drag.
+- **Contract** (`scripts/ContractManager.gd`, `scenes/ContractSummaryUI.tscn`): shut the
+  rear doors on the demon and the van bolts, seals, and rocks for 2.5 s; then the payout
+  card: $500 bounty, up to +$200 for speed, +$50 per bind level, up to +$100 for a tidy
+  house. The bank lives in the `GameState` autoload. NEXT CONTRACT resets the site in
+  place and spawns a faster, tougher demon.
+
+Quickest way to try the whole loop: `P` to summon the demon, `2` and hold `LMB` for
+about two seconds, `3` and hold `LMB` for three wraps, drag it up the ramp with `E`
+(or the lasso), then `F` on the rear doors.
+
 ## Checks
 
 ```
 godot --headless --path . --import          # first run only: builds the import cache
+godot --headless --path . -s tools/validate_project.gd
 godot --headless --fixed-fps 60 --path . -s tools/smoke_test.gd
+godot --headless --fixed-fps 60 --path . -s tools/stage3_test.gd
 ```
+
+`validate_project.gd` compiles every script, loads every scene and shader and checks
+every `res://` path. `stage3_test.gd` works the three gadgets through real input; the
+smoke test now also covers the seal, the payout card and the next contract.
 
 The smoke test boots the real game and plays the contract through the player's own
 input paths (F on the van doors, grab, haul up the ramp, throw, house triggers, V / T /
