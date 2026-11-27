@@ -99,6 +99,7 @@ throw={
 3d_physics/layer_2="player"
 3d_physics/layer_3="props"
 3d_physics/layer_4="interactable"
+3d_physics/layer_5="demon_limbs"
 
 [rendering]
 

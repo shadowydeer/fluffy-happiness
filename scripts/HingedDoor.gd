@@ -58,7 +58,7 @@ func configure(width: float, height: float, thickness: float, door_mass: float, 
 func _ready() -> void:
 	collision_layer = GameState.LAYER_INTERACT
 	# Deliberately blind to the world layer: the hinge keeps the leaf in its frame.
-	collision_mask = GameState.LAYER_PLAYER | GameState.LAYER_PROP
+	collision_mask = GameState.LAYER_PLAYER | GameState.LAYER_PROP | GameState.LAYER_DEMON
 	can_sleep = false
 	angular_damp = 0.4
 	_closed_local = transform.basis.orthonormalized()

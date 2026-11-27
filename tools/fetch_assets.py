@@ -11,12 +11,17 @@ Sources (all CC0 1.0 / public domain; licence is re-checked against each API):
   * Poly Haven  https://api.polyhaven.com   models (glTF packed into one .glb) and PBR textures
   * Poly Pizza  https://poly.pizza          .glb models by Quaternius, Kay Lousberg, CreativeTrio, iPoly3D
   * ambientCG   https://ambientcg.com/api   PBR textures
+  * vibeassets  https://vibeassets.io/api   rigged .glb characters (the demon)
 
 Nothing is fetched from a guessed URL: every download link comes out of the
 source's own API response for the asset id listed in the catalog below.
 Each file is checked for HTTP 200, a non-trivial size and the right magic
 bytes (glTF / JPEG / PNG), and the result is written to
 assets/asset_manifest.json.
+
+Rigged models listed in RIGGED_MODELS are also checked for a skin, skinned
+vertices and every bone the game maps by name; their bone hierarchy, rest
+positions and bounding box are printed and stored in the manifest.
 """
 
 from __future__ import annotations
@@ -43,7 +48,7 @@ MODELS = os.path.join(ASSETS, "models")
 TEXTURES = os.path.join(ASSETS, "textures")
 MANIFEST = os.path.join(ASSETS, "asset_manifest.json")
 
-USER_AGENT = "BindAndDeliver-AssetFetcher/1.5 (Godot indie project; contact via repository)"
+USER_AGENT = "BindAndDeliver-AssetFetcher/2.0 (Godot indie project; contact via repository)"
 BROWSER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) " + USER_AGENT
 POLYHAVEN_RESOLUTION = "1k"
 AMBIENTCG_ATTRIBUTE = "1K-JPG"
@@ -138,7 +143,20 @@ MODEL_CATALOG = [
     ("exorcist", "polypizza", "Yg2bQZO6Hj", "characters"),
     ("gas_mask", "polyhaven", "old_gas_mask", "characters"),
     ("gas_canister", "polyhaven", "propane_tank", "characters"),
+    # --- The demon: skinned humanoid, drives the Stage 2 ragdoll ------------
+    ("demon", "vibeassets", "6lgzyditwz", "demon"),
 ]
+
+# Rigged models and the bones scripts/DemonSkeletonDriver.gd looks up by name.
+RIGGED_MODELS = {
+    "demon": [
+        "Hips", "Spine02", "Spine01", "Spine", "neck", "Head", "head_end",
+        "LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand",
+        "RightShoulder", "RightArm", "RightForeArm", "RightHand",
+        "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase",
+        "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase",
+    ],
+}
 
 # (local name, source, source id)
 TEXTURE_CATALOG = [
@@ -169,6 +187,9 @@ TEXTURE_CATALOG = [
     ("metal_tread_plate", "polyhaven", "metal_plate"),
     ("metal_painted_rusty", "polyhaven", "rusty_metal_02"),
     ("fabric_suit", "polyhaven", "terlenka"),
+    # Stage 2 demon: fibrous bark stands in for charred sinew, ivory for claws, teeth and bone.
+    ("demon/charred_skin", "polyhaven", "bark_willow_02"),
+    ("demon/cracked_bone", "ambientcg", "Ivory001B"),
 ]
 
 # Poly Haven map key -> our file suffix.
@@ -256,6 +277,118 @@ def glb_summary(data: bytes) -> dict:
     }
 
 
+def _node_matrix(node: dict) -> list:
+    """Row-major 4x4 local transform of a glTF node."""
+    if "matrix" in node:
+        m = node["matrix"]
+        return [[m[column * 4 + row] for column in range(4)] for row in range(4)]
+    t = node.get("translation", [0.0, 0.0, 0.0])
+    x, y, z, w = node.get("rotation", [0.0, 0.0, 0.0, 1.0])
+    s = node.get("scale", [1.0, 1.0, 1.0])
+    r = [[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+         [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+         [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]]
+    return [[r[i][0] * s[0], r[i][1] * s[1], r[i][2] * s[2], t[i]] for i in range(3)] + [[0.0, 0.0, 0.0, 1.0]]
+
+
+def _matrix_product(a: list, b: list) -> list:
+    return [[sum(a[i][k] * b[k][j] for k in range(4)) for j in range(4)] for i in range(4)]
+
+
+def glb_rig(data: bytes, required_bones: list) -> dict:
+    """Checks a skinned .glb and returns its bone hierarchy, rest pose and bounds.
+
+    Raises FetchError when there is no skin, no skinned vertices, a non-finite
+    rest transform or a bone the game needs is missing.
+    """
+    json_length = struct.unpack("<I", data[12:16])[0]
+    document = json.loads(data[20:20 + json_length].decode("utf-8"))
+    nodes = document.get("nodes", [])
+    skins = document.get("skins", [])
+    if not skins:
+        raise FetchError("model has no skin")
+    skin = skins[0]
+    joints = skin["joints"]
+    parent = {child: index for index, node in enumerate(nodes) for child in node.get("children", [])}
+    world: dict = {}
+
+    def world_of(index: int) -> list:
+        if index not in world:
+            local = _node_matrix(nodes[index])
+            world[index] = _matrix_product(world_of(parent[index]), local) if index in parent else local
+        return world[index]
+
+    joint_set = set(joints)
+    bones = []
+    for joint in joints:
+        matrix = world_of(joint)
+        rest = [matrix[0][3], matrix[1][3], matrix[2][3]]
+        if any(value != value or abs(value) == float("inf") for row in matrix for value in row):
+            raise FetchError("bone %s has a non-finite rest transform" % nodes[joint].get("name"))
+        above = parent.get(joint)
+        bones.append({
+            "name": nodes[joint].get("name", "joint_%d" % joint),
+            "parent": nodes[above].get("name", "") if above in joint_set else "",
+            "rest": [round(value, 4) for value in rest],
+            "rotation": [round(value, 4) for value in nodes[joint].get("rotation", [0.0, 0.0, 0.0, 1.0])],
+        })
+    names = {bone["name"] for bone in bones}
+    absent = [name for name in required_bones if name not in names]
+    if absent:
+        raise FetchError("skeleton is missing bones: %s" % ", ".join(absent))
+
+    vertices = 0
+    low = [float("inf")] * 3
+    high = [float("-inf")] * 3
+    for node in nodes:
+        if "mesh" not in node or "skin" not in node:
+            continue
+        for primitive in document["meshes"][node["mesh"]]["primitives"]:
+            attributes = primitive["attributes"]
+            if "JOINTS_0" not in attributes or "WEIGHTS_0" not in attributes:
+                raise FetchError("skinned mesh has no joint weights")
+            accessor = document["accessors"][attributes["POSITION"]]
+            vertices += accessor["count"]
+            for axis in range(3):
+                low[axis] = min(low[axis], accessor["min"][axis])
+                high[axis] = max(high[axis], accessor["max"][axis])
+    if vertices <= 0:
+        raise FetchError("skinned mesh has no vertices")
+    return {
+        "skeleton": skin.get("name", ""),
+        "joints": len(joints),
+        "vertices": vertices,
+        "bounds_min": [round(value, 4) for value in low],
+        "bounds_max": [round(value, 4) for value in high],
+        "height": round(high[1] - low[1], 4),
+        "bones": bones,
+    }
+
+
+def print_rig(record: dict) -> None:
+    """Bone tree with rest positions (metres, model space) and the bind-pose bounding box."""
+    rig = record["rig"]
+    entry = record["files"][0]
+    print("")
+    print("RIG %s  %s  %s  %d mesh(es), %d vertices, %d triangles, skeleton '%s' with %d bones" % (
+        record["name"], entry["path"], human(entry["bytes"]), record["meshes"], rig["vertices"],
+        record["triangles"], rig["skeleton"], rig["joints"]))
+    print("  bounding box  min (%.3f, %.3f, %.3f)  max (%.3f, %.3f, %.3f)  height %.3f m" % (
+        *rig["bounds_min"], *rig["bounds_max"], rig["height"]))
+    children: dict = {}
+    for bone in rig["bones"]:
+        children.setdefault(bone["parent"], []).append(bone)
+
+    def show(bone: dict, depth: int) -> None:
+        print("  %-26s rest (%7.3f, %7.3f, %7.3f)  local rotation (%.3f, %.3f, %.3f, %.3f)" % (
+            "  " * depth + bone["name"], *bone["rest"], *bone["rotation"]))
+        for child in children.get(bone["name"], []):
+            show(child, depth + 1)
+
+    for root in children.get("", []):
+        show(root, 0)
+
+
 def file_record(path: str, data: bytes, kind: str) -> dict:
     return {
         "path": "res://" + os.path.relpath(path, ROOT).replace(os.sep, "/"),
@@ -264,6 +397,235 @@ def file_record(path: str, data: bytes, kind: str) -> dict:
         "format": kind,
         "verified": True,
     }
+
+
+# ---------------------------------------------------------------------------
+# Embedded JPEG repair
+#
+# Godot's JPEG decoder only accepts chroma planes sampled 1x1. Some encoders
+# write full-resolution images with every component marked 1x2 (or 2x1 / 2x2),
+# which is legal but makes the .glb fail to import. Such a scan holds exactly
+# the same 8x8 blocks, only visited in a different order, so it can be
+# re-ordered without touching a single coefficient.
+# ---------------------------------------------------------------------------
+
+STANDARD_DC_COUNTS = [0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+STANDARD_DC_SYMBOLS = list(range(12))
+
+
+def _huffman_codes(counts: list, symbols: list) -> dict:
+    """Canonical JPEG Huffman table as {bit string: symbol}."""
+    codes = {}
+    code = 0
+    index = 0
+    for length in range(1, 17):
+        for _ in range(counts[length - 1]):
+            codes[format(code, "0%db" % length)] = symbols[index]
+            code += 1
+            index += 1
+        code <<= 1
+    return codes
+
+
+def _jpeg_segments(blob: bytes) -> tuple:
+    """Splits a JPEG into its header segments and the entropy-coded scan."""
+    if blob[:2] != b"\xff\xd8":
+        raise FetchError("embedded image is not a JPEG")
+    segments = []
+    position = 2
+    while position + 4 <= len(blob):
+        if blob[position] != 0xFF:
+            raise FetchError("corrupt JPEG header")
+        marker = blob[position + 1]
+        length = struct.unpack(">H", blob[position + 2:position + 4])[0]
+        body = blob[position + 4:position + 2 + length]
+        position += 2 + length
+        segments.append((marker, body))
+        if marker == 0xDA:
+            end = position
+            while True:
+                end = blob.find(b"\xff", end)
+                if end < 0 or end + 1 >= len(blob):
+                    raise FetchError("JPEG scan has no end marker")
+                if blob[end + 1] == 0x00:
+                    end += 2
+                    continue
+                break
+            return segments, blob[position:end]
+    raise FetchError("JPEG has no scan")
+
+
+def jpeg_sampling(blob: bytes) -> list:
+    """(h, v) sampling factors of each component of a baseline JPEG, or [] for other kinds."""
+    try:
+        segments, _ = _jpeg_segments(blob)
+    except FetchError:
+        return []
+    for marker, body in segments:
+        if marker == 0xC0:
+            return [(body[7 + c * 3] >> 4, body[7 + c * 3] & 15) for c in range(body[5])]
+    return []
+
+
+def jpeg_flatten_sampling(blob: bytes) -> bytes:
+    """Losslessly rewrites a baseline JPEG whose components all share one HxV factor as 1x1."""
+    segments, scan = _jpeg_segments(blob)
+    frame = None
+    tables = {}
+    selectors = {}
+    for marker, body in segments:
+        if marker == 0xC0:
+            frame = body
+        elif marker in (0xC1, 0xC2, 0xC9, 0xCA):
+            raise FetchError("only baseline JPEGs can be re-ordered")
+        elif marker == 0xDD and struct.unpack(">H", body[:2])[0]:
+            raise FetchError("JPEG restart intervals are not supported")
+        elif marker == 0xC4:
+            at = 0
+            while at < len(body):
+                key = body[at]
+                counts = list(body[at + 1:at + 17])
+                symbols = list(body[at + 17:at + 17 + sum(counts)])
+                tables[key] = (counts, symbols)
+                at += 17 + sum(counts)
+        elif marker == 0xDA:
+            for c in range(body[0]):
+                selectors[body[1 + c * 2]] = (body[2 + c * 2] >> 4, body[2 + c * 2] & 15)
+    if frame is None:
+        raise FetchError("JPEG has no baseline frame")
+    height, width, count = struct.unpack(">HHB", frame[1:6])
+    components = [(frame[6 + c * 3], frame[7 + c * 3] >> 4, frame[7 + c * 3] & 15) for c in range(count)]
+    factor_h, factor_v = components[0][1], components[0][2]
+    if any((h, v) != (factor_h, factor_v) for _, h, v in components):
+        raise FetchError("JPEG components use different sampling factors")
+
+    # The leading 1 keeps the zero bits at the start of the scan; skip "0b1".
+    bits = bin(int.from_bytes(b"\x01" + scan.replace(b"\xff\x00", b"\xff"), "big"))[3:]
+    decoders = {key: _huffman_codes(*table) for key, table in tables.items()}
+    mcu_columns = -(-width // (8 * factor_h))
+    mcu_rows = -(-height // (8 * factor_v))
+    # blocks[component][row][column] = (absolute DC value, AC bits exactly as stored)
+    blocks = [[[None] * (mcu_columns * factor_h) for _ in range(mcu_rows * factor_v)] for _ in components]
+    predictors = [0] * count
+    at = 0
+
+    def symbol(table: dict) -> int:
+        nonlocal at
+        for length in range(1, 17):
+            found = table.get(bits[at:at + length])
+            if found is not None:
+                at += length
+                return found
+        raise FetchError("corrupt JPEG scan")
+
+    for mcu_row in range(mcu_rows):
+        for mcu_column in range(mcu_columns):
+            for c, (component_id, _, _) in enumerate(components):
+                dc_table = decoders[selectors[component_id][0]]
+                ac_table = decoders[16 + selectors[component_id][1]]
+                for v in range(factor_v):
+                    for h in range(factor_h):
+                        size = symbol(dc_table)
+                        if size:
+                            value = int(bits[at:at + size], 2)
+                            at += size
+                            if value < 1 << (size - 1):
+                                value -= (1 << size) - 1
+                            predictors[c] += value
+                        start = at
+                        k = 1
+                        while k < 64:
+                            run_size = symbol(ac_table)
+                            if run_size & 15:
+                                at += run_size & 15
+                                k += (run_size >> 4) + 1
+                            elif run_size == 0xF0:
+                                k += 16
+                            else:
+                                break
+                        blocks[c][mcu_row * factor_v + v][mcu_column * factor_h + h] = (predictors[c], bits[start:at])
+
+    dc_codes = {value: key for key, value in _huffman_codes(STANDARD_DC_COUNTS, STANDARD_DC_SYMBOLS).items()}
+    out = []
+    predictors = [0] * count
+    for row in range(-(-height // 8)):
+        for column in range(-(-width // 8)):
+            for c in range(count):
+                value, ac_bits = blocks[c][row][column]
+                difference = value - predictors[c]
+                predictors[c] = value
+                size = abs(difference).bit_length()
+                out.append(dc_codes[size])
+                if size:
+                    out.append(format(difference if difference >= 0 else difference + (1 << size) - 1, "0%db" % size))
+                out.append(ac_bits)
+    stream = "".join(out)
+    stream += "1" * (-len(stream) % 8)
+    packed = int(stream, 2).to_bytes(len(stream) // 8, "big").replace(b"\xff", b"\xff\x00")
+
+    def segment(marker: int, body: bytes) -> bytes:
+        return bytes([0xFF, marker]) + struct.pack(">H", len(body) + 2) + body
+
+    result = bytearray(b"\xff\xd8")
+    for marker, body in segments:
+        if marker == 0xC0:
+            flat = bytearray(body)
+            for c in range(count):
+                flat[7 + c * 3] = 0x11
+            result += segment(marker, bytes(flat))
+        elif marker == 0xC4:
+            continue
+        elif marker == 0xDA:
+            for key, (counts, symbols) in sorted(tables.items()):
+                if key < 16:
+                    counts, symbols = STANDARD_DC_COUNTS, STANDARD_DC_SYMBOLS
+                result += segment(0xC4, bytes([key]) + bytes(counts) + bytes(symbols))
+            result += segment(marker, body)
+        else:
+            result += segment(marker, body)
+    return bytes(result) + packed + b"\xff\xd9"
+
+
+def glb_repair_images(data: bytes) -> tuple:
+    """Re-orders embedded JPEGs Godot cannot decode. Returns (glb bytes, number of images fixed)."""
+    json_length = struct.unpack("<I", data[12:16])[0]
+    document = json.loads(data[20:20 + json_length].decode("utf-8"))
+    views = document.get("bufferViews", [])
+    binary_start = 20 + json_length
+    if binary_start + 8 > len(data):
+        return data, 0
+    binary_length = struct.unpack("<I", data[binary_start:binary_start + 4])[0]
+    binary = data[binary_start + 8:binary_start + 8 + binary_length]
+    replacements = {}
+    for image in document.get("images", []):
+        if image.get("mimeType") != "image/jpeg" or "bufferView" not in image:
+            continue
+        view = views[image["bufferView"]]
+        start = view.get("byteOffset", 0)
+        blob = binary[start:start + view["byteLength"]]
+        factors = jpeg_sampling(blob)
+        if len(factors) == 3 and factors[1] != (1, 1):
+            replacements[image["bufferView"]] = jpeg_flatten_sampling(blob)
+    if not replacements:
+        return data, 0
+    blob = bytearray()
+    for index, view in enumerate(views):
+        start = view.get("byteOffset", 0)
+        content = replacements.get(index, binary[start:start + view["byteLength"]])
+        while len(blob) % 4:
+            blob.append(0)
+        view["byteOffset"] = len(blob)
+        view["byteLength"] = len(content)
+        blob += content
+    while len(blob) % 4:
+        blob.append(0)
+    document["buffers"][0]["byteLength"] = len(blob)
+    text = json.dumps(document, separators=(",", ":")).encode("utf-8")
+    text += b" " * (-len(text) % 4)
+    total = 12 + 8 + len(text) + 8 + len(blob)
+    packed = b"glTF" + struct.pack("<II", 2, total) + struct.pack("<II", len(text), 0x4E4F534A) + text
+    packed += struct.pack("<II", len(blob), 0x004E4942) + bytes(blob)
+    return packed, len(replacements)
 
 
 def write_file(path: str, data: bytes) -> None:
@@ -386,6 +748,29 @@ def fetch_polypizza_model(public_id: str) -> tuple:
     return data, meta
 
 
+def fetch_vibeassets_model(asset_id: str) -> tuple:
+    info = http_json("https://vibeassets.io/api/asset/" + urllib.parse.quote(asset_id))["asset"]
+    licence = info.get("license", "")
+    if not licence.upper().replace(" ", "").startswith("CC0"):
+        raise FetchError("%s is %s, not CC0" % (info.get("page_url", asset_id), licence))
+    if info.get("format") != "glb":
+        raise FetchError("%s is %s, not a .glb" % (asset_id, info.get("format")))
+    url = info["download_url"]
+    data = http_get(url)
+    if info.get("size_bytes") and len(data) != int(info["size_bytes"]):
+        raise FetchError("%s: got %d bytes, the API lists %s" % (url, len(data), info["size_bytes"]))
+    meta = {
+        "source": "vibeassets",
+        "source_id": asset_id,
+        "source_page": info.get("page_url", "https://vibeassets.io/a/" + asset_id),
+        "title": info.get("title", asset_id),
+        "author": "vibeassets.io contributor (text-to-3D, auto-rigged)",
+        "license": "CC0 1.0",
+        "download_urls": [url],
+    }
+    return data, meta
+
+
 def fetch_polyhaven_texture(asset_id: str) -> tuple:
     info = polyhaven_info(asset_id, "textures")
     files = http_json("https://api.polyhaven.com/files/" + asset_id)
@@ -443,7 +828,7 @@ def fetch_ambientcg_texture(asset_id: str) -> tuple:
     return maps, meta
 
 
-MODEL_SOURCES = {"polyhaven": fetch_polyhaven_model, "polypizza": fetch_polypizza_model}
+MODEL_SOURCES = {"polyhaven": fetch_polyhaven_model, "polypizza": fetch_polypizza_model, "vibeassets": fetch_vibeassets_model}
 TEXTURE_SOURCES = {"polyhaven": fetch_polyhaven_texture, "ambientcg": fetch_ambientcg_texture}
 
 
@@ -456,7 +841,8 @@ def model_path(name: str, folder: str) -> str:
 
 
 def texture_path(name: str, suffix: str) -> str:
-    return os.path.join(TEXTURES, name, "%s_%s.jpg" % (name, suffix))
+    # Sets may live in a sub-folder ("demon/charred_skin"); files are named after the leaf.
+    return os.path.join(TEXTURES, name, "%s_%s.jpg" % (os.path.basename(name), suffix))
 
 
 def do_model(job: tuple, previous: dict, force: bool) -> dict:
@@ -472,8 +858,18 @@ def do_model(job: tuple, previous: dict, force: bool) -> dict:
         else:
             data, meta = MODEL_SOURCES[source](asset_id)
             record.update(meta)
+            data, repaired = glb_repair_images(data)
+            if repaired:
+                record["note"] = ("%d embedded JPEG(s) re-ordered losslessly to 1x1 sampling so Godot can decode them; "
+                                  "mesh, skin and pixels are unchanged" % repaired)
+            # Validate before anything lands on disk.
+            glb_summary(data)
+            if name in RIGGED_MODELS:
+                glb_rig(data, RIGGED_MODELS[name])
             write_file(path, data)
         record.update(glb_summary(data))
+        if name in RIGGED_MODELS:
+            record["rig"] = glb_rig(data, RIGGED_MODELS[name])
         record["files"] = [file_record(path, data, "glb")]
     except (FetchError, KeyError, ValueError, OSError) as error:
         record["status"] = "failed"
@@ -562,6 +958,9 @@ def print_summary(models: list, textures: list) -> None:
         total = sum(entry["bytes"] for entry in record["files"])
         print("%-22s %-11s %-30s %10s  %s" % (record["name"], record["source"], record["title"][:30], human(total),
                 ", ".join(record["maps"])))
+    for record in models:
+        if record["status"] == "ok" and "rig" in record:
+            print_rig(record)
 
 
 def verify_offline() -> int:
@@ -582,6 +981,9 @@ def verify_offline() -> int:
                     raise FetchError("checksum mismatch")
                 if entry["format"] == "glb":
                     glb_summary(data)
+                    if record["name"] in RIGGED_MODELS:
+                        record["rig"] = glb_rig(data, RIGGED_MODELS[record["name"]])
+                        print_rig(record)
                 elif image_format(data) != entry["format"]:
                     raise FetchError("not a valid %s" % entry["format"])
             except (OSError, FetchError) as error:
